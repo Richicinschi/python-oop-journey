@@ -113,7 +113,7 @@ export function FileTreeItem({
       <Folder className="h-4 w-4 text-blue-500" />
     )
   ) : (
-    getFileIcon(item.name)
+    getFileIcon(item.name ?? 'unnamed')
   );
 
   return (
@@ -158,7 +158,7 @@ export function FileTreeItem({
         "flex-1 truncate min-w-0",
         isFile && (item as ProjectFile).isModified && "italic"
       )}>
-        {item.name}
+        {item.name ?? 'unnamed'}
       </span>
 
       {/* Modified Indicator */}
