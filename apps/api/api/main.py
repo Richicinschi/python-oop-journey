@@ -1,7 +1,6 @@
 """FastAPI application entry point."""
 
 import logging
-import sentry_sdk
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket
