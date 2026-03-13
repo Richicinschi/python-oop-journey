@@ -158,6 +158,25 @@ export interface ProjectFile {
 
 ---
 
+### Anti-Pattern 4: Losing Fixes in Reverts
+**What happens:** When reverting type changes, null check fixes also get reverted.
+
+**Example:**
+```typescript
+// Fix added:
+if (file.id) project.openFile(file.id);
+
+// Later reverted back to:
+project.openFile(file.id);  // Error returns!
+```
+
+**Prevention:**
+- After any revert, re-scan previously fixed files
+- Keep fixes minimal and separate from type changes
+- Use `git diff` to verify fixes are still in place
+
+---
+
 ## ✅ Correct Fix Checklist
 
 Before committing a fix, verify:
@@ -167,6 +186,7 @@ Before committing a fix, verify:
 - [ ] Did I add guards where needed (`if (x)`, `?.`, `&&`)?
 - [ ] Did I check for syntax errors (missing `}`, extra `,`)?
 - [ ] Did I verify the type is not being changed (just the usage)?
+- [ ] After any revert, re-check previously fixed files
 
 ---
 
