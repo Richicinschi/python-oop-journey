@@ -361,7 +361,7 @@ export default function ProjectPage() {
                 {activeFile ? (
                   <CodeEditor
                     value={activeFile.content}
-                    onChange={(value) => updateFileContent(activeFile.id, value || '')}
+                    onChange={(value) => updateFileContent(activeFile.id || '', value || '')}
                     language={activeFile.language === 'python' ? 'python' : 'markdown'}
                     height="100%"
                   />
