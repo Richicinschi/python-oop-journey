@@ -69,10 +69,12 @@ from api.schemas.user import (
     TokenResponse,
     User,
     UserCreate,
-    UserResponse,
     UserStats,
     UserUpdate,
 )
+
+# UserResponse is an alias for User
+UserResponse = User
 from api.schemas.verification import (
     ErrorCategory,
     HintSuggestion,
