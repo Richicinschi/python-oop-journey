@@ -320,7 +320,7 @@ export function useUpdateBookmarkNotes() {
 // Legacy types for backward compatibility
 export interface LegacyBookmark {
   id: string;
-  type: 'problem' | 'week' | 'day';
+  type: 'problem' | 'week' | 'day' | 'theory';
   title: string;
   path: string;
   notes?: string;
@@ -372,7 +372,7 @@ export function useLocalBookmarks() {
     });
   }, []);
 
-  const toggleBookmark = useCallback((item: { id: string; type: 'problem' | 'week' | 'day'; title: string; path?: string; notes?: string }) => {
+  const toggleBookmark = useCallback((item: { id: string; type: 'problem' | 'week' | 'day' | 'theory'; title: string; path?: string; notes?: string }) => {
     const exists = bookmarks.some((b) => b.id === item.id);
     if (exists) {
       removeBookmark(item.id);
