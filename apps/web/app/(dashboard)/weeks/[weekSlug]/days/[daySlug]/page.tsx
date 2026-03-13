@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { 
   getTransformedWeekBySlug, 
-  getTransformedDayBySlug,
+  getDayBySlug,
   getWeeks,
   getDifficultyColor,
   formatWeekNumber,
@@ -54,7 +54,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: DayPageProps): Promise<Metadata> {
-  const day = getTransformedDayBySlug(params.weekSlug, params.daySlug);
+  const day = getDayBySlug(params.weekSlug, params.daySlug);
   if (!day) {
     return { title: 'Day Not Found' };
   }
@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: DayPageProps): Promise<Metada
 
 export default function DayPage({ params }: DayPageProps) {
   const week = getTransformedWeekBySlug(params.weekSlug);
-  const day = getTransformedDayBySlug(params.weekSlug, params.daySlug);
+  const day = getDayBySlug(params.weekSlug, params.daySlug);
 
   if (!week || !day) {
     notFound();
