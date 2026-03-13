@@ -104,6 +104,8 @@ export function ProblemVerificationWrapper({
         isLoading={isLoading}
         onRetry={hasRunOnce && !data?.all_tests_passed ? handleRetry : undefined}
         onGetHelp={onGetHint ? handleGetHelp : undefined}
+        code={code}
+        problemSlug={problemSlug}
       />
     </div>
   );

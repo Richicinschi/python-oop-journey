@@ -344,6 +344,8 @@ export default function ProblemPage() {
               hints={problem.hints.length > 0 ? problem.hints : getDefaultHints()}
               revealedHints={revealedHints}
               onRevealHint={handleRevealHint}
+              problemSlug={problemSlug}
+              code={code}
             />
           </div>
 

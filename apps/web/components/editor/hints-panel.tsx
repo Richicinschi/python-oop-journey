@@ -17,8 +17,8 @@ interface HintsPanelProps {
   hints: string[];
   revealedHints: number[];
   onRevealHint: (hintIndex: number) => void;
-  problemSlug: string;
-  code: string;
+  problemSlug?: string;
+  code?: string;
   testResults?: Record<string, unknown> | null;
   onHighlightLines?: (lines: number[]) => void;
 }
@@ -44,8 +44,8 @@ export function HintsPanel({
     clearHint,
     submitFeedback,
   } = useAIHints({
-    problemSlug,
-    code,
+    problemSlug: problemSlug || '',
+    code: code || '',
     testResults,
   });
 

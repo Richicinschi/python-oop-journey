@@ -332,6 +332,8 @@ export default function ProblemPageWithVerification({ params }: ProblemPageProps
             isLoading={isVerifying}
             onRetry={handleRunTests}
             onGetHelp={handleShowHint}
+            code={code}
+            problemSlug={problem.slug}
           />
 
           {/* Error Display */}
