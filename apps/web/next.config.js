@@ -166,12 +166,7 @@ const nextConfig = {
     return config;
   },
   
-  // Performance budgets
-  performance: {
-    // Warn if bundles exceed these sizes
-    maxInitialJsResourceSize: 500 * 1024, // 500KB
-    maxInitialCssResourceSize: 100 * 1024, // 100KB
-  },
+  // Note: Performance budgets removed - not supported in Next.js 14
   
   // Logging
   logging: {
