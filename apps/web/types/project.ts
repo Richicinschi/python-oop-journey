@@ -2,18 +2,7 @@
  * Project types for the Python OOP Journey
  */
 
-export interface ProjectFile {
-  id: string;
-  name: string;
-  path: string;
-  content?: string;
-  template?: string;
-  language?: string;
-  isEntryPoint?: boolean;
-  readOnly?: boolean;
-  isModified?: boolean;
-  lastModified?: number;
-}
+import { ProjectFile } from './project-files';
 
 export interface ProjectTask {
   id: string;

@@ -36,7 +36,8 @@ import {
   ProjectPageSkeleton,
   BreadcrumbSkeleton
 } from '@/components/projects';
-import { WeeklyProject, UserProjectProgress, ProjectFile } from '@/types/project';
+import { WeeklyProject, UserProjectProgress } from '@/types/project';
+import { ProjectFile } from '@/types/project-files';
 import { useProjectStore, useProjectKeyboardShortcuts } from '@/hooks/use-project-store';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';

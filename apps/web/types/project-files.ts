@@ -13,7 +13,10 @@ export interface ProjectFile {
   language: string;
   isModified: boolean;
   isReadOnly?: boolean;
+  readOnly?: boolean;
   lastModified?: number;
+  template?: string;
+  isEntryPoint?: boolean;
 }
 
 /** Represents a folder in the project */

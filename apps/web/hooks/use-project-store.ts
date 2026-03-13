@@ -4,11 +4,11 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { 
   WeeklyProject, 
   UserProjectProgress, 
-  ProjectFile, 
   ProjectStatus,
   EditorTab,
   AnalyticsEvent
 } from '@/types/project';
+import { ProjectFile } from '@/types/project-files';
 
 const STORAGE_KEY = 'oop-journey-projects-v1';
 const ANALYTICS_KEY = 'oop-journey-project-analytics-v1';

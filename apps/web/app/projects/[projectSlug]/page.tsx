@@ -42,7 +42,8 @@ import { CodeEditor } from '@/components/editor/code-editor';
 import { getCurriculum, getWeekBySlug } from '@/lib/curriculum-loader';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useProgress } from '@/hooks/use-progress';
-import { Project, ProjectFile, ProjectTask, ProjectStatus } from '@/types/project';
+import { Project, ProjectTask, ProjectStatus } from '@/types/project';
+import { ProjectFile } from '@/types/project-files';
 import { Week } from '@/types/curriculum';
 
 interface FileNode {

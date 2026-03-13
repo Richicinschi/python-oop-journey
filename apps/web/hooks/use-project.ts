@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ProjectFile, ProjectTask, ProjectStatus } from '@/types/project';
+import { ProjectTask, ProjectStatus } from '@/types/project';
+import { ProjectFile } from '@/types/project-files';
 
 interface UseProjectOptions {
   projectSlug: string;

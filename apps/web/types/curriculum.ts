@@ -3,6 +3,8 @@
  * Matches the structure of curriculum.json
  */
 
+import { ProjectFile } from './project-files';
+
 export interface Problem {
   slug: string;
   title: string;
@@ -41,19 +43,6 @@ export interface Day {
   theoryPath?: string | null;
   theoryContent?: string;
   learningObjectives?: string[];
-}
-
-export interface ProjectFile {
-  id: string;
-  name: string;
-  path: string;
-  content?: string;
-  template?: string;
-  language?: string;
-  isEntryPoint?: boolean;
-  readOnly?: boolean;
-  isModified?: boolean;
-  lastModified?: number;
 }
 
 export interface ProjectTask {
