@@ -10,7 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBookmarks } from "@/hooks/use-bookmarks";
 import { formatDate, cn } from "@/lib/utils";
-import type { Bookmark as BookmarkType } from "@repo/types";
+import type { Bookmark } from "@/lib/api";
+
+type BookmarkType = Bookmark;
 
 const typeIcons = {
   week: BookOpen,
