@@ -126,7 +126,7 @@ export function FileTabs({
         className="flex-1 flex overflow-x-auto scrollbar-hide"
         onWheel={handleMouseWheel}
       >
-        {tabs.filter((tab): tab is FileTab & { file: ProjectFile & { id: string } } => !!tab.file.id).map((tab) => (
+        {tabs.map((tab) => (
           <TabItem
             key={tab.file.id}
             tab={tab}
@@ -163,8 +163,8 @@ export function FileTabs({
             Close All
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => {
-              const activeTab = tabs.find(t => t.isActive && t.file.id);
-              if (activeTab) onCloseOthers(activeTab.file.id!);
+              const activeTab = tabs.find(t => t.isActive);
+              if (activeTab) onCloseOthers(activeTab.file.id);
             }}>
             Close Others
           </DropdownMenuItem>
@@ -201,7 +201,7 @@ function TabItem({
   onDrop,
   onDragEnd,
 }: TabItemProps) {
-  const Icon = getTabIcon(tab.file.name ?? 'unknown');
+  const Icon = getTabIcon(tab.file.name);
 
   return (
     <TooltipProvider delayDuration={500}>
@@ -237,7 +237,7 @@ function TabItem({
               "flex-1 truncate text-sm",
               tab.isModified && "italic"
             )}>
-              {tab.file.name ?? 'unnamed'}
+              {tab.file.name}
             </span>
 
             {/* Modified Indicator */}
@@ -261,7 +261,7 @@ function TabItem({
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom">
-          <p>{tab.file.path || tab.file.name || 'unnamed'}</p>
+          <p>{tab.file.path || tab.file.name}</p>
           {tab.isModified && <p className="text-amber-500">Modified</p>}
         </TooltipContent>
       </Tooltip>

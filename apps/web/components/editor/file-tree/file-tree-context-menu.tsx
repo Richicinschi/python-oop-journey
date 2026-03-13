@@ -51,7 +51,7 @@ export function FileTreeContextMenu({
   canPaste = false,
 }: FileTreeContextMenuProps) {
   const isFolder = item ? isProjectFolder(item) : true;
-  const folderId = item ? (isFolder ? (item.id ?? parentFolderId ?? "root") : (parentFolderId ?? "root")) : "root";
+  const folderId = item ? (isFolder ? item.id : parentFolderId) : "root";
 
   const handleNewFile = useCallback(() => {
     onNewFile?.(folderId);

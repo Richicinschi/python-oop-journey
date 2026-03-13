@@ -53,13 +53,13 @@ export function FileTree({
         const aIsFolder = isProjectFolder(a);
         const bIsFolder = isProjectFolder(b);
         if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
-        return (a.name ?? '').localeCompare(b.name ?? '');
+        return a.name.localeCompare(b.name);
       });
       
       for (const child of sorted) {
         items.push({ item: child, level, parentId });
         if (isProjectFolder(child) && child.isExpanded) {
-          if (child.id) traverse(child, level + 1, child.id);
+          traverse(child, level + 1, child.id);
         }
       }
     }
@@ -83,11 +83,11 @@ export function FileTree({
   }, []);
 
   const handleDragStart = useCallback((e: React.DragEvent, item: ProjectItem) => {
-    setDragState(prev => ({ ...prev, draggingId: item.id ?? null }));
+    setDragState(prev => ({ ...prev, draggingId: item.id }));
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent, item: ProjectItem) => {
-    if (isProjectFolder(item) && item.id && item.id !== dragState.draggingId) {
+    if (isProjectFolder(item) && item.id !== dragState.draggingId) {
       setDragState(prev => ({ ...prev, dragOverId: item.id }));
     }
   }, [dragState.draggingId]);
@@ -103,7 +103,7 @@ export function FileTree({
       const data = JSON.parse(e.dataTransfer.getData("application/json"));
       const sourceId = data.id;
       
-      if (sourceId && isProjectFolder(targetItem) && targetItem.id && sourceId !== targetItem.id) {
+      if (sourceId && isProjectFolder(targetItem) && sourceId !== targetItem.id) {
         onMove?.(sourceId, targetItem.id);
       }
     } catch {
@@ -127,7 +127,7 @@ export function FileTree({
             <span className="text-sm font-medium">Explorer</span>
           </div>
           <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-            {root.name ?? 'Project'}
+            {root.name}
           </span>
         </div>
       </FileTreeContextMenu>
@@ -153,7 +153,7 @@ export function FileTree({
           ) : (
             flatItems.map(({ item, level, parentId }) => (
               <FileTreeContextMenu
-                key={item.id ?? `item-${Math.random()}`}
+                key={item.id}
                 item={item}
                 parentFolderId={parentId}
                 onNewFile={onNewFile}
@@ -166,7 +166,7 @@ export function FileTree({
                   <FileTreeItem
                     item={item}
                     level={level}
-                    isActive={item.id ? item.id === activeFileId : false}
+                    isActive={item.id === activeFileId}
                     onSelect={handleSelect}
                     onToggleExpand={handleToggleExpand}
                     onContextMenu={handleContextMenu}
@@ -174,7 +174,7 @@ export function FileTree({
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    isDragOver={item.id ? item.id === dragState.dragOverId : false}
+                    isDragOver={item.id === dragState.dragOverId}
                   />
                 </div>
               </FileTreeContextMenu>

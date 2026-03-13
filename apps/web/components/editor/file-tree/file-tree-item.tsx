@@ -70,7 +70,7 @@ export function FileTreeItem({
   const handleDragStart = useCallback((e: React.DragEvent) => {
     setIsDragging(true);
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("application/json", JSON.stringify({ id: item.id ?? '', type: isFile ? "file" : "folder" }));
+    e.dataTransfer.setData("application/json", JSON.stringify({ id: item.id, type: isFile ? "file" : "folder" }));
     onDragStart?.(e, item);
   }, [item, isFile, onDragStart]);
 
@@ -113,7 +113,7 @@ export function FileTreeItem({
       <Folder className="h-4 w-4 text-blue-500" />
     )
   ) : (
-    getFileIcon(item.name ?? 'unnamed')
+    getFileIcon(item.name)
   );
 
   return (
@@ -158,7 +158,7 @@ export function FileTreeItem({
         "flex-1 truncate min-w-0",
         isFile && (item as ProjectFile).isModified && "italic"
       )}>
-        {item.name ?? 'unnamed'}
+        {item.name}
       </span>
 
       {/* Modified Indicator */}

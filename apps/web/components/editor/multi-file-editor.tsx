@@ -106,7 +106,7 @@ export function MultiFileEditor({
 
   const handleConfirmRename = useCallback((newName: string) => {
     if (dialogState.item) {
-      if (dialogState.item.id) project.renameItem(dialogState.item.id, newName);
+      project.renameItem(dialogState.item.id, newName);
     }
     setDialogState({ type: null, item: null });
   }, [dialogState.item, project]);
@@ -117,13 +117,13 @@ export function MultiFileEditor({
 
   const handleConfirmDelete = useCallback(async () => {
     if (dialogState.item) {
-      if (dialogState.item.id) project.deleteItem(dialogState.item.id);
+      project.deleteItem(dialogState.item.id);
     }
     setDialogState({ type: null, item: null });
   }, [dialogState.item, project]);
 
   const handleSelectFile = useCallback((file: ProjectFile) => {
-    if (file.id) project.openFile(file.id);
+    project.openFile(file.id);
   }, [project]);
 
   const handleToggleFolder = useCallback((folder: ProjectFolder) => {
