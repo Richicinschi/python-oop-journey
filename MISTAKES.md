@@ -5,7 +5,7 @@
 
 ---
 
-## Last Updated: 2026-03-13
+## Last Updated: 2026-03-14
 
 ---
 
@@ -14,11 +14,14 @@
 ### Pattern 1: Optional Property Access
 **Error:** `Type 'string | undefined' is not assignable to parameter of type 'string'`
 
+**Variation:** `Type 'string | undefined' is not assignable to type 'string | null'`
+- State expects `string | null` but optional property gives `string | undefined`
+
 **Root Cause:** Accessing optional properties (`id?: string`, `name?: string`) without null checks.
 
 **Files Affected:**
 - `components/editor/file-tabs/file-tabs.tsx`
-- `components/editor/file-tree/file-tree.tsx`
+- `components/editor/file-tree/file-tree.tsx` (dragState setters - use `?? null`)
 - `components/editor/file-tree/file-tree-item.tsx`
 - `components/editor/file-tree/file-tree-context-menu.tsx`
 - `components/editor/multi-file-editor.tsx`
@@ -34,6 +37,9 @@ return a.name.localeCompare(b.name)
 // ✅ GOOD - Nullish coalescing
 onSelect(tab.file.id ?? '')
 return (a.name ?? '').localeCompare(b.name ?? '')
+
+// ✅ GOOD - Convert undefined to null for state
+setDragState(prev => ({ ...prev, draggingId: item.id ?? null }))
 
 // ✅ GOOD - Optional chaining with guard
 if (activeTab?.file.id) onCloseOthers(activeTab.file.id)

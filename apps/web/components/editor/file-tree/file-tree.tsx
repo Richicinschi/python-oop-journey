@@ -83,12 +83,12 @@ export function FileTree({
   }, []);
 
   const handleDragStart = useCallback((e: React.DragEvent, item: ProjectItem) => {
-    setDragState(prev => ({ ...prev, draggingId: item.id }));
+    setDragState(prev => ({ ...prev, draggingId: item.id ?? null }));
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent, item: ProjectItem) => {
     if (isProjectFolder(item) && item.id !== dragState.draggingId) {
-      setDragState(prev => ({ ...prev, dragOverId: item.id }));
+      setDragState(prev => ({ ...prev, dragOverId: item.id ?? null }));
     }
   }, [dragState.draggingId]);
 
