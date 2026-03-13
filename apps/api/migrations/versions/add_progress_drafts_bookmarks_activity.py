@@ -19,12 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create enum types if they don't exist (idempotent)
-    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'problemstatus') THEN CREATE TYPE problemstatus AS ENUM ('NOT_STARTED', 'IN_PROGRESS', 'SOLVED', 'NEEDS_REVIEW'); END IF; END $$;")
-    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'itemtype') THEN CREATE TYPE itemtype AS ENUM ('PROBLEM', 'DAY', 'WEEK', 'THEORY'); END IF; END $$;")
-    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'activitytype') THEN CREATE TYPE activitytype AS ENUM ('STARTED_PROBLEM', 'SOLVED_PROBLEM', 'ATTEMPTED_PROBLEM', 'VIEWED_THEORY', 'VIEWED_WEEK', 'VIEWED_DAY', 'SAVED_DRAFT', 'CREATED_BOOKMARK', 'DELETED_BOOKMARK', 'LOGIN', 'LOGOUT'); END IF; END $$;")
-    
-    # Create progress table
+    # Create progress table - using String instead of Enum for CockroachDB compatibility
     op.create_table(
         'progress',
         sa.Column('id', sa.String(36), nullable=False),
@@ -32,7 +27,7 @@ def upgrade() -> None:
         sa.Column('problem_slug', sa.String(100), nullable=False),
         sa.Column('week_slug', sa.String(100), nullable=True),
         sa.Column('day_slug', sa.String(100), nullable=True),
-        sa.Column('status', sa.Enum('NOT_STARTED', 'IN_PROGRESS', 'SOLVED', 'NEEDS_REVIEW', name='problemstatus'), nullable=False),
+        sa.Column('status', sa.String(50), nullable=False, server_default='NOT_STARTED'),
         sa.Column('attempts_count', sa.Integer, nullable=False, server_default='0'),
         sa.Column('solved_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('first_attempted_at', sa.DateTime(timezone=True), nullable=True),
@@ -71,12 +66,12 @@ def upgrade() -> None:
     op.create_index('ix_drafts_user_id', 'drafts', ['user_id'])
     op.create_index('ix_drafts_problem_slug', 'drafts', ['problem_slug'])
     
-    # Create bookmarks table
+    # Create bookmarks table - using String instead of Enum
     op.create_table(
         'bookmarks',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('user_id', sa.String(36), nullable=False),
-        sa.Column('item_type', sa.Enum('PROBLEM', 'DAY', 'WEEK', 'THEORY', name='itemtype'), nullable=False),
+        sa.Column('item_type', sa.String(50), nullable=False),
         sa.Column('item_slug', sa.String(100), nullable=False),
         sa.Column('notes', sa.Text, nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
@@ -89,20 +84,14 @@ def upgrade() -> None:
     op.create_index('ix_bookmarks_user_id', 'bookmarks', ['user_id'])
     op.create_index('ix_bookmarks_item_slug', 'bookmarks', ['item_slug'])
     
-    # Create activities table
+    # Create activities table - using String instead of Enum
     op.create_table(
         'activities',
         sa.Column('id', sa.String(36), nullable=False),
         sa.Column('user_id', sa.String(36), nullable=False),
-        sa.Column('activity_type', sa.Enum(
-            'STARTED_PROBLEM', 'SOLVED_PROBLEM', 'ATTEMPTED_PROBLEM',
-            'VIEWED_THEORY', 'VIEWED_WEEK', 'VIEWED_DAY',
-            'SAVED_DRAFT', 'CREATED_BOOKMARK', 'DELETED_BOOKMARK',
-            'LOGIN', 'LOGOUT',
-            name='activitytype'
-        ), nullable=False),
+        sa.Column('activity_type', sa.String(50), nullable=False),
         sa.Column('item_slug', sa.String(100), nullable=True),
-        sa.Column('metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column('meta_data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
@@ -137,8 +126,3 @@ def downgrade() -> None:
     op.drop_index('ix_progress_problem_slug', table_name='progress')
     op.drop_index('ix_progress_user_id', table_name='progress')
     op.drop_table('progress')
-    
-    # Drop enum types
-    op.execute('DROP TYPE IF EXISTS activitytype')
-    op.execute('DROP TYPE IF EXISTS itemtype')
-    op.execute('DROP TYPE IF EXISTS problemstatus')
