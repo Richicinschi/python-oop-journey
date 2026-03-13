@@ -51,6 +51,11 @@ const statusConfig: Record<ProjectStatus, { label: string; icon: typeof Circle; 
     icon: CheckCircle2, 
     color: 'text-green-500' 
   },
+  'completed': { 
+    label: 'Completed', 
+    icon: CheckCircle2, 
+    color: 'text-green-500' 
+  },
 };
 
 export function ProjectCard({ 
