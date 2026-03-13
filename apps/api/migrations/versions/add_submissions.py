@@ -13,8 +13,8 @@ from sqlalchemy import inspect
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'add_submissions'
-down_revision: Union[str, None] = 'add_progress_drafts_bookmarks_activity'
+revision: str = '003_add_submissions'
+down_revision: Union[str, None] = '002_add_progress'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
