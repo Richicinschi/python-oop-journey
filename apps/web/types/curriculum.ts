@@ -16,9 +16,15 @@ export interface Problem {
   solution_code: string;
   test_code: string;
   hints: string[];
-  // CamelCase aliases for convenience
+  // CamelCase aliases for component compatibility
+  weekSlug?: string;
+  daySlug?: string;
   weekNumber?: number;
   dayNumber?: number;
+  starterCode?: string;
+  solutionCode?: string;
+  testCode?: string;
+  nextProblemSlug?: string;
 }
 
 export interface Day {

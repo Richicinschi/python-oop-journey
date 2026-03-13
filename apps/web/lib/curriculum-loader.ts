@@ -80,17 +80,33 @@ export function getProblemsForDay(weekSlug: string, daySlug: string): Problem[] 
 
 /**
  * Find a problem by its slug across all weeks
+ * Returns problem with both snake_case and camelCase properties
  */
-export function findProblemBySlug(problemSlug: string): (Problem & { weekNumber: number; dayNumber: number }) | undefined {
+export function findProblemBySlug(problemSlug: string): (Problem & { 
+  weekNumber: number; 
+  dayNumber: number;
+  weekSlug: string;
+  daySlug: string;
+  starterCode: string;
+  solutionCode: string;
+  testCode: string;
+}) | undefined {
   const weeks = getWeeks();
   
   for (const week of weeks) {
-    const weekNumber = week.order;
     for (const day of week.days) {
-      const dayNumber = day.order;
       const problem = day.problems.find((p) => p.slug === problemSlug);
       if (problem) {
-        return { ...problem, weekNumber, dayNumber };
+        return { 
+          ...problem, 
+          weekNumber: week.order, 
+          dayNumber: day.order,
+          weekSlug: week.slug,
+          daySlug: day.slug,
+          starterCode: problem.starter_code,
+          solutionCode: problem.solution_code,
+          testCode: problem.test_code,
+        };
       }
     }
   }
