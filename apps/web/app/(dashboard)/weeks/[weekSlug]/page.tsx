@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { 
-  getTransformedWeekBySlug, 
+  getWeekBySlug, 
   getWeeks,
   getWeekProblemCount,
   formatWeekNumber,
@@ -49,7 +49,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: WeekPageProps): Promise<Metadata> {
-  const week = getTransformedWeekBySlug(params.weekSlug);
+  const week = getWeekBySlug(params.weekSlug);
   if (!week) {
     return { title: 'Week Not Found' };
   }
@@ -71,7 +71,7 @@ function getProjectProgress(weekSlug: string): number {
 }
 
 export default function WeekPage({ params }: WeekPageProps) {
-  const week = getTransformedWeekBySlug(params.weekSlug);
+  const week = getWeekBySlug(params.weekSlug);
 
   if (!week) {
     notFound();

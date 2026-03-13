@@ -25,7 +25,7 @@ import {
   ChevronRight,
   LayoutTemplate
 } from 'lucide-react';
-import { getTransformedWeekBySlug, getWeeks, formatWeekNumber } from '@/lib/curriculum-loader';
+import { getWeekBySlug, getWeeks, formatWeekNumber } from '@/lib/curriculum-loader';
 import { 
   FileTree, 
   ProjectTour,
@@ -57,7 +57,7 @@ const CodeEditor = dynamic(
 
 // Mock project data - in real app, fetch from API
 const getMockProject = (weekSlug: string): WeeklyProject | null => {
-  const week = getTransformedWeekBySlug(weekSlug);
+  const week = getWeekBySlug(weekSlug);
   if (!week?.project) return null;
 
   return {

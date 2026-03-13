@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { 
-  getTransformedWeekBySlug, 
+  getWeekBySlug, 
   getDayBySlug,
   getWeeks,
   getDifficultyColor,
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: DayPageProps): Promise<Metada
 }
 
 export default function DayPage({ params }: DayPageProps) {
-  const week = getTransformedWeekBySlug(params.weekSlug);
+  const week = getWeekBySlug(params.weekSlug);
   const day = getDayBySlug(params.weekSlug, params.daySlug);
 
   if (!week || !day) {
