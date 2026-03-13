@@ -307,8 +307,8 @@ export default function ProjectPage() {
           <Card className="lg:h-full">
             <FileTree
               files={currentProject?.slug === project.slug 
-                ? (currentProject.files || project.starterFiles)
-                : project.starterFiles
+                ? (currentProject.files || project.starterFiles || [])
+                : (project.starterFiles || [])
               }
               activeFileId={activeFileId}
               onFileSelect={openTab}
