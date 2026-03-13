@@ -83,7 +83,7 @@ export default function ProblemPageWithVerification({ params }: ProblemPageProps
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{problem.title}</h1>
-          <p className="text-muted-foreground mt-2">{problem.description}</p>
+          <p className="text-muted-foreground mt-2">{problem.topic}</p>
           <div className="flex items-center gap-2 mt-3">
             <Badge className={getDifficultyColor(problem.difficulty)}>
               {problem.difficulty}
@@ -147,7 +147,7 @@ export default function ProblemPageWithVerification({ params }: ProblemPageProps
                 <CardContent className="p-6">
                   <div className="prose prose-slate dark:prose-invert max-w-none">
                     <h3>Problem Statement</h3>
-                    <p>{problem.description}</p>
+                    <p>{problem.instructions}</p>
                     
                     <h4>Requirements</h4>
                     <ul>
