@@ -330,6 +330,31 @@ project.openFile(file.id);  // Error returns!
 
 ---
 
+### Anti-Pattern 5: Not Fixing All Instances (Rule 2 Violation)
+**What happened:** Pattern 8 (Missing Component Export) appeared in 3 files but was fixed one at a time over multiple deploy cycles.
+
+**Timeline of failures:**
+1. Deploy failed: `Dashboard` not exported → Fixed `dashboard/index.ts`
+2. Deploy failed: `CurriculumNav` not exported → Fixed `curriculum/index.ts`  
+3. Deploy failed: `SearchDialog` not exported → Fixed `search/index.ts`
+
+**Root cause:** `lazy-components.tsx` imports from all 3 modules:
+```typescript
+export const LazyDashboard = dynamic(() => import("@/components/dashboard")...);
+export const LazyCurriculumNav = dynamic(() => import("@/components/curriculum")...);
+export const LazySearchDialog = dynamic(() => import("@/components/search")...);
+```
+
+**Should have done in ONE commit:**
+1. Check what `lazy-components.tsx` imports from each module
+2. Create all missing components
+3. Export all from index.ts files
+4. Deploy once
+
+**Lesson:** When fixing "missing export" errors, always check what OTHER exports the importer expects from related modules.
+
+---
+
 ## ✅ Correct Fix Checklist
 
 Before committing a fix, verify:
