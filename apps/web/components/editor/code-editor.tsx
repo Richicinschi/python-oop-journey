@@ -21,7 +21,7 @@ export interface CodeEditorProps {
   /** Current code value */
   value?: string;
   /** Called when code changes */
-  onChange?: (value: string) => void;
+  onChange?: (value: string | undefined) => void;
   /** Called when editor is mounted */
   onMount?: (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => void;
   /** Called before editor mounts */
