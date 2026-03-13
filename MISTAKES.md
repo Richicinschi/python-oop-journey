@@ -210,51 +210,41 @@ const searchIndex = searchIndexRaw as SearchIndexItem[];
 
 ---
 
-## 📋 Pattern 6: Missing Module Import
-**Error:** `Cannot find module '@/components/ui/use-toast' or its corresponding type declarations`
+## 📋 Pattern 6: Missing Module/Type Export
+**Error:** `Cannot find module '@/components/ui/use-toast'`  
+**OR:** `Module '"@/types/project"' has no exported member 'ActiveProject'`
 
-**Root Cause:** Code imports from a file that doesn't exist.
+**Root Cause:** Code imports something that doesn't exist (file or export).
 
 **Files Affected:**
-- `components/editor/post-solve-recommendations.tsx`
-- `components/notifications/smart-notifications.tsx`
+- `components/editor/post-solve-recommendations.tsx` - Missing `use-toast` module
+- `components/notifications/smart-notifications.tsx` - Missing `use-toast` module
+- `components/projects/active-projects-section.tsx` - Missing `ActiveProject` type
+- `components/projects/index.ts` - Re-exports `ActiveProject` but it doesn't exist in `types/project.ts`
 
-**Solution:**
-Create the missing module with compatible API:
-
+**Solution 1 - Create Missing Module:**
 ```typescript
 // components/ui/use-toast.ts
 'use client';
-
 import { toast as sonnerToast } from 'sonner';
-import { ReactNode } from 'react';
-
-interface ToastOptions {
-  title?: string | ReactNode;
-  description?: string;
-  variant?: 'default' | 'destructive';
-  duration?: number;
-}
 
 export function useToast() {
-  const toast = (options: ToastOptions) => {
-    // Map to Sonner's API
-    if (options.variant === 'destructive') {
-      sonnerToast.error(options.title as string, {
-        description: options.description,
-      });
-    } else {
-      sonnerToast.success(options.title as string, {
-        description: options.description,
-      });
-    }
+  const toast = (options: { title?: string; variant?: string }) => {
+    // Implementation
   };
-
   return { toast };
 }
 ```
 
-**Note:** This project uses Sonner for toasts, but some components expect a custom `useToast` hook.
+**Solution 2 - Add Missing Type:**
+```typescript
+// types/project.ts
+export interface ActiveProject {
+  project: WeeklyProject;
+  progress: UserProjectProgress;
+  completionPercentage: number;
+}
+```
 
 ---
 
