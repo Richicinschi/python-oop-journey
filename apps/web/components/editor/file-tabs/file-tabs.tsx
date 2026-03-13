@@ -87,7 +87,7 @@ export function FileTabs({
     const sourceFileId = e.dataTransfer.getData("text/plain");
     
     if (sourceFileId && sourceFileId !== targetFileId && onReorder) {
-      const newOrder = tabs.map(t => t.file.id);
+      const newOrder = tabs.map(t => t.file.id).filter((id): id is string => id !== undefined);
       const sourceIndex = newOrder.indexOf(sourceFileId);
       const targetIndex = newOrder.indexOf(targetFileId);
       
