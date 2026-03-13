@@ -31,7 +31,7 @@ import { RecommendationList } from '@/components/dashboard/recommendation-card';
 import { CircularProgress } from '@/components/dashboard/circular-progress';
 import { QuickActions, ActionButtons } from '@/components/dashboard/quick-actions';
 import { ActiveProjectsSection } from '@/components/projects';
-import { WeeklyProject } from '@/types/project';
+import { WeeklyProject, UserProjectProgress } from '@/types/project';
 
 // Hooks
 import { useDashboardData } from '@/hooks/use-dashboard-data';
@@ -71,14 +71,12 @@ const mockProjects: WeeklyProject[] = [
   },
 ];
 
-const mockProjectProgress: Record<string, { status: 'not_started' | 'in_progress' | 'submitted'; files: any[]; totalTimeSpent: number }> = {
+const mockProjectProgress: Record<string, UserProjectProgress> = {
   'week-01-project': {
+    projectSlug: 'week-01-project',
     status: 'in_progress',
-    files: [
-      { id: '1', name: 'calculator.py', isModified: false },
-      { id: '2', name: 'test_calculator.py', isModified: true },
-    ],
-    totalTimeSpent: 3600,
+    completedTasks: ['task-1'],
+    lastAccessed: new Date().toISOString(),
   },
 };
 
