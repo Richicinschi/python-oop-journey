@@ -16,6 +16,9 @@ export interface Problem {
   solution_code: string;
   test_code: string;
   hints: string[];
+  // CamelCase aliases for convenience
+  weekNumber?: number;
+  dayNumber?: number;
 }
 
 export interface Day {

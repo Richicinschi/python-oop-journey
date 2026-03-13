@@ -81,9 +81,21 @@ export function getProblemsForDay(weekSlug: string, daySlug: string): Problem[] 
 /**
  * Find a problem by its slug across all weeks
  */
-export function findProblemBySlug(problemSlug: string): Problem | undefined {
-  const allProblems = getAllProblems();
-  return allProblems.find((problem) => problem.slug === problemSlug);
+export function findProblemBySlug(problemSlug: string): (Problem & { weekNumber: number; dayNumber: number }) | undefined {
+  const weeks = getWeeks();
+  
+  for (const week of weeks) {
+    const weekNumber = week.order;
+    for (const day of week.days) {
+      const dayNumber = day.order;
+      const problem = day.problems.find((p) => p.slug === problemSlug);
+      if (problem) {
+        return { ...problem, weekNumber, dayNumber };
+      }
+    }
+  }
+  
+  return undefined;
 }
 
 /**
