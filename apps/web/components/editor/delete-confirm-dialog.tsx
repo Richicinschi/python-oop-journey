@@ -95,7 +95,7 @@ export function DeleteConfirmDialog({
           <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
             <Icon className="h-8 w-8 text-muted-foreground" />
             <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">{item.name}</p>
+              <p className="font-medium truncate">{item.name ?? 'unnamed'}</p>
               <p className="text-sm text-muted-foreground truncate">
                 {item.path || "Root"}
               </p>

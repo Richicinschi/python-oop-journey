@@ -39,7 +39,7 @@ export function RenameDialog({
   // Reset and set initial name when dialog opens
   useEffect(() => {
     if (isOpen && item) {
-      setName(item.name);
+      setName(item.name ?? '');
       setError(null);
       
       // Select name without extension for files
@@ -48,7 +48,7 @@ export function RenameDialog({
         if (input) {
           input.focus();
           if (isFile) {
-            const dotIndex = item.name.lastIndexOf(".");
+            const dotIndex = (item.name ?? '').lastIndexOf(".");
             if (dotIndex > 0) {
               input.setSelectionRange(0, dotIndex);
             } else {
