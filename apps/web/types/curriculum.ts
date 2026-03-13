@@ -44,11 +44,16 @@ export interface Day {
 }
 
 export interface ProjectFile {
+  id?: string;
+  name?: string;
   path: string;
   content?: string;
   template?: string;
+  language?: string;
   isEntryPoint?: boolean;
   readOnly?: boolean;
+  isModified?: boolean;
+  lastModified?: number;
 }
 
 export interface ProjectTask {
