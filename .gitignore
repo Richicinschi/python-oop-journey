@@ -124,7 +124,7 @@ test_auth_system.py
 test_verification.py
 
 # Infrastructure & Deployment (not needed for Render)
-docs/
+# docs/ - KEEPING docs for reference
 infrastructure/
 monitoring/
 nginx/
