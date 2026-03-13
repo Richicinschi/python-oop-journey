@@ -70,7 +70,7 @@ export function FileTreeItem({
   const handleDragStart = useCallback((e: React.DragEvent) => {
     setIsDragging(true);
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("application/json", JSON.stringify({ id: item.id, type: isFile ? "file" : "folder" }));
+    e.dataTransfer.setData("application/json", JSON.stringify({ id: item.id ?? '', type: isFile ? "file" : "folder" }));
     onDragStart?.(e, item);
   }, [item, isFile, onDragStart]);
 

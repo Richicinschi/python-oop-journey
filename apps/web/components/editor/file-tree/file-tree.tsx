@@ -83,11 +83,11 @@ export function FileTree({
   }, []);
 
   const handleDragStart = useCallback((e: React.DragEvent, item: ProjectItem) => {
-    setDragState(prev => ({ ...prev, draggingId: item.id }));
+    setDragState(prev => ({ ...prev, draggingId: item.id ?? null }));
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent, item: ProjectItem) => {
-    if (isProjectFolder(item) && item.id !== dragState.draggingId) {
+    if (isProjectFolder(item) && item.id && item.id !== dragState.draggingId) {
       setDragState(prev => ({ ...prev, dragOverId: item.id }));
     }
   }, [dragState.draggingId]);
@@ -153,7 +153,7 @@ export function FileTree({
           ) : (
             flatItems.map(({ item, level, parentId }) => (
               <FileTreeContextMenu
-                key={item.id}
+                key={item.id ?? `item-${Math.random()}`}
                 item={item}
                 parentFolderId={parentId}
                 onNewFile={onNewFile}
@@ -166,7 +166,7 @@ export function FileTree({
                   <FileTreeItem
                     item={item}
                     level={level}
-                    isActive={item.id === activeFileId}
+                    isActive={item.id ? item.id === activeFileId : false}
                     onSelect={handleSelect}
                     onToggleExpand={handleToggleExpand}
                     onContextMenu={handleContextMenu}
@@ -174,7 +174,7 @@ export function FileTree({
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    isDragOver={item.id === dragState.dragOverId}
+                    isDragOver={item.id ? item.id === dragState.dragOverId : false}
                   />
                 </div>
               </FileTreeContextMenu>

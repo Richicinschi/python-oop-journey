@@ -106,7 +106,7 @@ export function MultiFileEditor({
 
   const handleConfirmRename = useCallback((newName: string) => {
     if (dialogState.item) {
-      project.renameItem(dialogState.item.id, newName);
+      if (dialogState.item.id) project.renameItem(dialogState.item.id, newName);
     }
     setDialogState({ type: null, item: null });
   }, [dialogState.item, project]);
@@ -117,7 +117,7 @@ export function MultiFileEditor({
 
   const handleConfirmDelete = useCallback(async () => {
     if (dialogState.item) {
-      project.deleteItem(dialogState.item.id);
+      if (dialogState.item.id) project.deleteItem(dialogState.item.id);
     }
     setDialogState({ type: null, item: null });
   }, [dialogState.item, project]);
