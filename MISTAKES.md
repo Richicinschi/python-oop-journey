@@ -157,6 +157,7 @@ interface Props { week: WeekProgress }
 **Files Affected:**
 - `components/dashboard/dashboard.tsx` - Missing props for HeroSection
 - `components/dashboard/dashboard.tsx` - Wrong props for ProgressCard
+- `components/curriculum/curriculum-nav.tsx` - Missing weeks prop for WeekNavigator
 
 ---
 
