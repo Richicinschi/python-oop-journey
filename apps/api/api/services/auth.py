@@ -245,43 +245,8 @@ class AuthService:
         )
         return token, expires
 
-    def create_magic_token(self, email: str) -> str:
-        """Create short-lived magic link token (legacy method)."""
-        expires = datetime.utcnow() + timedelta(
-            minutes=settings.magic_link_expire_minutes
-        )
-        payload = {
-            "email": email,
-            "type": "magic",
-            "exp": expires,
-            "iat": datetime.utcnow(),
-            "jti": str(uuid4()),
-        }
-        return jwt.encode(
-            payload, settings.secret_key, algorithm=settings.jwt_algorithm
-        )
 
-    def verify_token(self, token: str, token_type: str = "access") -> dict | None:
-        """Verify JWT token."""
-        try:
-            payload = jwt.decode(
-                token, settings.secret_key, algorithms=[settings.jwt_algorithm]
-            )
-            if payload.get("type") != token_type:
-                return None
-            return payload
-        except JWTError as e:
-            logger.debug(f"Token verification failed: {e}")
-            return None
-
-    def get_settings(self):
-        """Get application settings."""
-        return settings
-
-    async def send_magic_link(self, email: str, token: str) -> bool:
-        """Send magic link email (legacy method - uses new implementation)."""
-        magic_link = await self.create_magic_link(email)
-        if settings.is_development:
-            logger.info(f"Magic link for {email}: {magic_link}")
-            return True
-        return await self.email_service.send_magic_link_email(email, magic_link)
+# Dependency injection function
+async def get_auth_service(session: AsyncSession) -> AuthService:
+    """Get AuthService instance with session."""
+    return AuthService(session)
