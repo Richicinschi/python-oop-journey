@@ -1,4 +1,5 @@
 // Dashboard components
+export { Dashboard } from './dashboard';
 export { ActivityItemRow, ActivityList } from './activity-item';
 export { CircularProgress } from './circular-progress';
 export { EmptyState } from './empty-state';
