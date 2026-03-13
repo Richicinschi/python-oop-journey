@@ -33,7 +33,11 @@ export function ActiveProjectsSection({
   className,
 }: ActiveProjectsSectionProps) {
   // Get active and completed projects
-  const { activeProjects, completedProjects, currentWeekProject } = useMemo(() => {
+  const { activeProjects, completedProjects, currentWeekProject } = useMemo<{
+    activeProjects: ActiveProject[];
+    completedProjects: ActiveProject[];
+    currentWeekProject: ActiveProject | null;
+  }>(() => {
     const active: ActiveProject[] = [];
     const completed: ActiveProject[] = [];
     let current: ActiveProject | null = null;
@@ -206,7 +210,7 @@ export function ActiveProjectsSection({
                   Week {currentWeekProject.project.week} • {currentWeekProject.project.estimatedHours}
                 </CardDescription>
               </div>
-              <Button onClick={() => onContinueProject?.(currentWeekProject.project)}>
+              <Button onClick={() => onContinueProject?.(currentWeekProject!.project)}>
                 <Play className="h-4 w-4 mr-2" />
                 Continue
               </Button>

@@ -97,7 +97,7 @@ export function FileTree({
           current = existingNode;
         } else {
           const newNode: FileNode = {
-            id: isFile ? file.id : `${current.id}/${part}`,
+            id: isFile ? (file.id ?? `${current.id}/${part}`) : `${current.id}/${part}`,
             name: part,
             type: isFile ? 'file' : 'folder',
             file: isFile ? file : undefined,
@@ -325,18 +325,18 @@ export function FileList({
 }: Omit<FileTreeProps, 'onFileCreate' | 'onFileDelete' | 'onFileSave' | 'isLoading'>) {
   return (
     <div className={cn('space-y-1', className)}>
-      {files.map(file => (
+      {files.filter(file => file.id).map(file => (
         <button
           key={file.id}
-          onClick={() => onFileSelect(file.id)}
+          onClick={() => file.id && onFileSelect(file.id)}
           className={cn(
             'w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors',
             'hover:bg-accent hover:text-accent-foreground',
             activeFileId === file.id && 'bg-accent text-accent-foreground'
           )}
         >
-          <FileIcon name={file.name} isModified={file.isModified || false} />
-          <span className="truncate flex-1 text-left">{file.name}</span>
+          <FileIcon name={file.name ?? 'unnamed'} isModified={file.isModified || false} />
+          <span className="truncate flex-1 text-left">{file.name ?? 'unnamed'}</span>
           {(file.isModified || false) && (
             <Circle className="h-2 w-2 fill-current" />
           )}
