@@ -123,7 +123,7 @@ export function MultiFileEditor({
   }, [dialogState.item, project]);
 
   const handleSelectFile = useCallback((file: ProjectFile) => {
-    project.openFile(file.id);
+    if (file.id) project.openFile(file.id);
   }, [project]);
 
   const handleToggleFolder = useCallback((folder: ProjectFolder) => {
@@ -178,8 +178,8 @@ export function MultiFileEditor({
 
   const tabs = project.openFiles.map(file => ({
     file,
-    isActive: file.id === project.state.activeFileId,
-    isModified: file.isModified,
+    isActive: file.id === project.state.activeFileId || false,
+    isModified: file.isModified || false,
   }));
 
   return (

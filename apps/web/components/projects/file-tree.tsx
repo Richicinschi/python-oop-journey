@@ -97,7 +97,7 @@ export function FileTree({
           current = existingNode;
         } else {
           const newNode: FileNode = {
-            id: isFile ? file.id : `${current.id}/${part}`,
+            id: isFile ? (file.id ?? file.path) : `${current.id}/${part}`,
             name: part,
             type: isFile ? 'file' : 'folder',
             file: isFile ? file : undefined,
@@ -335,9 +335,9 @@ export function FileList({
             activeFileId === file.id && 'bg-accent text-accent-foreground'
           )}
         >
-          <FileIcon name={file.name} isModified={file.isModified} />
-          <span className="truncate flex-1 text-left">{file.name}</span>
-          {file.isModified && (
+          <FileIcon name={file.name ?? 'unnamed'} isModified={file.isModified || false} />
+          <span className="truncate flex-1 text-left">{file.name ?? 'unnamed'}</span>
+          {(file.isModified || false) && (
             <Circle className="h-2 w-2 fill-current" />
           )}
         </button>
