@@ -72,8 +72,8 @@ export function ProjectCard({
   const StatusIcon = statusConfigItem.icon;
   
   // Calculate completion percentage
-  const completionPercentage = progress?.files.length 
-    ? Math.round((progress.files.filter(f => !f.isModified).length / progress.files.length) * 100)
+  const completionPercentage = progress && project.totalTasks > 0
+    ? Math.round((progress.completedTasks.length / project.totalTasks) * 100)
     : 0;
 
   if (variant === 'compact') {
