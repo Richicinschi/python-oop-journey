@@ -8,6 +8,10 @@ interface UseProgressReturn {
   isLoading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
+  // Local progress functions for component compatibility
+  completeProblem: (problemSlug: string) => void;
+  isCompleted: (problemSlug: string) => boolean;
+  updateStreak: () => void;
 }
 
 interface UseProblemProgressReturn {
@@ -81,11 +85,17 @@ export function useProgress(): UseProgressReturn {
     fetchProgress();
   }, [fetchProgress]);
 
+  // Local progress functions (backward compatible)
+  const localProgress = useLocalProgress();
+
   return {
     progress,
     isLoading,
     error,
     refetch: fetchProgress,
+    completeProblem: localProgress.completeProblem,
+    isCompleted: localProgress.isCompleted,
+    updateStreak: localProgress.updateStreak,
   };
 }
 
@@ -326,11 +336,39 @@ export function useLocalProgress() {
     return Math.round((progress.completedProblems.length / progress.totalProblems) * 100);
   }, [progress.completedProblems.length, progress.totalProblems]);
 
+  const updateStreak = useCallback(() => {
+    setProgress((prev) => {
+      const today = new Date().toDateString();
+      const lastActiveDate = prev.lastActive ? new Date(prev.lastActive).toDateString() : null;
+      
+      // Only update streak if last active was not today
+      if (lastActiveDate !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        const isConsecutiveDay = lastActiveDate === yesterday.toDateString();
+        const newStreakDays = isConsecutiveDay ? prev.streakDays + 1 : 1;
+        
+        const newProgress = {
+          ...prev,
+          streakDays: newStreakDays,
+          lastActive: new Date().toISOString(),
+        };
+        
+        localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(newProgress));
+        return newProgress;
+      }
+      
+      return prev;
+    });
+  }, []);
+
   return {
     progress,
     isLoading,
     completeProblem,
     isCompleted,
     getCompletionPercentage,
+    updateStreak,
   };
 }

@@ -105,7 +105,7 @@ export default function ProblemPage() {
 
     // Load saved code or starter code
     const savedCode = localStorage.getItem(`code-${problemSlug}`);
-    const starterCode = foundProblem.starter_code;
+    const starterCode = foundProblem.starterCode || foundProblem.starter_code;
     setCode(savedCode || starterCode);
     setOriginalCode(starterCode);
 
@@ -436,7 +436,7 @@ export default function ProblemPage() {
         isOpen={isSolutionModalOpen}
         onClose={() => setIsSolutionModalOpen(false)}
         onConfirm={handleConfirmSolution}
-        solutionCode={problem.solution_code}
+        solutionCode={problem.solutionCode || problem.solution_code}
         userCode={code}
       />
     </div>

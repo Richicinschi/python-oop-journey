@@ -2,7 +2,7 @@
 
 import { Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useBookmarks } from "@/hooks/use-bookmarks";
+import { useLocalBookmarks } from "@/hooks/use-bookmarks";
 import { cn } from "@/lib/utils";
 import type { Bookmark as BookmarkType } from "@repo/types";
 
@@ -21,7 +21,7 @@ export function BookmarkButton({
   className,
   showLabel = false,
 }: BookmarkButtonProps) {
-  const { isBookmarked, toggleBookmark } = useBookmarks();
+  const { isBookmarked, toggleBookmark } = useLocalBookmarks();
   const bookmarked = isBookmarked(item.id);
 
   const handleClick = (e: React.MouseEvent) => {

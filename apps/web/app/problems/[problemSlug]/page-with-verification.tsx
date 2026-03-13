@@ -30,7 +30,7 @@ interface ProblemPageProps {
 
 export default function ProblemPageWithVerification({ params }: ProblemPageProps) {
   const problem = findProblemBySlug(params.problemSlug);
-  const [code, setCode] = useState(problem?.starter_code || "");
+  const [code, setCode] = useState(problem?.starterCode || problem?.starter_code || "");
   const [activeHint, setActiveHint] = useState<number | null>(null);
   
   const { 
@@ -53,9 +53,9 @@ export default function ProblemPageWithVerification({ params }: ProblemPageProps
   }, [code, problem.slug, verify]);
 
   const handleResetCode = useCallback(() => {
-    setCode(problem.starter_code || "");
+    setCode(problem.starterCode || problem.starter_code || "");
     resetVerification();
-  }, [problem.starter_code, resetVerification]);
+  }, [problem, resetVerification]);
 
   const handleShowHint = useCallback((hintIndex: number) => {
     setActiveHint(hintIndex);

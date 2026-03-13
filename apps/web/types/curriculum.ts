@@ -36,6 +36,11 @@ export interface Day {
   theory_content: string;
   learning_objectives: string[];
   problems: Problem[];
+  // CamelCase aliases for component compatibility
+  weekSlug?: string;
+  theoryPath?: string | null;
+  theoryContent?: string;
+  learningObjectives?: string[];
 }
 
 export interface ProjectFile {
@@ -70,6 +75,10 @@ export interface Project {
   requirements?: string[];
   hints?: string[];
   submissionGuidelines?: string;
+  // CamelCase aliases for component compatibility
+  starterPath?: string | null;
+  solutionPath?: string | null;
+  testPath?: string | null;
 }
 
 export interface Week {
