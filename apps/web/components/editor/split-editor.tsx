@@ -174,11 +174,11 @@ export function SplitEditor({
             {/* Editor */}
             <div className="flex-1 overflow-hidden">
               <CodeEditor
-                value={primaryFile.content}
+                value={primaryFile.content ?? ''}
                 onChange={(value) => value !== undefined && onPrimaryChange?.(value)}
                 onMount={handlePrimaryMount}
-                language={primaryFile.language}
-                readOnly={readOnly || primaryFile.isReadOnly}
+                language={primaryFile.language ?? 'plaintext'}
+                readOnly={readOnly || primaryFile.isReadOnly || false}
                 height="100%"
                 className="border-0 rounded-none"
               />
@@ -221,7 +221,7 @@ export function SplitEditor({
           <div className="h-full flex flex-col">
             {/* Pane Header */}
             <div className="flex items-center justify-between px-3 py-1.5 bg-muted/50 border-b text-xs">
-              <span className="font-medium truncate">{secondaryFile.name}</span>
+              <span className="font-medium truncate">{secondaryFile.name ?? 'unnamed'}</span>
               <div className="flex items-center gap-1">
                 {onSwapPanes && (
                   <Button
@@ -251,11 +251,11 @@ export function SplitEditor({
             {/* Editor */}
             <div className="flex-1 overflow-hidden">
               <CodeEditor
-                value={secondaryFile.content}
+                value={secondaryFile.content ?? ''}
                 onChange={(value) => value !== undefined && onSecondaryChange?.(value)}
                 onMount={handleSecondaryMount}
-                language={secondaryFile.language}
-                readOnly={readOnly || secondaryFile.isReadOnly}
+                language={secondaryFile.language ?? 'plaintext'}
+                readOnly={readOnly || secondaryFile.isReadOnly || false}
                 height="100%"
                 className="border-0 rounded-none"
               />
