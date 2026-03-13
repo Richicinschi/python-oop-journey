@@ -63,36 +63,12 @@ const getMockProject = (weekSlug: string): WeeklyProject | null => {
     slug: `${weekSlug}-project`,
     title: week.project.title,
     description: week.project.description,
-    difficulty: 'Intermediate' as const,
-    estimatedTime: '2-3 hours',
-    weekSlug: week.slug,
-    weekNumber: week.order,
-    starterFiles: [
-      {
-        id: 'main-py',
-        name: 'main.py',
-        path: '/main.py',
-        content: '# Your solution goes here\n\ndef main():\n    pass\n\nif __name__ == "__main__":\n    main()',
-        language: 'python',
-        isModified: false,
-        lastModified: Date.now(),
-      },
-      {
-        id: 'readme-md',
-        name: 'README.md',
-        path: '/README.md',
-        content: `# ${week.project.title}\n\n${week.project.description}\n\n## Requirements\n\n- Implement the required functionality\n- Follow best practices\n- Write clean, readable code`,
-        language: 'markdown',
-        isModified: false,
-        lastModified: Date.now(),
-      },
-    ],
-    requirements: week.project.requirements || [
-      'Implement core functionality',
-      'Handle edge cases',
-      'Write tests',
-    ],
-    hints: week.project.hints || [],
+    difficulty: 'intermediate',
+    estimatedHours: 3,
+    week: week.order,
+    status: 'not_started',
+    completedTasks: 0,
+    totalTasks: 4,
   };
 };
 
