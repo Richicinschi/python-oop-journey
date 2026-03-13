@@ -539,7 +539,7 @@ export default function ProjectPage() {
             {activeFile ? (
               <CodeEditor
                 value={code}
-                onChange={(value) => value !== undefined && setCode(value)
+                onChange={(value) => value !== undefined && setCode(value)}
                 height="100%"
                 fontSize={fontSize}
                 wordWrap={wordWrap ? 'on' : 'off'}
