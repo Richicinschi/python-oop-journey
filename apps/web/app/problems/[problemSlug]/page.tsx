@@ -85,10 +85,10 @@ export default function ProblemPage() {
 
     // Find prev/next problems using the slugs from transformed data
     if (foundProblem.prevProblemSlug) {
-      setPrevProblem(getTransformedProblemBySlug(foundProblem.prevProblemSlug));
+      setPrevProblem(getTransformedProblemBySlug(foundProblem.prevProblemSlug) ?? null);
     }
     if (foundProblem.nextProblemSlug) {
-      setNextProblem(getTransformedProblemBySlug(foundProblem.nextProblemSlug));
+      setNextProblem(getTransformedProblemBySlug(foundProblem.nextProblemSlug) ?? null);
     }
 
     // Load saved code or starter code
