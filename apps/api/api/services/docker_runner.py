@@ -11,8 +11,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import docker
-from docker.errors import ContainerError, DockerException, ImageNotFound
+try:
+    import docker
+    from docker.errors import ContainerError, DockerException, ImageNotFound
+    DOCKER_AVAILABLE = True
+except ImportError:
+    docker = None
+    ContainerError = DockerException = ImageNotFound = Exception
+    DOCKER_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
