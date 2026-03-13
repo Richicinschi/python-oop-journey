@@ -343,8 +343,8 @@ export default function ProjectPage() {
       };
       setFiles(prev => addFileToTree(prev, newFile));
       setActiveFile(newFile);
-      setCode(newFile.content);
-      setOriginalCode(newFile.content);
+      setCode(newFile.content || '');
+      setOriginalCode(newFile.content || '');
     }
   };
 
