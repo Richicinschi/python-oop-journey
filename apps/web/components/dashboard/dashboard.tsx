@@ -6,6 +6,7 @@ import { QuickActions } from './quick-actions';
 import { ActivityList } from './activity-item';
 import { StatCard } from './stat-card';
 import type { DashboardData, WeekProgress } from '@/types/dashboard';
+import { CheckCircle, Flame, Target } from 'lucide-react';
 
 const mockData: DashboardData = {
   isLoggedIn: true,
@@ -43,8 +44,8 @@ export function Dashboard() {
       <HeroSection data={mockData} overallProgress={overallProgress} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <ProgressCard week={mockWeek} />
-        <StatCard title="Problems Solved" value={42} trend={{ value: 12, positive: true }} />
-        <StatCard title="Current Streak" value={7} trend={{ value: 2, positive: true }} />
+        <StatCard title="Problems Solved" value={42} icon={CheckCircle} trend={{ value: 12, label: '+12%', positive: true }} />
+        <StatCard title="Current Streak" value={7} icon={Flame} trend={{ value: 2, label: '+2 days', positive: true }} />
       </div>
       <QuickActions />
     </div>
