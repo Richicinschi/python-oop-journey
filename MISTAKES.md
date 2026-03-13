@@ -170,10 +170,18 @@ if (file.id) project.openFile(file.id);
 project.openFile(file.id);  // Error returns!
 ```
 
+**Files most affected:**
+- `components/editor/multi-file-editor.tsx` - Multiple `.id` accesses lost
+  - Line 109: `dialogState.item.id` ✓ fixed
+  - Line 120: `dialogState.item.id` ✓ fixed  
+  - Line 126: `file.id` ✓ fixed (was lost, fixed again)
+  - Line 161: `activeFile.id` ✓ fixed (was lost, fixed again)
+
 **Prevention:**
 - After any revert, re-scan previously fixed files
 - Keep fixes minimal and separate from type changes
 - Use `git diff` to verify fixes are still in place
+- Check ALL lines with the pattern, not just the first one found
 
 ---
 
