@@ -8,6 +8,7 @@ export {
   getWeekBySlug,
   getDayBySlug,
   getProblemBySlug,
+  findProblemBySlug,
   getAllProblems,
   getProblemsForDay,
   generateWeekParams,
