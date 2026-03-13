@@ -8,6 +8,9 @@ interface UseBookmarksReturn {
   isLoading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
+  groupedBookmarks: Record<string, Bookmark[]>;
+  removeBookmark: (id: string) => Promise<void>;
+  clearBookmarks: () => void;
 }
 
 interface UseToggleBookmarkReturn {
@@ -72,11 +75,40 @@ export function useBookmarks(itemType?: ItemType): UseBookmarksReturn {
     fetchBookmarks();
   }, [fetchBookmarks]);
 
+  // Group bookmarks by type
+  const groupedBookmarks = bookmarks.reduce((acc, bookmark) => {
+    const type = bookmark.itemType;
+    if (!acc[type]) {
+      acc[type] = [];
+    }
+    acc[type].push(bookmark);
+    return acc;
+  }, {} as Record<string, Bookmark[]>);
+
+  // Remove a bookmark
+  const removeBookmark = useCallback(async (id: string) => {
+    try {
+      await api.bookmarks.delete(id);
+      setBookmarks((prev) => prev.filter((b) => b.id !== id));
+    } catch (err) {
+      console.error('Failed to delete bookmark:', err);
+    }
+  }, []);
+
+  // Clear all bookmarks
+  const clearBookmarks = useCallback(() => {
+    setBookmarks([]);
+    localStorage.removeItem(BOOKMARKS_STORAGE_KEY);
+  }, []);
+
   return {
     bookmarks,
     isLoading,
     error,
     refetch: fetchBookmarks,
+    groupedBookmarks,
+    removeBookmark,
+    clearBookmarks,
   };
 }
 
