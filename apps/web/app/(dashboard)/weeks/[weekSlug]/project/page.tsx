@@ -69,6 +69,28 @@ const getMockProject = (weekSlug: string): WeeklyProject | null => {
     status: 'not_started',
     completedTasks: 0,
     totalTasks: 4,
+    starterFiles: [
+      {
+        id: 'main-py',
+        name: 'main.py',
+        path: '/main.py',
+        content: '# Your solution goes here\n\ndef main():\n    pass\n\nif __name__ == "__main__":\n    main()',
+        language: 'python',
+        isModified: false,
+        lastModified: Date.now(),
+      },
+      {
+        id: 'readme-md',
+        name: 'README.md',
+        path: '/README.md',
+        content: `# ${week.project.title}\n\n${week.project.description}`,
+        language: 'markdown',
+        isModified: false,
+        lastModified: Date.now(),
+      },
+    ],
+    requirements: week.project.requirements || ['Implement core functionality'],
+    hints: week.project.hints || [],
   };
 };
 

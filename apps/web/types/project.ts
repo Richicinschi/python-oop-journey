@@ -71,6 +71,11 @@ export interface WeeklyProject {
   status: ProjectStatus;
   completedTasks: number;
   totalTasks: number;
+  // Optional fields for detailed project view
+  starterFiles?: ProjectFile[];
+  files?: ProjectFile[];
+  requirements?: string[];
+  hints?: string[];
 }
 
 export interface UserProjectProgress {
