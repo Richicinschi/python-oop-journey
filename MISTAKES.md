@@ -140,6 +140,20 @@ interface Props { week: WeekProgress }
 <ProgressCard week={mockWeek} />
 ```
 
+**Example 3 - Missing Required Sub-Props:**
+```typescript
+// ❌ BAD - Missing trend.label and icon
+<StatCard title="Solved" value={42} trend={{ value: 12, positive: true }} />
+
+// ✅ GOOD - Include all required props
+<StatCard 
+  title="Solved" 
+  value={42} 
+  icon={CheckCircle}
+  trend={{ value: 12, label: '+12%', positive: true }} 
+/>
+```
+
 **Files Affected:**
 - `components/dashboard/dashboard.tsx` - Missing props for HeroSection
 - `components/dashboard/dashboard.tsx` - Wrong props for ProgressCard
