@@ -190,7 +190,7 @@ export function FileTree({
 
     return (
       <button
-        onClick={() => node.file && onFileSelect(node.file.id)}
+        onClick={() => node.file?.id && onFileSelect(node.file.id)}
         className={cn(
           'w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors group',
           'hover:bg-accent hover:text-accent-foreground',
@@ -222,7 +222,7 @@ export function FileTree({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {node.file?.isModified && onFileSave && (
-              <DropdownMenuItem onClick={() => node.file && onFileSave(node.file.id)}>
+              <DropdownMenuItem onClick={() => node.file?.id && onFileSave(node.file.id)}>
                 <Save className="h-4 w-4 mr-2" />
                 Save
               </DropdownMenuItem>
@@ -231,7 +231,7 @@ export function FileTree({
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
-                  onClick={() => node.file && onFileDelete(node.file.id)}
+                  onClick={() => node.file?.id && onFileDelete(node.file.id)}
                   className="text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
