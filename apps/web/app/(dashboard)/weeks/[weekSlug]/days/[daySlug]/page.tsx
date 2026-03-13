@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: DayPageProps): Promise<Metada
 
 export default function DayPage({ params }: DayPageProps) {
   const week = getTransformedWeekBySlug(params.weekSlug);
-  const day = getDayBySlug(params.weekSlug, params.daySlug);
+  const day = getTransformedDayBySlug(params.weekSlug, params.daySlug);
 
   if (!week || !day) {
     notFound();
