@@ -31,6 +31,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refresh: () => Promise<boolean>;
   updateProfile: (data: { display_name: string }) => Promise<boolean>;
+  setToken: (token: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -240,6 +241,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  // Set token from OAuth callback
+  const setToken = useCallback(async (token: string): Promise<boolean> => {
+    try {
+      localStorage.setItem(TOKEN_KEY, token);
+      
+      // Fetch user with the token
+      const response = await fetch(`${API_URL}/api/v1/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+        return true;
+      }
+      
+      // If fetching user fails, clear token
+      localStorage.removeItem(TOKEN_KEY);
+      return false;
+    } catch (error) {
+      console.error("Set token error:", error);
+      localStorage.removeItem(TOKEN_KEY);
+      return false;
+    }
+  }, []);
+
   const value: AuthContextType = {
     user,
     isLoading,
@@ -249,6 +278,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     refresh,
     updateProfile,
+    setToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
