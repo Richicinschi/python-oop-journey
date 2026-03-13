@@ -209,6 +209,7 @@ export interface Bookmark {
   userId: string;
   itemType: ItemType;
   itemSlug: string;
+  title: string;
   notes: string | null;
   createdAt: string;
 }
