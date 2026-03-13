@@ -237,7 +237,7 @@ function TabItem({
               "flex-1 truncate text-sm",
               tab.isModified && "italic"
             )}>
-              {tab.file.name}
+              {tab.file.name ?? 'unnamed'}
             </span>
 
             {/* Modified Indicator */}
@@ -261,7 +261,7 @@ function TabItem({
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom">
-          <p>{tab.file.path || tab.file.name}</p>
+          <p>{tab.file.path || tab.file.name || 'unnamed'}</p>
           {tab.isModified && <p className="text-amber-500">Modified</p>}
         </TooltipContent>
       </Tooltip>
