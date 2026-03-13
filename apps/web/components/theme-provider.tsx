@@ -7,6 +7,10 @@ type Theme = 'dark' | 'light' | 'system';
 interface ThemeProviderProps {
   children: ReactNode;
   defaultTheme?: Theme;
+  // Ignored props (for next-themes compatibility)
+  attribute?: string;
+  enableSystem?: boolean;
+  disableTransitionOnChange?: boolean;
 }
 
 interface ThemeContextType {
