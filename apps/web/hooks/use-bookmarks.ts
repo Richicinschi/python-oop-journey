@@ -372,12 +372,12 @@ export function useLocalBookmarks() {
     });
   }, []);
 
-  const toggleBookmark = useCallback((item: Omit<LegacyBookmark, 'createdAt'>) => {
+  const toggleBookmark = useCallback((item: { id: string; type: 'problem' | 'week' | 'day'; title: string; path?: string; notes?: string }) => {
     const exists = bookmarks.some((b) => b.id === item.id);
     if (exists) {
       removeBookmark(item.id);
     } else {
-      addBookmark(item);
+      addBookmark(item as Omit<LegacyBookmark, 'createdAt'>);
     }
   }, [bookmarks, addBookmark, removeBookmark]);
 
