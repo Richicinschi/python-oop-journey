@@ -20,8 +20,15 @@ from api.services.monitoring import get_monitor
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# Service instance
-execution_service = get_execution_service()
+# Service instance (lazy initialization)
+_execution_service = None
+
+def get_execution_service_instance():
+    """Get execution service instance (lazy init for Render compatibility)."""
+    global _execution_service
+    if _execution_service is None:
+        _execution_service = get_execution_service()
+    return _execution_service
 
 
 async def get_client_info(request: Request) -> tuple[str | None, str | None]:
@@ -74,7 +81,7 @@ async def execute_code(
     
     # Check rate limit (TODO: Get actual user_id from auth)
     user_id = None  # Will come from auth token
-    allowed, current_count, limit = await execution_service.check_rate_limit(
+    allowed, current_count, limit = await get_execution_service_instance().check_rate_limit(
         user_id, ip_address
     )
     
@@ -86,7 +93,7 @@ async def execute_code(
         )
     
     # Validate syntax first
-    validation = await execution_service.validate_syntax(exec_request.code)
+    validation = await get_execution_service_instance().validate_syntax(exec_request.code)
     if not validation.valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -98,7 +105,7 @@ async def execute_code(
         )
     
     # Execute the code
-    result = await execution_service.execute(
+    result = await get_execution_service_instance().execute(
         exec_request,
         user_id=user_id,
         ip_address=ip_address,
@@ -131,7 +138,7 @@ async def execute_code_async(
     
     # Check rate limit
     user_id = None
-    allowed, current_count, limit = await execution_service.check_rate_limit(
+    allowed, current_count, limit = await get_execution_service_instance().check_rate_limit(
         user_id, ip_address
     )
     
@@ -142,7 +149,7 @@ async def execute_code_async(
         )
     
     # Validate syntax
-    validation = await execution_service.validate_syntax(exec_request.code)
+    validation = await get_execution_service_instance().validate_syntax(exec_request.code)
     if not validation.valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -154,7 +161,7 @@ async def execute_code_async(
         )
     
     # Submit async job
-    result = await execution_service.execute_async(exec_request, user_id=user_id)
+    result = await get_execution_service_instance().execute_async(exec_request, user_id=user_id)
     return result
 
 
@@ -169,7 +176,7 @@ async def execute_code_async(
 )
 async def get_execution_job(job_id: str) -> ExecutionJobResult:
     """Get result of an asynchronous execution job."""
-    result = await execution_service.get_job_result(job_id)
+    result = await get_execution_service_instance().get_job_result(job_id)
     return result
 
 
@@ -197,7 +204,7 @@ async def validate_code_with_tests(
     
     # Check rate limit
     user_id = None
-    allowed, current_count, limit = await execution_service.check_rate_limit(
+    allowed, current_count, limit = await get_execution_service_instance().check_rate_limit(
         user_id, ip_address
     )
     
@@ -208,7 +215,7 @@ async def validate_code_with_tests(
         )
     
     # Validate syntax first
-    validation = await execution_service.validate_syntax(validation_request.code)
+    validation = await get_execution_service_instance().validate_syntax(validation_request.code)
     if not validation.valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -220,7 +227,7 @@ async def validate_code_with_tests(
         )
     
     # Execute with tests
-    result = await execution_service.validate_and_test(
+    result = await get_execution_service_instance().validate_and_test(
         validation_request,
         user_id=user_id,
         ip_address=ip_address,
@@ -238,7 +245,7 @@ async def validate_code_with_tests(
 )
 async def check_syntax(code: str) -> ValidationResponse:
     """Validate Python syntax without executing."""
-    result = await execution_service.validate_syntax(code)
+    result = await get_execution_service_instance().validate_syntax(code)
     return result
 
 
@@ -260,7 +267,7 @@ async def get_metrics(hours: int = 24) -> ExecutionMetrics:
             detail="Hours must be between 1 and 168",
         )
     
-    metrics = await execution_service.get_metrics(hours)
+    metrics = await get_execution_service_instance().get_metrics(hours)
     return metrics
 
 

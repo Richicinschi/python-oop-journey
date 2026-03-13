@@ -23,8 +23,15 @@ from api.services.project_execution import get_project_execution_service
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# Service instance
-project_service = get_project_execution_service()
+# Service instance (lazy initialization for Render compatibility)
+_project_service = None
+
+def get_project_service():
+    """Get project execution service (lazy init)."""
+    global _project_service
+    if _project_service is None:
+        _project_service = get_project_execution_service()
+    return _project_service
 
 
 @router.get(
@@ -145,7 +152,7 @@ async def run_project(
         )
 
     # Execute project
-    result = await project_service.execute_project(
+    result = await get_project_service().execute_project(
         files=request.files,
         entry_point=entry_point,
         timeout=30,
@@ -189,7 +196,7 @@ async def run_project_tests(
     test_path = request.test_path or "tests"
 
     # Run tests
-    result = await project_service.run_project_tests(
+    result = await get_project_service().run_project_tests(
         files=request.files,
         test_path=test_path,
         timeout=30,
@@ -223,7 +230,7 @@ async def validate_project(
         required_files = None
 
     # Validate project
-    result = await project_service.validate_project(
+    result = await get_project_service().validate_project(
         files=files,
         required_files=required_files,
     )
