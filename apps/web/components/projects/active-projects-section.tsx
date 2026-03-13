@@ -71,8 +71,8 @@ export function ActiveProjectsSection({
     
     const weekOrder = currentWeekNumber || 1;
     return projects
-      .filter(p => p.weekNumber >= weekOrder && !progressMap[p.slug])
-      .sort((a, b) => a.weekNumber - b.weekNumber)[0];
+      .filter(p => p.week >= weekOrder && !progressMap[p.slug])
+      .sort((a, b) => a.week - b.week)[0];
   }, [projects, progressMap, currentWeekNumber, currentWeekProject]);
 
   if (isLoading) {
@@ -151,7 +151,7 @@ export function ActiveProjectsSection({
               <div className="flex items-center justify-between mb-1.5">
                 <span className="font-medium text-sm truncate">{project.title}</span>
                 <Badge variant="outline" className="text-xs">
-                  Week {project.weekNumber}
+                  Week {project.week}
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
@@ -203,7 +203,7 @@ export function ActiveProjectsSection({
                 <Badge className="mb-2">Current Week</Badge>
                 <CardTitle>{currentWeekProject.project.title}</CardTitle>
                 <CardDescription>
-                  Week {currentWeekProject.project.weekNumber} • {currentWeekProject.project.estimatedTime}
+                  Week {currentWeekProject.project.week} • {currentWeekProject.project.estimatedTime}
                 </CardDescription>
               </div>
               <Button onClick={() => onContinueProject?.(currentWeekProject.project)}>
@@ -248,7 +248,7 @@ export function ActiveProjectsSection({
               <div className="flex-1">
                 <p className="font-medium">{nextProject.title}</p>
                 <p className="text-sm text-muted-foreground">
-                  Week {nextProject.weekNumber} • {nextProject.estimatedTime}
+                  Week {nextProject.week} • {nextProject.estimatedTime}
                 </p>
               </div>
               <Button asChild>
@@ -297,7 +297,7 @@ export function ActiveProjectsSection({
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{project.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        Week {project.weekNumber}
+                        Week {project.week}
                       </p>
                     </div>
                   </div>

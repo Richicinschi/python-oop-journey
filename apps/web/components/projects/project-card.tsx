@@ -81,7 +81,7 @@ export function ProjectCard({
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="font-medium truncate">{project.title}</h4>
-              <p className="text-sm text-muted-foreground">Week {project.weekNumber}</p>
+              <p className="text-sm text-muted-foreground">Week {project.week}</p>
             </div>
             <StatusIcon className={cn('h-5 w-5', statusConfigItem.color)} />
           </div>
@@ -102,7 +102,7 @@ export function ProjectCard({
               <div>
                 <CardTitle className="text-xl">{project.title}</CardTitle>
                 <CardDescription className="mt-1">
-                  Week {project.weekNumber} • {project.estimatedTime}
+                  Week {project.week} • {project.estimatedHours}
                 </CardDescription>
               </div>
             </div>
@@ -127,7 +127,7 @@ export function ProjectCard({
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Clock className="h-4 w-4" />
-              {project.estimatedTime}
+              {project.estimatedHours}
             </span>
             <span className="flex items-center gap-1.5">
               <FileCode2 className="h-4 w-4" />
@@ -192,7 +192,7 @@ export function ProjectCard({
             <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
               <span className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4" />
-                {project.estimatedTime}
+                {project.estimatedHours}
               </span>
               <span className={cn('flex items-center gap-1.5', statusConfigItem.color)}>
                 <StatusIcon className="h-4 w-4" />
@@ -261,7 +261,7 @@ export function ProjectMiniCard({
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{project.title}</p>
-        <p className="text-xs text-muted-foreground">Week {project.weekNumber}</p>
+        <p className="text-xs text-muted-foreground">Week {project.week}</p>
       </div>
       <StatusIcon className={cn('h-4 w-4 shrink-0', statusConfigItem.color)} />
     </button>
