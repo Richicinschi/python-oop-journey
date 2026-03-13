@@ -3,7 +3,9 @@
 import * as React from "react";
 import { Header } from "./header";
 import { CommandPalette } from "@/components/search";
-import searchIndex from "@/data/search-index.json";
+import searchIndexRaw from "@/data/search-index.json";
+import type { SearchIndexItem } from "@/lib/search";
+const searchIndex = searchIndexRaw as SearchIndexItem[];
 
 interface ClientLayoutProps {
   children: React.ReactNode;
