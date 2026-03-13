@@ -1,9 +1,8 @@
 #!/bin/bash
-# Start the FastAPI development server
-
 set -e
 
-export PYTHONDONTWRITEBYTECODE=1
-export PYTHONUNBUFFERED=1
+echo "Running database migrations..."
+alembic upgrade head
 
-./venv/bin/python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+echo "Starting server on port $PORT..."
+exec uvicorn api.main:app --host 0.0.0.0 --port "$PORT" --timeout-keep-alive 75
