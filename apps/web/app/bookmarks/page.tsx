@@ -152,6 +152,22 @@ export default function BookmarksPage() {
   );
 }
 
+// Helper to generate URL from bookmark
+function getBookmarkUrl(bookmark: BookmarkType): string {
+  switch (bookmark.itemType) {
+    case 'week':
+      return `/weeks/${bookmark.itemSlug}`;
+    case 'day':
+      return `/days/${bookmark.itemSlug}`;
+    case 'problem':
+      return `/problems/${bookmark.itemSlug}`;
+    case 'theory':
+      return `/theory/${bookmark.itemSlug}`;
+    default:
+      return '/';
+  }
+}
+
 function BookmarkCard({
   bookmark,
   onRemove,
@@ -160,6 +176,7 @@ function BookmarkCard({
   onRemove: () => void;
 }) {
   const Icon = typeIcons[bookmark.itemType] || BookOpen;
+  const url = getBookmarkUrl(bookmark);
 
   return (
     <Card className="group hover:shadow-sm transition-shadow">
@@ -189,7 +206,7 @@ function BookmarkCard({
               <Trash2 className="h-4 w-4" />
             </Button>
             <Button asChild size="sm">
-              <Link href={bookmark.url}>
+              <Link href={url}>
                 View
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
