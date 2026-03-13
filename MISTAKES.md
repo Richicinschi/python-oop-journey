@@ -115,6 +115,28 @@ name: part,
 
 ---
 
+## 📋 Pattern 7: JSON Import Type Mismatch
+**Error:** `Type 'string' is not assignable to type '"week" | "day" | "problem" | ...'`
+
+**Root Cause:** When importing JSON files, TypeScript infers string fields as `string` type, not as specific string literals.
+
+**Example:**
+```typescript
+// ❌ BAD - Type inferred as string
+import searchIndex from "@/data/search-index.json";
+// searchIndex[0].type is inferred as 'string'
+
+// ✅ GOOD - Type assertion
+import searchIndexRaw from "@/data/search-index.json";
+import type { SearchIndexItem } from "@/lib/search";
+const searchIndex = searchIndexRaw as SearchIndexItem[];
+```
+
+**Files Affected:**
+- `components/layout/client-layout.tsx` - search-index.json import
+
+---
+
 ## 📋 Pattern 6: Missing Module Import
 **Error:** `Cannot find module '@/components/ui/use-toast' or its corresponding type declarations`
 
