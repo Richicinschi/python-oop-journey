@@ -502,7 +502,7 @@ python_files = solution.py
     def _clean_message(self, message: str) -> str:
         """Clean up error message for display."""
         # Remove file paths for security
-        cleaned = re.sub(r"File\s+"[^"]+"", 'File "..."', message)
+        cleaned = re.sub(r'File\s+"[^"]+"', 'File "..."', message)
         # Limit length
         if len(cleaned) > 500:
             cleaned = cleaned[:497] + "..."
