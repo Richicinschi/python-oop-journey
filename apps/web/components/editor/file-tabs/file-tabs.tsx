@@ -162,7 +162,10 @@ export function FileTabs({
           <DropdownMenuItem onClick={onCloseAll}>
             Close All
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => tabs.find(t => t.isActive) && onCloseOthers(tabs.find(t => t.isActive)!.file.id)}>
+          <DropdownMenuItem onClick={() => {
+              const activeTab = tabs.find(t => t.isActive && t.file.id);
+              if (activeTab) onCloseOthers(activeTab.file.id!);
+            }}>
             Close Others
           </DropdownMenuItem>
         </DropdownMenuContent>
