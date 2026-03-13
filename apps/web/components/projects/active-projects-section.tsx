@@ -258,7 +258,7 @@ export function ActiveProjectsSection({
                 </p>
               </div>
               <Button asChild>
-                <Link href={`/weeks/${nextProject.weekSlug}/project`}>
+                <Link href={`/projects/${nextProject.slug}`}>
                   Start Project
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
