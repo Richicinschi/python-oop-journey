@@ -54,6 +54,7 @@ class Activity(Base):
         index=True,
     )
     meta_data: Mapped[dict | None] = mapped_column(
+        "metadata",
         JSONB,
         nullable=True,
     )
