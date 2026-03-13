@@ -126,7 +126,7 @@ export function FileTabs({
         className="flex-1 flex overflow-x-auto scrollbar-hide"
         onWheel={handleMouseWheel}
       >
-        {tabs.map((tab) => (
+        {tabs.filter((tab): tab is FileTab & { file: ProjectFile & { id: string } } => !!tab.file.id).map((tab) => (
           <TabItem
             key={tab.file.id}
             tab={tab}
