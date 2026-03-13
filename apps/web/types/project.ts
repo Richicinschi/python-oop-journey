@@ -82,8 +82,10 @@ export interface ActiveProject {
 
 // Editor tab type for multi-file editor
 export interface EditorTab {
+  id: string;
   fileId: string;
   fileName: string;
+  filePath: string;
   isModified: boolean;
   isActive: boolean;
 }
