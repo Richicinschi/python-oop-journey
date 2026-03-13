@@ -157,7 +157,7 @@ export function MultiFileEditor({
 
   const handlePrimaryChange = useCallback((content: string) => {
     const activeFile = project.getActiveFile();
-    if (activeFile) {
+    if (activeFile?.id) {
       project.updateFileContent(activeFile.id, content);
       onFileChange?.(activeFile.id, content);
     }
