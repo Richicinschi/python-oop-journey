@@ -80,6 +80,12 @@ class User(Base):
         cascade="all, delete-orphan",
         lazy="selectin",
     )
+    activities: Mapped[list["Activity"]] = relationship(
+        "Activity",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
     submissions: Mapped[list["Submission"]] = relationship(
         "Submission",
         foreign_keys="Submission.user_id",
