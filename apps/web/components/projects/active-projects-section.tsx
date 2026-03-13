@@ -223,9 +223,11 @@ export function ActiveProjectsSection({
                 <span className="font-medium">{currentWeekProject.completionPercentage}%</span>
               </div>
               <Progress value={currentWeekProject.completionPercentage} className="h-2" />
-              <p className="text-sm text-muted-foreground">
-                {formatTime(currentWeekProject.progress.totalTimeSpent)} spent so far
-              </p>
+              {(currentWeekProject.progress as unknown as { totalTimeSpent?: number }).totalTimeSpent && (
+                <p className="text-sm text-muted-foreground">
+                  {formatTime((currentWeekProject.progress as unknown as { totalTimeSpent: number }).totalTimeSpent)} spent so far
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
