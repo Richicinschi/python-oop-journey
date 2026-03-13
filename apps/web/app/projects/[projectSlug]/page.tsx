@@ -1120,19 +1120,27 @@ function restoreFileTree(files: FileNode[], savedData: { path: string; content: 
 function generateDefaultFiles(project: Project): ProjectFile[] {
   return [
     {
+      id: 'main-py',
+      name: 'main.py',
       path: 'src/main.py',
       content: `# ${project.title}\n# Entry point for your project\n\ndef main():\n    pass\n\nif __name__ == "__main__":\n    main()\n`,
       isEntryPoint: true,
     },
     {
+      id: 'src-init',
+      name: '__init__.py',
       path: 'src/__init__.py',
       content: '',
     },
     {
+      id: 'tests-init',
+      name: '__init__.py',
       path: 'tests/__init__.py',
       content: '',
     },
     {
+      id: 'test-main',
+      name: 'test_main.py',
       path: 'tests/test_main.py',
       content: `import pytest\nfrom src.main import main\n\ndef test_main():\n    pass\n`,
       readOnly: false,

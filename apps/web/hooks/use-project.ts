@@ -127,7 +127,8 @@ export function useProject({
 
   // Add new file
   const addFile = useCallback((path: string, content: string = '') => {
-    const newFile: ProjectFile = { path, content };
+    const name = path.split('/').pop() || path;
+    const newFile: ProjectFile = { id: path, name, path, content };
     setFiles(prev => [...prev, newFile]);
     setActiveFile(newFile);
   }, []);
