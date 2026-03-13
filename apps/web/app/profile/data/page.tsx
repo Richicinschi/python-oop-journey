@@ -37,24 +37,31 @@ import {
   DialogTitle 
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { exportAllData, importData, deleteDatabase } from '@/lib/offline-db';
+import { 
+  exportAllData, 
+  importData, 
+  deleteDatabase,
+  SyncOperation, 
+  LocalDraft, 
+  LocalProgress, 
+  LocalBookmark, 
+  CachedCurriculum 
+} from '@/lib/offline-db';
 import { syncPendingOperations } from '@/lib/sync-engine';
-
-interface ExportData {
-  operations: unknown[];
-  drafts: unknown[];
-  progress: unknown[];
-  bookmarks: unknown[];
-  curriculum: unknown[];
-  exportedAt: string;
-  version: string;
-}
 
 interface ValidationResult {
   valid: boolean;
   errors: string[];
   warnings: string[];
-  data?: ExportData;
+  data?: {
+    operations: unknown[];
+    drafts: unknown[];
+    progress: unknown[];
+    bookmarks: unknown[];
+    curriculum: unknown[];
+    exportedAt: string;
+    version: string;
+  };
 }
 
 export default function DataPage() {
@@ -73,7 +80,7 @@ export default function DataPage() {
     setIsExporting(true);
     try {
       const data = await exportAllData();
-      const exportPayload: ExportData = {
+      const exportPayload = {
         ...data,
         version: '1.0',
       };
@@ -146,7 +153,7 @@ export default function DataPage() {
       return { valid: false, errors, warnings };
     }
 
-    const exportData = data as Partial<ExportData>;
+    const exportData = data as Record<string, unknown>;
 
     // Check required fields
     if (!exportData.version) {
@@ -160,7 +167,7 @@ export default function DataPage() {
     // Validate arrays
     const arrays = ['operations', 'drafts', 'progress', 'bookmarks', 'curriculum'];
     for (const key of arrays) {
-      const arr = exportData[key as keyof ExportData];
+      const arr = exportData[key];
       if (arr !== undefined && !Array.isArray(arr)) {
         errors.push(`${key} must be an array`);
       }
@@ -174,7 +181,15 @@ export default function DataPage() {
       valid: true, 
       errors, 
       warnings, 
-      data: exportData as ExportData,
+      data: {
+        operations: (exportData.operations || []) as unknown[],
+        drafts: (exportData.drafts || []) as unknown[],
+        progress: (exportData.progress || []) as unknown[],
+        bookmarks: (exportData.bookmarks || []) as unknown[],
+        curriculum: (exportData.curriculum || []) as unknown[],
+        exportedAt: String(exportData.exportedAt || ''),
+        version: String(exportData.version || ''),
+      },
     };
   };
 
@@ -192,11 +207,11 @@ export default function DataPage() {
 
       // Import the data
       await importData({
-        operations: data.operations,
-        drafts: data.drafts,
-        progress: data.progress,
-        bookmarks: data.bookmarks,
-        curriculum: data.curriculum,
+        operations: (data.operations || []) as SyncOperation[],
+        drafts: (data.drafts || []) as LocalDraft[],
+        progress: (data.progress || []) as LocalProgress[],
+        bookmarks: (data.bookmarks || []) as LocalBookmark[],
+        curriculum: (data.curriculum || []) as CachedCurriculum[],
       });
 
       // Trigger sync
