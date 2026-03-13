@@ -136,7 +136,7 @@ export function ProjectCard({
             </span>
             <span className="flex items-center gap-1.5">
               <FileCode2 className="h-4 w-4" />
-              {project.starterFiles.length} starter files
+              {project.starterFiles?.length ?? 0} starter files
             </span>
             <span className={cn('flex items-center gap-1.5', statusConfigItem.color)}>
               <StatusIcon className="h-4 w-4" />
