@@ -115,6 +115,54 @@ name: part,
 
 ---
 
+## 📋 Pattern 6: Missing Module Import
+**Error:** `Cannot find module '@/components/ui/use-toast' or its corresponding type declarations`
+
+**Root Cause:** Code imports from a file that doesn't exist.
+
+**Files Affected:**
+- `components/editor/post-solve-recommendations.tsx`
+- `components/notifications/smart-notifications.tsx`
+
+**Solution:**
+Create the missing module with compatible API:
+
+```typescript
+// components/ui/use-toast.ts
+'use client';
+
+import { toast as sonnerToast } from 'sonner';
+import { ReactNode } from 'react';
+
+interface ToastOptions {
+  title?: string | ReactNode;
+  description?: string;
+  variant?: 'default' | 'destructive';
+  duration?: number;
+}
+
+export function useToast() {
+  const toast = (options: ToastOptions) => {
+    // Map to Sonner's API
+    if (options.variant === 'destructive') {
+      sonnerToast.error(options.title as string, {
+        description: options.description,
+      });
+    } else {
+      sonnerToast.success(options.title as string, {
+        description: options.description,
+      });
+    }
+  };
+
+  return { toast };
+}
+```
+
+**Note:** This project uses Sonner for toasts, but some components expect a custom `useToast` hook.
+
+---
+
 ## 🚫 Anti-Patterns to Avoid
 
 ### Anti-Pattern 1: Changing Type Definitions
