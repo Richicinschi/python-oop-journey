@@ -203,7 +203,7 @@ export function ActiveProjectsSection({
                 <Badge className="mb-2">Current Week</Badge>
                 <CardTitle>{currentWeekProject.project.title}</CardTitle>
                 <CardDescription>
-                  Week {currentWeekProject.project.week} • {currentWeekProject.project.estimatedTime}
+                  Week {currentWeekProject.project.week} • {currentWeekProject.project.estimatedHours}
                 </CardDescription>
               </div>
               <Button onClick={() => onContinueProject?.(currentWeekProject.project)}>
@@ -248,7 +248,7 @@ export function ActiveProjectsSection({
               <div className="flex-1">
                 <p className="font-medium">{nextProject.title}</p>
                 <p className="text-sm text-muted-foreground">
-                  Week {nextProject.week} • {nextProject.estimatedTime}
+                  Week {nextProject.week} • {nextProject.estimatedHours}
                 </p>
               </div>
               <Button asChild>
