@@ -73,3 +73,9 @@ export interface UserProjectProgress {
   completedTasks: string[];
   lastAccessed: string;
 }
+
+export interface ActiveProject {
+  project: WeeklyProject;
+  progress: UserProjectProgress;
+  completionPercentage: number;
+}
