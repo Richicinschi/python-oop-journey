@@ -403,7 +403,7 @@ export default function ProblemPage() {
           <div className="flex-1 overflow-hidden">
             <CodeEditor
               value={code}
-              onChange={setCode}
+              onChange={(value) => value !== undefined && setCode(value)}
               height="100%"
               fontSize={fontSize}
               wordWrap={wordWrap ? 'on' : 'off'}

@@ -197,7 +197,7 @@ export function ConflictResolution({
             <div className="h-[200px] border rounded-md">
               <CodeEditor
                 value={String(mergedData ?? (conflict.localData as { code?: string })?.code ?? '')}
-                onChange={(value) => setMergedData({ code: value })}
+                onChange={(value) => value !== undefined && setMergedData({ code: value })}
                 language="python"
               />
             </div>

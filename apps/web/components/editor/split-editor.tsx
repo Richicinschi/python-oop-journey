@@ -175,7 +175,7 @@ export function SplitEditor({
             <div className="flex-1 overflow-hidden">
               <CodeEditor
                 value={primaryFile.content}
-                onChange={onPrimaryChange}
+                onChange={(value) => value !== undefined && onPrimaryChange?.(value)}
                 onMount={handlePrimaryMount}
                 language={primaryFile.language}
                 readOnly={readOnly || primaryFile.isReadOnly}
@@ -252,7 +252,7 @@ export function SplitEditor({
             <div className="flex-1 overflow-hidden">
               <CodeEditor
                 value={secondaryFile.content}
-                onChange={onSecondaryChange}
+                onChange={(value) => value !== undefined && onSecondaryChange?.(value)}
                 onMount={handleSecondaryMount}
                 language={secondaryFile.language}
                 readOnly={readOnly || secondaryFile.isReadOnly}

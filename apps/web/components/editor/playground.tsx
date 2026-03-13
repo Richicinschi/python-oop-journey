@@ -173,7 +173,7 @@ export function Playground({
       >
         <CodeEditor
           value={editor.code}
-          onChange={editor.setCode}
+          onChange={(value) => value !== undefined && editor.setCode(value)}
           height={height}
           fontSize={editor.fontSize}
           wordWrap={editor.wordWrap ? "on" : "off"}

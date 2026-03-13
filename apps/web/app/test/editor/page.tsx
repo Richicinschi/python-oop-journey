@@ -176,7 +176,7 @@ export default function EditorTestPage() {
               <div className="grid gap-4 lg:grid-cols-[1fr,300px]">
                 <CodeEditor
                   value={basicEditor.code}
-                  onChange={basicEditor.setCode}
+                  onChange={(value) => value !== undefined && basicEditor.setCode(value)}
                   height="500px"
                   fontSize={basicEditor.fontSize}
                   wordWrap={basicEditor.wordWrap ? "on" : "off"}
@@ -229,7 +229,7 @@ export default function EditorTestPage() {
             <CardContent className="space-y-4">
               <CodeEditor
                 value={minimalEditor.code}
-                onChange={minimalEditor.setCode}
+                onChange={(value) => value !== undefined && minimalEditor.setCode(value)}
                 height="400px"
                 minimap={false}
                 fontSize={16}
