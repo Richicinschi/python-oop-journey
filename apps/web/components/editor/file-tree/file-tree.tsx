@@ -53,13 +53,13 @@ export function FileTree({
         const aIsFolder = isProjectFolder(a);
         const bIsFolder = isProjectFolder(b);
         if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
-        return a.name.localeCompare(b.name);
+        return (a.name ?? '').localeCompare(b.name ?? '');
       });
       
       for (const child of sorted) {
         items.push({ item: child, level, parentId });
         if (isProjectFolder(child) && child.isExpanded) {
-          traverse(child, level + 1, child.id);
+          if (child.id) traverse(child, level + 1, child.id);
         }
       }
     }
@@ -127,7 +127,7 @@ export function FileTree({
             <span className="text-sm font-medium">Explorer</span>
           </div>
           <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-            {root.name}
+            {root.name ?? 'Project'}
           </span>
         </div>
       </FileTreeContextMenu>
