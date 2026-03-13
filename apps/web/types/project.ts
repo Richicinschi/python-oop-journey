@@ -91,7 +91,7 @@ export interface EditorTab {
 // Analytics event type
 export interface AnalyticsEvent {
   id: string;
-  type: 'file_open' | 'file_edit' | 'file_save' | 'task_complete' | 'project_submit' | 'test_run' | 'error';
+  type: 'file_open' | 'file_edit' | 'file_save' | 'task_complete' | 'project_submit' | 'test_run' | 'run_executed' | 'error';
   timestamp: number;
   metadata?: Record<string, unknown>;
 }
