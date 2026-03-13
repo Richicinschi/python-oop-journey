@@ -1,0 +1,136 @@
+# Dependencies
+node_modules
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment files (NEVER commit these!)
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!.env.production.example
+
+# Build outputs
+.next/
+dist/
+build/
+out/
+.turbo/
+
+# Python
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+*.mo
+*.pot
+*.log
+local_settings.py
+instance/
+.webassets-cache
+.scrapy
+docs/_build/
+target/
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+.python-version
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+.cache
+.temp
+.tmp
+*.pid
+*.seed
+*.pid.lock
+
+# Render/Fly local files
+.fly/
+
+# Local development
+*.local
+
+# Documentation & Tutorials (not needed for deployment)
+COMPLETE_TUTORIAL.md
+DEPLOYMENT_CHECKLIST.md
+DEPLOY_NETLIFY.md
+EXECUTION_PLAN.md
+FREE_DEPLOYMENT_OPTIONS.md
+FREE_DEPLOY_QUICKSTART.md
+GITHUB_SETUP.md
+GOOGLE_OAUTH_DETAILED.md
+INTEGRATION_TEST_REPORT.md
+MONACO_INTEGRATION.md
+PHASE3_INTEGRATION_TEST_REPORT.md
+PHASE5_INTEGRATION_TEST_REPORT.md
+PRODUCTION.md
+PROGRESS_PERSISTENCE_SUMMARY.md
+PROJECT_AUDIT_REPORT.md
+PROJECT_FINAL_STATUS.md
+QUICKSTART.md
+QUICK_REFERENCE.md
+VERIFICATION_SYSTEM_SUMMARY.md
+AUTH_SYSTEM.md
+memory.md
+AGENTS.md
+lighthouserc.js
+test_auth_system.py
+test_verification.py
+
+# Infrastructure & Deployment (not needed for Render)
+docs/
+infrastructure/
+monitoring/
+nginx/
+scripts/
+terraform/
+tests/
+.github/
+Makefile
+docker-compose*.yml

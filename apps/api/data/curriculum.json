@@ -1,0 +1,94 @@
+{
+  "version": "1.0.0",
+  "weeks": [
+    {
+      "slug": "week-01-foundations",
+      "title": "Week 1: Foundations",
+      "description": "Understanding objects, classes, and the basics of OOP",
+      "theme": "foundations",
+      "days": [
+        {
+          "slug": "day-01-objects",
+          "title": "Day 1: Objects in Python",
+          "description": "Everything is an object in Python",
+          "problems": [
+            {
+              "slug": "w01d01-hello-object",
+              "title": "Hello, Object!",
+              "description": "Explore Python's object nature by inspecting types and identities",
+              "difficulty": "beginner",
+              "starter_code": "# Explore objects\ndef explore_type(value):\n    return type(value)",
+              "test_code": "def test_explore_type_int():\n    assert explore_type(42) == int\n\ndef test_explore_type_str():\n    assert explore_type('hello') == str\n\ndef test_explore_type_list():\n    assert explore_type([1, 2, 3]) == list",
+              "hints": [
+                "Use Python's built-in type() function to get the type of an object.",
+                "Remember that everything in Python is an object, including integers and strings.",
+                "Try calling type() on different values to see what you get."
+              ]
+            },
+            {
+              "slug": "w01d01-type-check",
+              "title": "Type Detective",
+              "description": "Write a function that returns the type name of any object",
+              "difficulty": "beginner",
+              "starter_code": "def get_type_name(obj):\n    \"\"\"Return the type name of an object as a string.\"\"\"\n    pass",
+              "test_code": "def test_get_type_name_int():\n    assert get_type_name(42) == 'int'\n\ndef test_get_type_name_str():\n    assert get_type_name('hello') == 'str'\n\ndef test_get_type_name_list():\n    assert get_type_name([1, 2]) == 'list'\n\ndef test_get_type_name_none():\n    assert get_type_name(None) == 'NoneType'",
+              "hints": [
+                "type(obj) gives you the type, but you need to get its name.",
+                "Type objects have a __name__ attribute.",
+                "You can access it like: type(obj).__name__"
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "day-02-classes",
+          "title": "Day 2: Defining Classes",
+          "description": "Create your own classes with attributes and methods",
+          "problems": [
+            {
+              "slug": "w01d02-simple-class",
+              "title": "Simple Person Class",
+              "description": "Create a Person class with name and age attributes",
+              "difficulty": "beginner",
+              "starter_code": "class Person:\n    \"\"\"A simple person class.\"\"\"\n    \n    def __init__(self, name, age):\n        \"\"\"Initialize a person with name and age.\"\"\"\n        pass",
+              "test_code": "def test_person_creation():\n    p = Person('Alice', 30)\n    assert p.name == 'Alice'\n    assert p.age == 30\n\ndef test_person_different_values():\n    p = Person('Bob', 25)\n    assert p.name == 'Bob'\n    assert p.age == 25\n\ndef test_person_edge_case_zero_age():\n    p = Person('Baby', 0)\n    assert p.age == 0",
+              "hints": [
+                "In the __init__ method, use self.name = name to set attributes.",
+                "Remember to use self to refer to instance attributes.",
+                "Don't forget to handle all parameters passed to __init__."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "week-02-encapsulation",
+      "title": "Week 2: Encapsulation",
+      "description": "Private attributes, properties, and controlling access",
+      "theme": "encapsulation",
+      "days": [
+        {
+          "slug": "day-01-private",
+          "title": "Day 1: Private Attributes",
+          "description": "Using underscores to indicate private members",
+          "problems": [
+            {
+              "slug": "w02d01-bank-account",
+              "title": "Bank Account",
+              "description": "Create a bank account with private balance and public methods",
+              "difficulty": "intermediate",
+              "starter_code": "class BankAccount:\n    \"\"\"A bank account with private balance.\"\"\"\n    \n    def __init__(self):\n        self._balance = 0\n    \n    def deposit(self, amount):\n        \"\"\"Deposit money into the account.\"\"\"\n        pass\n    \n    def withdraw(self, amount):\n        \"\"\"Withdraw money from the account.\"\"\"\n        pass\n    \n    @property\n    def balance(self):\n        \"\"\"Get the current balance.\"\"\"\n        pass",
+              "test_code": "def test_initial_balance():\n    acc = BankAccount()\n    assert acc.balance == 0\n\ndef test_deposit():\n    acc = BankAccount()\n    acc.deposit(100)\n    assert acc.balance == 100\n\ndef test_withdraw():\n    acc = BankAccount()\n    acc.deposit(100)\n    acc.withdraw(30)\n    assert acc.balance == 70\n\ndef test_multiple_operations():\n    acc = BankAccount()\n    acc.deposit(50)\n    acc.deposit(25)\n    acc.withdraw(10)\n    assert acc.balance == 65",
+              "hints": [
+                "Use self._balance to store the balance internally.",
+                "Update _balance in deposit and withdraw methods.",
+                "The balance property should just return self._balance."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

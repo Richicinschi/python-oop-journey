@@ -1,0 +1,322 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom scrollbar for code editor */
+.editor-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.editor-scrollbar::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+.editor-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full;
+}
+
+.editor-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/30;
+}
+
+/* Theory Content Styles */
+.theory-content {
+  @apply text-foreground;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.theory-content h1 {
+  @apply text-4xl font-bold mt-8 mb-6 scroll-mt-24;
+  letter-spacing: -0.02em;
+}
+
+.theory-content h2 {
+  @apply text-2xl font-semibold mt-10 mb-4 scroll-mt-24 border-b pb-3;
+  letter-spacing: -0.01em;
+}
+
+.theory-content h3 {
+  @apply text-xl font-semibold mt-8 mb-3 scroll-mt-24;
+}
+
+.theory-content h4 {
+  @apply text-lg font-semibold mt-6 mb-2;
+}
+
+.theory-content p {
+  @apply mb-5 leading-7;
+}
+
+.theory-content ul {
+  @apply list-disc pl-6 mb-5 space-y-2;
+}
+
+.theory-content ol {
+  @apply list-decimal pl-6 mb-5 space-y-2;
+}
+
+.theory-content li {
+  @apply leading-7;
+}
+
+.theory-content blockquote {
+  @apply border-l-4 border-primary pl-5 italic my-6 py-2 text-muted-foreground;
+}
+
+.theory-content pre {
+  @apply rounded-lg bg-muted p-4 overflow-x-auto my-6;
+}
+
+.theory-content code {
+  @apply font-mono text-sm;
+}
+
+.theory-content pre code {
+  @apply bg-transparent p-0;
+}
+
+.theory-content :not(pre) > code {
+  @apply px-1.5 py-0.5 rounded bg-muted text-sm;
+}
+
+.theory-content table {
+  @apply w-full border-collapse my-6 rounded-lg overflow-hidden border;
+}
+
+.theory-content thead {
+  @apply bg-muted;
+}
+
+.theory-content th {
+  @apply border-b px-4 py-3 text-left font-semibold;
+}
+
+.theory-content td {
+  @apply border-b px-4 py-3;
+}
+
+.theory-content tr:last-child td {
+  @apply border-b-0;
+}
+
+.theory-content hr {
+  @apply my-8 border-border;
+}
+
+.theory-content a {
+  @apply text-primary underline hover:text-primary/80 font-medium;
+}
+
+.theory-content strong {
+  @apply font-semibold text-foreground;
+}
+
+.theory-content em {
+  @apply italic;
+}
+
+.theory-content img {
+  @apply rounded-lg max-w-full h-auto my-6;
+}
+
+/* Python code block specific styles */
+.theory-content pre[data-language="python"] {
+  @apply bg-slate-900 text-slate-50;
+}
+
+/* Callout styles for theory content */
+.theory-content .callout {
+  @apply rounded-lg border p-4 my-6;
+}
+
+.theory-content .callout-tip {
+  @apply bg-green-500/10 border-green-500/20 text-green-900;
+}
+
+.theory-content .callout-warning {
+  @apply bg-yellow-500/10 border-yellow-500/20 text-yellow-900;
+}
+
+.theory-content .callout-info {
+  @apply bg-blue-500/10 border-blue-500/20 text-blue-900;
+}
+
+.theory-content .callout-danger {
+  @apply bg-red-500/10 border-red-500/20 text-red-900;
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Animation Classes */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Progress bar animation */
+.progress-animate {
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

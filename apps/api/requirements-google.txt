@@ -1,0 +1,10 @@
+# Additional requirements for Google OAuth
+# Add these to your requirements.txt or install separately
+
+# Google Auth libraries
+google-auth>=2.22.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.1
+
+# HTTP client for token exchange
+httpx>=0.25.0
