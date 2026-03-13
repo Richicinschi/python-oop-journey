@@ -182,7 +182,7 @@ export function CodeReviewPanel({
               <Sparkles className="h-5 w-5 text-primary" />
               AI Code Review Results
             </CardTitle>
-            <CardDescription>{review.overall_feedback}</CardDescription>
+            <CardDescription>{review.overallFeedback}</CardDescription>
           </div>
           {onClose && (
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
@@ -256,14 +256,14 @@ export function CodeReviewPanel({
         )}
 
         {/* Rubric Assessment */}
-        {Object.keys(review.rubric_assessment).length > 0 && (
+        {Object.keys(review.rubricAssessment).length > 0 && (
           <div className="space-y-2">
             <h4 className="text-sm font-medium flex items-center gap-2">
               <FileCode className="h-4 w-4" />
               Rubric Assessment
             </h4>
             <div className="space-y-2">
-              {Object.entries(review.rubric_assessment).map(([criterion, assessment]) => (
+              {Object.entries(review.rubricAssessment).map(([criterion, assessment]) => (
                 <div key={criterion} className="bg-muted/50 rounded p-2">
                   <p className="text-xs font-medium">{criterion}</p>
                   <p className="text-xs text-muted-foreground">{assessment}</p>
