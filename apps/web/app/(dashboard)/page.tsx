@@ -31,6 +31,7 @@ import { RecommendationList } from '@/components/dashboard/recommendation-card';
 import { CircularProgress } from '@/components/dashboard/circular-progress';
 import { QuickActions, ActionButtons } from '@/components/dashboard/quick-actions';
 import { ActiveProjectsSection } from '@/components/projects';
+import { WeeklyProject } from '@/types/project';
 
 // Hooks
 import { useDashboardData } from '@/hooks/use-dashboard-data';
@@ -45,30 +46,28 @@ function formatDuration(seconds: number): string {
 }
 
 // Mock data for projects - in real app, fetch from API/store
-const mockProjects = [
+const mockProjects: WeeklyProject[] = [
   {
     slug: 'week-01-project',
     title: 'CLI Calculator',
     description: 'Build a command-line calculator with basic operations',
-    difficulty: 'Beginner' as const,
-    estimatedTime: '2 hours',
-    weekSlug: 'week-01-foundations',
-    weekNumber: 1,
-    starterFiles: [],
-    requirements: ['Implement add, subtract, multiply, divide', 'Handle invalid input', 'Add help command'],
-    hints: ['Use input() for user input', 'Consider using a loop for continuous operation'],
+    difficulty: 'beginner',
+    estimatedHours: 2,
+    week: 1,
+    status: 'in_progress',
+    completedTasks: 1,
+    totalTasks: 3,
   },
   {
     slug: 'week-04-project',
     title: 'Library Management System',
     description: 'Build a library system with books and patrons',
-    difficulty: 'Intermediate' as const,
-    estimatedTime: '3 hours',
-    weekSlug: 'week-04-inheritance',
-    weekNumber: 4,
-    starterFiles: [],
-    requirements: ['Create Book and Patron classes', 'Implement checkout system', 'Track due dates'],
-    hints: ['Use inheritance for different book types', 'Consider using composition for library'],
+    difficulty: 'intermediate',
+    estimatedHours: 3,
+    week: 4,
+    status: 'not_started',
+    completedTasks: 0,
+    totalTasks: 4,
   },
 ];
 
