@@ -4,6 +4,15 @@
  */
 
 import { Curriculum, Week, Day, Problem, Project } from '@/types/curriculum';
+import type {
+  TransformedCurriculum,
+  TransformedWeek,
+  TransformedDay,
+  TransformedProblem,
+  TransformedProject,
+  TransformedProjectFile,
+  ProjectTask,
+} from '@/types/curriculum';
 
 // Import curriculum.json at build time for static generation
 import curriculumData from '@/data/curriculum.json';
@@ -222,4 +231,236 @@ export function searchProblems(query: string): Problem[] {
     p.title.toLowerCase().includes(q) || 
     p.topic.toLowerCase().includes(q)
   );
+}
+
+// ============================================================================
+// TRANSFORMATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Transform a raw ProjectFile to component-ready format
+ */
+function transformProjectFile(rawFile: any, index: number): TransformedProjectFile {
+  return {
+    id: rawFile.id || `file-${index}`,
+    name: rawFile.name || rawFile.path?.split('/').pop() || 'unnamed',
+    path: rawFile.path || '/',
+    content: rawFile.content || rawFile.template || '',
+    language: rawFile.language || getLanguageFromExtension(rawFile.path || ''),
+    isModified: rawFile.isModified || false,
+    lastModified: rawFile.lastModified || Date.now(),
+    isEntryPoint: rawFile.isEntryPoint || false,
+    template: rawFile.template,
+  };
+}
+
+/**
+ * Get language from file extension
+ */
+function getLanguageFromExtension(filename: string): string {
+  const ext = filename.split('.').pop()?.toLowerCase() || '';
+  const map: Record<string, string> = {
+    py: 'python',
+    md: 'markdown',
+    txt: 'plaintext',
+    json: 'json',
+    yaml: 'yaml',
+    yml: 'yaml',
+  };
+  return map[ext] || 'plaintext';
+}
+
+/**
+ * Generate default project files
+ */
+function generateDefaultProjectFiles(title: string): TransformedProjectFile[] {
+  return [
+    {
+      id: 'main-py',
+      name: 'main.py',
+      path: '/main.py',
+      content: `# ${title}\n\ndef main():\n    pass\n\nif __name__ == "__main__":\n    main()`,
+      language: 'python',
+      isModified: false,
+      lastModified: Date.now(),
+      isEntryPoint: true,
+    },
+    {
+      id: 'readme-md',
+      name: 'README.md',
+      path: '/README.md',
+      content: `# ${title}\n\nSee project requirements.`,
+      language: 'markdown',
+      isModified: false,
+      lastModified: Date.now(),
+    },
+  ];
+}
+
+/**
+ * Generate default tasks from requirements
+ */
+function generateDefaultTasks(requirements: string[]): ProjectTask[] {
+  return requirements.map((req, index) => ({
+    id: `task-${index}`,
+    description: req,
+    completed: false,
+    autoCheck: false,
+  }));
+}
+
+/**
+ * Transform a raw Project to component-ready format
+ */
+function transformProject(rawProject: any, weekOrder: number): TransformedProject {
+  const requirements = rawProject.requirements || ['Complete the project'];
+  const files = rawProject.files?.map((f: any, i: number) => transformProjectFile(f, i)) 
+    || generateDefaultProjectFiles(rawProject.title);
+  
+  return {
+    slug: rawProject.slug,
+    title: rawProject.title,
+    description: rawProject.description,
+    overview: rawProject.overview || rawProject.description,
+    entryPoint: rawProject.entryPoint || 'main.py',
+    starterPath: rawProject.starter_path || null,
+    solutionPath: rawProject.solution_path || null,
+    testPath: rawProject.test_path || null,
+    requirements,
+    hints: rawProject.hints || [],
+    files,
+    tasks: rawProject.tasks || generateDefaultTasks(requirements),
+  };
+}
+
+/**
+ * Transform a raw Problem to component-ready format
+ */
+function transformProblem(
+  rawProblem: any, 
+  weekOrder: number, 
+  dayOrder: number,
+  allProblemsInDay: any[],
+  problemIndex: number
+): TransformedProblem {
+  const nextProblem = allProblemsInDay[problemIndex + 1];
+  const prevProblem = allProblemsInDay[problemIndex - 1];
+  
+  return {
+    slug: rawProblem.slug,
+    title: rawProblem.title,
+    topic: rawProblem.topic,
+    difficulty: rawProblem.difficulty,
+    order: rawProblem.order,
+    instructions: rawProblem.instructions,
+    hints: rawProblem.hints || [],
+    weekSlug: rawProblem.week_slug,
+    daySlug: rawProblem.day_slug,
+    weekNumber: weekOrder,
+    dayNumber: dayOrder,
+    starterCode: rawProblem.starter_code || '',
+    solutionCode: rawProblem.solution_code || '',
+    testCode: rawProblem.test_code || '',
+    nextProblemSlug: nextProblem?.slug || null,
+    prevProblemSlug: prevProblem?.slug || null,
+  };
+}
+
+/**
+ * Transform a raw Day to component-ready format
+ */
+function transformDay(rawDay: any, weekOrder: number): TransformedDay {
+  const transformedProblems = rawDay.problems?.map((p: any, index: number) => 
+    transformProblem(p, weekOrder, rawDay.order, rawDay.problems, index)
+  ) || [];
+  
+  return {
+    slug: rawDay.slug,
+    title: rawDay.title,
+    order: rawDay.order,
+    problems: transformedProblems,
+    weekSlug: rawDay.week_slug,
+    theoryPath: rawDay.theory_path || null,
+    theoryContent: rawDay.theory_content || '',
+    learningObjectives: rawDay.learning_objectives || [],
+  };
+}
+
+/**
+ * Transform a raw Week to component-ready format
+ */
+function transformWeek(rawWeek: any): TransformedWeek {
+  return {
+    slug: rawWeek.slug,
+    title: rawWeek.title,
+    order: rawWeek.order,
+    objective: rawWeek.objective || '',
+    prerequisites: rawWeek.prerequisites || [],
+    days: rawWeek.days?.map((d: any) => transformDay(d, rawWeek.order)) || [],
+    project: rawWeek.project ? transformProject(rawWeek.project, rawWeek.order) : null,
+  };
+}
+
+/**
+ * Transform the full curriculum
+ */
+function transformCurriculum(rawCurriculum: any): TransformedCurriculum {
+  return {
+    version: rawCurriculum.version,
+    weeks: rawCurriculum.weeks?.map((w: any) => transformWeek(w)) || [],
+  };
+}
+
+// ============================================================================
+// TRANSFORMED DATA GETTERS (use these in pages)
+// ============================================================================
+
+let transformedCache: TransformedCurriculum | null = null;
+
+export function getTransformedCurriculum(): TransformedCurriculum {
+  if (!transformedCache) {
+    transformedCache = transformCurriculum(curriculumData);
+  }
+  return transformedCache;
+}
+
+export function getTransformedWeeks(): TransformedWeek[] {
+  return getTransformedCurriculum().weeks;
+}
+
+export function getTransformedWeekBySlug(slug: string): TransformedWeek | undefined {
+  return getTransformedWeeks().find((week) => week.slug === slug);
+}
+
+export function getTransformedDayBySlug(
+  weekSlug: string, 
+  daySlug: string
+): TransformedDay | undefined {
+  const week = getTransformedWeekBySlug(weekSlug);
+  return week?.days.find((day) => day.slug === daySlug);
+}
+
+export function getTransformedProblemBySlug(problemSlug: string): TransformedProblem | undefined {
+  for (const week of getTransformedWeeks()) {
+    for (const day of week.days) {
+      const problem = day.problems.find((p) => p.slug === problemSlug);
+      if (problem) return problem;
+    }
+  }
+  return undefined;
+}
+
+export function getAllTransformedProblems(): TransformedProblem[] {
+  const problems: TransformedProblem[] = [];
+  for (const week of getTransformedWeeks()) {
+    for (const day of week.days) {
+      problems.push(...day.problems);
+    }
+  }
+  return problems;
+}
+
+export function getTransformedProjectForWeek(weekSlug: string): TransformedProject | null {
+  const week = getTransformedWeekBySlug(weekSlug);
+  return week?.project || null;
 }

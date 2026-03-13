@@ -16,8 +16,8 @@ import { SolutionModal } from '@/components/editor/solution-modal';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useProgress } from '@/hooks/use-progress';
 import { verificationApi } from '@/lib/verification-api';
-import { getCurriculum } from '@/lib/curriculum-loader';
-import { Problem, Week, Day } from '@/types/curriculum';
+import { getTransformedProblemBySlug, getTransformedWeekBySlug, getTransformedDayBySlug } from '@/lib/curriculum-loader';
+import { TransformedProblem, TransformedWeek, TransformedDay } from '@/types/curriculum';
 import { cn, getDifficultyColor } from '@/lib/utils';
 
 export default function ProblemPage() {
@@ -25,11 +25,11 @@ export default function ProblemPage() {
   const { problemSlug } = params;
 
   // Load curriculum data
-  const [problem, setProblem] = useState<Problem | null>(null);
-  const [week, setWeek] = useState<Week | null>(null);
-  const [day, setDay] = useState<Day | null>(null);
-  const [prevProblem, setPrevProblem] = useState<Problem | null>(null);
-  const [nextProblem, setNextProblem] = useState<Problem | null>(null);
+  const [problem, setProblem] = useState<TransformedProblem | null>(null);
+  const [week, setWeek] = useState<TransformedWeek | null>(null);
+  const [day, setDay] = useState<TransformedDay | null>(null);
+  const [prevProblem, setPrevProblem] = useState<TransformedProblem | null>(null);
+  const [nextProblem, setNextProblem] = useState<TransformedProblem | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Editor state
@@ -65,47 +65,35 @@ export default function ProblemPage() {
 
   // Load problem data
   useEffect(() => {
-    const curriculum = getCurriculum();
+    const foundProblem = getTransformedProblemBySlug(problemSlug);
     
-    // Find problem by slug across all weeks and days
-    let foundProblem: Problem | null = null;
-    let foundWeek: Week | null = null;
-    let foundDay: Day | null = null;
-    
-    for (const w of curriculum.weeks) {
-      for (const d of w.days) {
-        const p = d.problems.find((prob) => prob.slug === problemSlug);
-        if (p) {
-          foundProblem = p;
-          foundWeek = w;
-          foundDay = d;
-          break;
-        }
-      }
-      if (foundProblem) break;
-    }
-
-    if (!foundProblem || !foundWeek || !foundDay) {
+    if (!foundProblem) {
       setLoading(false);
       return;
     }
 
     setProblem(foundProblem);
+
+    // Load week and day data
+    const foundWeek = foundProblem.weekSlug ? getTransformedWeekBySlug(foundProblem.weekSlug) : null;
+    const foundDay = foundProblem.weekSlug && foundProblem.daySlug 
+      ? getTransformedDayBySlug(foundProblem.weekSlug, foundProblem.daySlug) 
+      : null;
+
     setWeek(foundWeek);
     setDay(foundDay);
 
-    // Find prev/next problems within the same day
-    const problemIndex = foundDay.problems.findIndex((p) => p.slug === problemSlug);
-    setPrevProblem(problemIndex > 0 ? foundDay.problems[problemIndex - 1] : null);
-    setNextProblem(
-      problemIndex < foundDay.problems.length - 1
-        ? foundDay.problems[problemIndex + 1]
-        : null
-    );
+    // Find prev/next problems using the slugs from transformed data
+    if (foundProblem.prevProblemSlug) {
+      setPrevProblem(getTransformedProblemBySlug(foundProblem.prevProblemSlug));
+    }
+    if (foundProblem.nextProblemSlug) {
+      setNextProblem(getTransformedProblemBySlug(foundProblem.nextProblemSlug));
+    }
 
     // Load saved code or starter code
     const savedCode = localStorage.getItem(`code-${problemSlug}`);
-    const starterCode = foundProblem.starterCode || foundProblem.starter_code;
+    const starterCode = foundProblem.starterCode;
     setCode(savedCode || starterCode);
     setOriginalCode(starterCode);
 
@@ -438,7 +426,7 @@ export default function ProblemPage() {
         isOpen={isSolutionModalOpen}
         onClose={() => setIsSolutionModalOpen(false)}
         onConfirm={handleConfirmSolution}
-        solutionCode={problem.solutionCode || problem.solution_code}
+        solutionCode={problem.solutionCode}
         userCode={code}
       />
     </div>
