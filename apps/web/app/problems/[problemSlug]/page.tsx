@@ -75,9 +75,9 @@ export default function ProblemPage() {
     setProblem(foundProblem);
 
     // Load week and day data
-    const foundWeek = foundProblem.weekSlug ? getTransformedWeekBySlug(foundProblem.weekSlug) : null;
+    const foundWeek = foundProblem.weekSlug ? getTransformedWeekBySlug(foundProblem.weekSlug) ?? null : null;
     const foundDay = foundProblem.weekSlug && foundProblem.daySlug 
-      ? getTransformedDayBySlug(foundProblem.weekSlug, foundProblem.daySlug) 
+      ? getTransformedDayBySlug(foundProblem.weekSlug, foundProblem.daySlug) ?? null
       : null;
 
     setWeek(foundWeek);
