@@ -904,7 +904,7 @@ function FileTree({ files, activePath, expandedDirs, onToggleDir, onSelect, onDe
   return (
     <div className="space-y-0.5">
       {files.map((file) => (
-        <div key={file.id}>
+        <div key={file.id ?? file.path}>
           {file.type === 'directory' ? (
             <div>
               <button
@@ -921,7 +921,7 @@ function FileTree({ files, activePath, expandedDirs, onToggleDir, onSelect, onDe
                   )} 
                 />
                 <Folder className="h-4 w-4 text-yellow-500" />
-                <span className="truncate">{file.name}</span>
+                <span className="truncate">{file.name ?? 'unnamed'}</span>
               </button>
               {expandedDirs.has(file.path) && file.children && (
                 <FileTree
@@ -947,7 +947,7 @@ function FileTree({ files, activePath, expandedDirs, onToggleDir, onSelect, onDe
                 style={{ paddingLeft: `${24 + level * 12}px` }}
               >
                 <FileCode className="h-4 w-4 text-blue-500" />
-                <span className="truncate flex-1 text-left">{file.name}</span>
+                <span className="truncate flex-1 text-left">{file.name ?? 'unnamed'}</span>
                 {file.isEntryPoint && (
                   <Badge variant="outline" className="text-[10px] h-4 px-1">main</Badge>
                 )}
@@ -1061,7 +1061,7 @@ function addFileToTree(files: FileNode[], newFile: FileNode): FileNode[] {
   }
 
   return files.map(file => {
-    if (file.type === 'directory' && parts[0] === file.name) {
+    if (file.type === 'directory' && parts[0] === (file.name ?? '')) {
       const remainingPath = parts.slice(1).join('/');
       const childFile = { ...newFile, path: remainingPath };
       return {
