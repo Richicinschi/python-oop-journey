@@ -14,7 +14,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from api.config import get_settings
-from api.middleware.auth import get_current_user_optional
+from api.middleware.auth import get_optional_user as get_current_user_optional
 from api.schemas.ai_hints import (
     AIErrorRequest,
     AIErrorResponse,

@@ -17,6 +17,7 @@ from api.routers import (
     curriculum_router,
     drafts_router,
     execute_router,
+    health_router,
     progress_router,
     projects_router,
     recommendations_router,

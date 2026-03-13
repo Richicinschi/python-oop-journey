@@ -80,6 +80,10 @@ class DockerRunner:
 
     def _init_docker_client(self) -> None:
         """Initialize Docker client with proper configuration."""
+        if not DOCKER_AVAILABLE:
+            logger.warning("Docker not available - code execution disabled")
+            self._client = None
+            return
         try:
             # Try environment-based connection first
             docker_host = os.getenv("DOCKER_HOST")
@@ -92,7 +96,7 @@ class DockerRunner:
             self._client.ping()
             logger.info("Docker client initialized successfully")
             
-        except DockerException as e:
+        except (DockerException, AttributeError) as e:
             logger.error(f"Failed to initialize Docker client: {e}")
             self._client = None
 

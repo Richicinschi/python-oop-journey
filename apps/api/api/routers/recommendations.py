@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.database import get_session
-from api.middleware.auth import get_current_user, get_current_user_optional
+from api.database import get_db
+from api.middleware.auth import get_current_user, get_optional_user as get_current_user_optional
 from api.services.recommendations import (
     RecommendationEngine,
     RecommendationType,
@@ -182,7 +182,7 @@ class RecordReviewResponse(BaseModel):
 # Endpoints
 @router.get("/next", response_model=RecommendationResponse)
 async def get_next_recommendation(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get the next recommended problem to attempt."""
@@ -197,7 +197,7 @@ async def get_next_recommendation(
 
 @router.get("/all", response_model=List[RecommendationResponse])
 async def get_all_recommendations(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
     limit: int = Query(10, ge=1, le=20),
 ):
@@ -210,7 +210,7 @@ async def get_all_recommendations(
 
 @router.get("/review", response_model=ReviewQueueResponse)
 async def get_review_queue(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
     limit: int = Query(10, ge=1, le=50),
 ):
@@ -246,7 +246,7 @@ async def get_review_queue(
 
 @router.get("/review/stats", response_model=ReviewStatsResponse)
 async def get_review_stats(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get spaced repetition statistics."""
@@ -267,7 +267,7 @@ async def get_review_stats(
 async def record_review(
     problem_slug: str,
     request: RecordReviewRequest,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Record a review attempt with quality rating (SM-2 algorithm).
@@ -296,7 +296,7 @@ async def record_review(
 
 @router.get("/weak-areas", response_model=List[WeakAreaResponse])
 async def get_weak_areas(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
     limit: int = Query(5, ge=1, le=10),
 ):
@@ -320,7 +320,7 @@ async def get_weak_areas(
 
 @router.get("/path", response_model=LearningPathResponse)
 async def get_learning_path(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get personalized learning path."""
@@ -347,7 +347,7 @@ async def get_learning_path(
 
 @router.get("/difficulty", response_model=Optional[DifficultySuggestionResponse])
 async def get_difficulty_suggestion(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get difficulty adjustment suggestion based on performance."""
@@ -368,7 +368,7 @@ async def get_difficulty_suggestion(
 
 @router.get("/stats/time", response_model=dict)
 async def get_time_analytics(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get time analytics by difficulty."""
@@ -380,7 +380,7 @@ async def get_time_analytics(
 
 @router.get("/stats/attempts", response_model=AttemptPatternResponse)
 async def get_attempt_patterns(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get attempt pattern analysis."""
@@ -398,7 +398,7 @@ async def get_attempt_patterns(
 
 @router.get("/stats/mastery", response_model=dict)
 async def get_topic_mastery(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get topic mastery levels."""
@@ -410,7 +410,7 @@ async def get_topic_mastery(
 
 @router.get("/stats/velocity", response_model=LearningVelocityResponse)
 async def get_learning_velocity(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get learning velocity (problems per week)."""
@@ -428,7 +428,7 @@ async def get_learning_velocity(
 
 @router.get("/stats/success-rate", response_model=dict)
 async def get_success_rate(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get success rate by difficulty."""
@@ -440,7 +440,7 @@ async def get_success_rate(
 
 @router.get("/stats", response_model=LearningStatsResponse)
 async def get_learning_stats(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get complete learning statistics."""
@@ -475,7 +475,7 @@ async def get_learning_stats(
 
 @router.get("/streak", response_model=dict)
 async def get_streak_info(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     """Get review streak information."""

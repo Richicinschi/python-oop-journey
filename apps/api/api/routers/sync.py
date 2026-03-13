@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +13,7 @@ from api.models.progress import Progress, ProblemStatus
 from api.models.draft import Draft
 from api.models.bookmark import Bookmark
 from api.models.user import User
-from api.services.auth import get_current_user
+from api.middleware.auth import get_current_user
 
 router = APIRouter()
 
@@ -402,8 +402,8 @@ async def get_sync_status(
     description="Resolve a sync conflict by choosing which version to keep.",
 )
 async def resolve_conflict(
-    operation_id: str,
-    strategy: str = Field(..., pattern="^(local|server|merge)$"),
+    operation_id: str = Query(..., description="Operation ID to resolve"),
+    strategy: str = Query(..., pattern="^(local|server|merge)$"),
     merged_data: dict[str, Any] | None = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
