@@ -97,7 +97,7 @@ export function FileTree({
           current = existingNode;
         } else {
           const newNode: FileNode = {
-            id: isFile ? file.id : `${current.id}/${part}`}, {
+            id: isFile ? file.id : `${current.id}/${part}`,
             name: part,
             type: isFile ? 'file' : 'folder',
             file: isFile ? file : undefined,
