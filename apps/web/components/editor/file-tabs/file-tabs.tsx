@@ -163,8 +163,8 @@ export function FileTabs({
             Close All
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => {
-              const activeTab = tabs.find(t => t.isActive);
-              if (activeTab) onCloseOthers(activeTab.file.id);
+              const activeTab = tabs.find(t => t.isActive && t.file.id);
+              if (activeTab?.file.id) onCloseOthers(activeTab.file.id);
             }}>
             Close Others
           </DropdownMenuItem>
