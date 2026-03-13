@@ -115,6 +115,25 @@ name: part,
 
 ---
 
+## 📋 Pattern 9: Missing Required Props
+**Error:** `Type '{}' is missing the following properties from type 'XProps': prop1, prop2`
+
+**Root Cause:** Component requires props but none were provided.
+
+**Example:**
+```typescript
+// ❌ BAD - Missing required props
+<HeroSection />
+
+// ✅ GOOD - Provide all required props
+<HeroSection data={mockData} overallProgress={overallProgress} />
+```
+
+**Files Affected:**
+- `components/dashboard/dashboard.tsx` - Missing props for HeroSection
+
+---
+
 ## 📋 Pattern 8: Missing Component Export
 **Error:** `Property 'X' does not exist on type 'typeof import("...")'`
 
