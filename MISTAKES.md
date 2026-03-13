@@ -115,6 +115,33 @@ name: part,
 
 ---
 
+## 📋 Pattern 8: Missing Component Export
+**Error:** `Property 'X' does not exist on type 'typeof import("...")'`
+
+**Root Cause:** A lazy-loaded component tries to import something that isn't exported from the module.
+
+**Example:**
+```typescript
+// ❌ BAD - Importing non-existent export
+export const LazyDashboard = dynamic(
+  () => import("@/components/dashboard").then((mod) => ({ default: mod.Dashboard })),
+);
+// But Dashboard is not exported from components/dashboard/index.ts
+
+// ✅ GOOD - Create and export the component
+// components/dashboard/dashboard.tsx
+export function Dashboard() { ... }
+
+// components/dashboard/index.ts
+export { Dashboard } from './dashboard';
+```
+
+**Files Affected:**
+- `components/dashboard/index.ts` - Missing Dashboard export
+- `components/lazy-components.tsx` - Tries to lazy-load Dashboard
+
+---
+
 ## 📋 Pattern 7: JSON Import Type Mismatch
 **Error:** `Type 'string' is not assignable to type '"week" | "day" | "problem" | ...'`
 
