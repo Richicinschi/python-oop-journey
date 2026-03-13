@@ -1,5 +1,5 @@
 // Dashboard components
-export { ActivityItem } from './activity-item';
+export { ActivityItemRow, ActivityList } from './activity-item';
 export { CircularProgress } from './circular-progress';
 export { EmptyState } from './empty-state';
 export { HeroSection } from './hero-section';
