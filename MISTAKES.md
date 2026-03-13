@@ -115,12 +115,13 @@ name: part,
 
 ---
 
-## 📋 Pattern 9: Missing Required Props
-**Error:** `Type '{}' is missing the following properties from type 'XProps': prop1, prop2`
+## 📋 Pattern 9: Missing Required Props / Wrong Prop Types
+**Error:** `Type '{}' is missing the following properties from type 'XProps': prop1, prop2`  
+**OR:** `Property 'X' does not exist on type 'Y'`
 
-**Root Cause:** Component requires props but none were provided.
+**Root Cause:** Component requires props but none were provided, or wrong props were passed.
 
-**Example:**
+**Example 1 - Missing Props:**
 ```typescript
 // ❌ BAD - Missing required props
 <HeroSection />
@@ -129,8 +130,19 @@ name: part,
 <HeroSection data={mockData} overallProgress={overallProgress} />
 ```
 
+**Example 2 - Wrong Props:**
+```typescript
+// ❌ BAD - Wrong prop names
+interface Props { week: WeekProgress }
+<ProgressCard weekNumber={1} weekTitle="Week 1" />
+
+// ✅ GOOD - Pass correct object
+<ProgressCard week={mockWeek} />
+```
+
 **Files Affected:**
 - `components/dashboard/dashboard.tsx` - Missing props for HeroSection
+- `components/dashboard/dashboard.tsx` - Wrong props for ProgressCard
 
 ---
 
