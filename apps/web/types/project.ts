@@ -79,3 +79,19 @@ export interface ActiveProject {
   progress: UserProjectProgress;
   completionPercentage: number;
 }
+
+// Editor tab type for multi-file editor
+export interface EditorTab {
+  fileId: string;
+  fileName: string;
+  isModified: boolean;
+  isActive: boolean;
+}
+
+// Analytics event type
+export interface AnalyticsEvent {
+  id: string;
+  type: 'file_open' | 'file_edit' | 'file_save' | 'task_complete' | 'project_submit' | 'test_run' | 'error';
+  timestamp: number;
+  metadata?: Record<string, unknown>;
+}

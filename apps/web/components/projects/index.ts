@@ -35,11 +35,10 @@ export { ActiveProjectsSection } from './active-projects-section';
 
 // Types
 export type {
-  ProjectFolder,
   WeeklyProject,
   UserProjectProgress,
   ProjectStatus,
   EditorTab,
   ActiveProject,
 } from '@/types/project';
-export type { ProjectFile } from '@/types/project-files';
+export type { ProjectFile, ProjectFolder } from '@/types/project-files';
