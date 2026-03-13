@@ -14,7 +14,7 @@ import type { Bookmark } from "@/lib/api";
 
 type BookmarkType = Bookmark;
 
-const typeIcons = {
+const typeIcons: Record<string, typeof BookOpen> = {
   week: BookOpen,
   day: Calendar,
   problem: FileCode,
@@ -159,7 +159,7 @@ function BookmarkCard({
   bookmark: BookmarkType;
   onRemove: () => void;
 }) {
-  const Icon = typeIcons[bookmark.type];
+  const Icon = typeIcons[bookmark.itemType] || BookOpen;
 
   return (
     <Card className="group hover:shadow-sm transition-shadow">
@@ -172,7 +172,7 @@ function BookmarkCard({
             <div className="flex items-center gap-2">
               <h3 className="font-medium">{bookmark.title}</h3>
               <Badge variant="secondary" className="text-[10px]">
-                {bookmark.type}
+                {bookmark.itemType}
               </Badge>
             </div>
             {bookmark.notes && (
@@ -182,13 +182,6 @@ function BookmarkCard({
             )}
             <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
               <span>Bookmarked {formatDate(bookmark.createdAt)}</span>
-              {bookmark.week !== undefined && (
-                <>
-                  <span>·</span>
-                  <span>Week {bookmark.week}</span>
-                  {bookmark.day && <span>· Day {bookmark.day}</span>}
-                </>
-              )}
             </div>
           </div>
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
