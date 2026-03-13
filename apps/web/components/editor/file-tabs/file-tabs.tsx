@@ -201,7 +201,7 @@ function TabItem({
   onDrop,
   onDragEnd,
 }: TabItemProps) {
-  const Icon = getTabIcon(tab.file.name);
+  const Icon = getTabIcon(tab.file.name ?? 'unknown');
 
   return (
     <TooltipProvider delayDuration={500}>
