@@ -93,7 +93,7 @@ let syncState: SyncState = {
 };
 
 let syncOptions: SyncOptions = {};
-let syncIntervalId: NodeJS.Timeout | null = null;
+let syncIntervalId: ReturnType<typeof setInterval> | null = null;
 let isSyncing = false;
 const conflictResolvers = new Map<string, (resolution: ConflictResolution) => void>();
 

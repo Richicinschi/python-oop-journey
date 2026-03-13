@@ -30,7 +30,7 @@ export function useProgressSync(isAuthenticated: boolean) {
     error: null,
   });
   
-  const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const syncIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /**
    * Check if there's legacy localStorage progress to migrate
@@ -233,7 +233,7 @@ export function useProgressWebSocket(
 ) {
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!userId) {

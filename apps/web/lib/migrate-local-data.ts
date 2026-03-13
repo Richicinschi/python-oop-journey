@@ -9,6 +9,7 @@
  * - Handle conflicts during import
  */
 
+import { useState, useCallback } from 'react';
 import {
   getAllProgress,
   saveProgress,
@@ -438,10 +439,6 @@ export function useDataMigration() {
     estimateSize: estimateMigrationSize,
   };
 }
-
-// ==================== Import ====================
-
-import { useState, useCallback } from 'react';
 
 export default {
   hasLegacyData,

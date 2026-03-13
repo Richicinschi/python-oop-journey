@@ -202,3 +202,24 @@ export function getDayProgress(day: Day): number {
   // TODO: Connect to user progress store
   return 0;
 }
+
+// ============================================================================
+// Convenience aliases for cleaner API
+// ============================================================================
+
+export const loadCurriculum = getCurriculum;
+export const getWeek = getWeekBySlug;
+export const getDay = getDayBySlug;
+export const getProblem = findProblemBySlug;
+
+/**
+ * Search problems by query string (matches title or topic)
+ */
+export function searchProblems(query: string): Problem[] {
+  const all = getAllProblems();
+  const q = query.toLowerCase();
+  return all.filter(p => 
+    p.title.toLowerCase().includes(q) || 
+    p.topic.toLowerCase().includes(q)
+  );
+}

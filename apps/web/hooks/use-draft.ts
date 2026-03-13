@@ -84,7 +84,7 @@ export function useDraft(problemSlug: string): UseDraftReturn {
 export function useSaveDraft(problemSlug: string): UseSaveDraftReturn {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const saveDraft = useCallback(async (code: string, isAutoSave: boolean = false) => {
     if (!problemSlug) return null;

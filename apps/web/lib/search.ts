@@ -1,4 +1,35 @@
-import type { SearchIndexItem, SearchFilters, SearchResult } from "@repo/types";
+// Local type definitions (previously imported from '@repo/types')
+export interface SearchIndexItem {
+  id: string;
+  type: 'week' | 'day' | 'problem' | 'topic' | 'keyword';
+  title: string;
+  slug: string;
+  description: string;
+  content: string;
+  week?: number;
+  day?: number;
+  difficulty?: 'beginner' | 'easy' | 'medium' | 'hard' | 'expert';
+  topics: string[];
+  keywords: string[];
+  url: string;
+}
+
+export interface SearchFilters {
+  week?: number;
+  difficulty?: string;
+  topic?: string;
+  type?: SearchIndexItem['type'];
+}
+
+export interface SearchResult {
+  item: SearchIndexItem;
+  score: number;
+  matches: Array<{
+    key: string;
+    indices: Array<[number, number]>;
+    value: string;
+  }>;
+}
 
 let searchIndexCache: SearchIndexItem[] | null = null;
 

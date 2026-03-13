@@ -53,8 +53,13 @@ export {
 // Phase 5 Project hooks
 export {
   useProjectStore,
-  useProjectKeyboardShortcuts,
 } from './use-project-store';
+
+// Editor store hooks
+export {
+  useEditorStore,
+  useEditorKeyboardShortcuts,
+} from './use-editor-store';
 
 // Smart Recommendations hooks (Agent 22)
 export {
@@ -85,9 +90,15 @@ export type {
 
 // Other hooks
 export { useAuth } from './use-auth';
-export { useCurriculum } from './use-curriculum';
+// Curriculum hooks
+export {
+  useWeeks,
+  useWeek,
+  useDay,
+  useProblems,
+  useProblem,
+} from './use-curriculum';
 export { useDashboardData } from './use-dashboard-data';
-export { useEditorStore } from './use-editor-store';
 export { useLocalStorage } from './use-local-storage';
 export { useRecentSearches } from './use-recent-searches';
 export { useSearch } from './use-search';
@@ -100,3 +111,17 @@ export type { ConnectionStatus, OnlineStatusState } from './use-online-status';
 
 export { useSync } from './use-sync';
 export type { UseSyncReturn } from './use-sync';
+
+// Submissions hooks (from lib/hooks)
+export {
+  useSubmissions,
+  useSubmission,
+  useSubmissionFiles,
+  useGamificationStats,
+  useSubmitProject,
+  useSubmissionChecklist,
+  useSubmissionComments,
+  useAddComment,
+  useReviewQueue,
+  useReviewSubmission,
+} from '@/lib/hooks/use-submissions';

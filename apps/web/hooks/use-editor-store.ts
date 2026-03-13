@@ -92,7 +92,7 @@ export function useEditorStore(
   });
 
   // Refs for debounce
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitializedRef = useRef(false);
 
   // Load saved code on mount

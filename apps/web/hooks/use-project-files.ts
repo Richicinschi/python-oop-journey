@@ -277,7 +277,7 @@ export function useProjectFiles(options: UseProjectFilesOptions = {}): UseProjec
   const [error, setError] = useState<string | null>(null);
   
   // Refs for auto-save
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dbRef = useRef<IDBPDatabase<ProjectDB> | null>(null);
   
   // Initialize database and load saved state
