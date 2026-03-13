@@ -75,7 +75,7 @@ export function ReviewQueueCard({ reviewQueue, stats, isLoading }: ReviewQueueCa
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">{reviewQueue?.items[0]?.problemTitle}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {reviewQueue?.items[0]?.daysOverdue > 0 
+                  {(reviewQueue?.items[0]?.daysOverdue ?? 0) > 0 
                     ? `${reviewQueue?.items[0]?.daysOverdue} days overdue`
                     : 'Due today'}
                 </p>
