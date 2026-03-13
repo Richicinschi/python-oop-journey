@@ -50,7 +50,7 @@ export function ActiveProjectsSection({
 
       if (progress.status === 'in_progress') {
         active.push(activeProject);
-        if (project.weekNumber === currentWeekNumber) {
+        if (project.week === currentWeekNumber) {
           current = activeProject;
         }
       } else if (progress.status === 'submitted') {
