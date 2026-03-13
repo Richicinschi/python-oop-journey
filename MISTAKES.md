@@ -158,8 +158,8 @@ interface Props { week: WeekProgress }
 - `components/dashboard/dashboard.tsx` - Missing props for HeroSection
 - `components/dashboard/dashboard.tsx` - Wrong props for ProgressCard
 - `components/curriculum/curriculum-nav.tsx` - Missing weeks prop for WeekNavigator
-- `components/projects/project-card.tsx` - Wrong property name `weekNumber` instead of `week`
-- `components/projects/active-projects-section.tsx` - Wrong property name `weekNumber` instead of `week`
+- `components/projects/project-card.tsx` - Wrong property name `weekNumber` instead of `week`, `estimatedTime` instead of `estimatedHours`
+- `components/projects/active-projects-section.tsx` - Wrong property name `weekNumber` instead of `week`, `estimatedTime` instead of `estimatedHours`
 
 ---
 
@@ -224,7 +224,12 @@ const searchIndex = searchIndexRaw as SearchIndexItem[];
 - `components/projects/active-projects-section.tsx` - Missing `ActiveProject` type
 - `components/projects/index.ts` - Re-exports `ActiveProject` but it doesn't exist in `types/project.ts`
 
-**Solution 1 - Create Missing Module:**
+**Variation - Type 'never' Error:**
+When TypeScript shows `Property 'X' does not exist on type 'never'`, check:
+1. Are you using correct property names? (e.g., `estimatedHours` not `estimatedTime`)
+2. Is the type definition complete?
+
+**Solution 1 - Create Missing Module:
 ```typescript
 // components/ui/use-toast.ts
 'use client';
