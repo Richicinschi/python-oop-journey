@@ -70,7 +70,7 @@ export function FileTreeItem({
   const handleDragStart = useCallback((e: React.DragEvent) => {
     setIsDragging(true);
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("application/json", JSON.stringify({ id: item.id, type: isFile ? "file" : "folder" }));
+    e.dataTransfer.setData("application/json", JSON.stringify({ id: item.id ?? '', type: isFile ? "file" : "folder" }));
     onDragStart?.(e, item);
   }, [item, isFile, onDragStart]);
 
@@ -113,7 +113,7 @@ export function FileTreeItem({
       <Folder className="h-4 w-4 text-blue-500" />
     )
   ) : (
-    getFileIcon(item.name)
+    getFileIcon(item.name ?? 'unnamed')
   );
 
   return (
@@ -156,13 +156,13 @@ export function FileTreeItem({
       {/* Name */}
       <span className={cn(
         "flex-1 truncate min-w-0",
-        isFile && (item as ProjectFile).isModified && "italic"
+        isFile && ((item as ProjectFile).isModified || false) && "italic"
       )}>
-        {item.name}
+        {item.name ?? 'unnamed'}
       </span>
 
       {/* Modified Indicator */}
-      {isFile && (item as ProjectFile).isModified && (
+      {isFile && ((item as ProjectFile).isModified || false) && (
         <Circle className="h-2 w-2 fill-current text-amber-500 flex-shrink-0" />
       )}
     </div>

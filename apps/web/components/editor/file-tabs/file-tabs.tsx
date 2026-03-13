@@ -126,22 +126,22 @@ export function FileTabs({
         className="flex-1 flex overflow-x-auto scrollbar-hide"
         onWheel={handleMouseWheel}
       >
-        {tabs.map((tab) => (
+        {tabs.filter(tab => tab.file.id).map((tab) => (
           <TabItem
             key={tab.file.id}
             tab={tab}
             isDragged={tab.file.id === draggedTab}
             isDragOver={tab.file.id === dragOverTab}
-            onSelect={() => onSelect(tab.file.id)}
+            onSelect={() => onSelect(tab.file.id!)}
             onClose={(e) => {
               e.stopPropagation();
-              onClose(tab.file.id);
+              onClose(tab.file.id!);
             }}
-            onCloseOthers={() => onCloseOthers(tab.file.id)}
-            onDragStart={(e) => handleDragStart(e, tab.file.id)}
-            onDragOver={(e) => handleDragOver(e, tab.file.id)}
+            onCloseOthers={() => onCloseOthers(tab.file.id!)}
+            onDragStart={(e) => handleDragStart(e, tab.file.id!)}
+            onDragOver={(e) => handleDragOver(e, tab.file.id!)}
             onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, tab.file.id)}
+            onDrop={(e) => handleDrop(e, tab.file.id!)}
             onDragEnd={handleDragEnd}
           />
         ))}
@@ -201,7 +201,7 @@ function TabItem({
   onDrop,
   onDragEnd,
 }: TabItemProps) {
-  const Icon = getTabIcon(tab.file.name);
+  const Icon = getTabIcon(tab.file.name ?? 'unnamed');
 
   return (
     <TooltipProvider delayDuration={500}>
@@ -237,7 +237,7 @@ function TabItem({
               "flex-1 truncate text-sm",
               tab.isModified && "italic"
             )}>
-              {tab.file.name}
+              {tab.file.name ?? 'unnamed'}
             </span>
 
             {/* Modified Indicator */}
@@ -261,7 +261,7 @@ function TabItem({
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom">
-          <p>{tab.file.path || tab.file.name}</p>
+          <p>{tab.file.path || tab.file.name || 'unnamed'}</p>
           {tab.isModified && <p className="text-amber-500">Modified</p>}
         </TooltipContent>
       </Tooltip>
