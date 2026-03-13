@@ -15,7 +15,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import type { ProjectItem, ProjectFolder } from "@/types/project-files";
-import { isProjectFile, isProjectFolder } from "@/types/project-files";
+import { isProjectFile, isProjectFolder, type ProjectFile } from "@/types/project-files";
 
 export interface DeleteConfirmDialogProps {
   isOpen: boolean;
@@ -123,7 +123,7 @@ export function DeleteConfirmDialog({
           )}
 
           {/* Modified file warning */}
-          {isFile && (item as ReturnType<typeof isProjectFile>).isModified && (
+          {isFile && (item as ProjectFile).isModified && (
             <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg">
               <p className="text-sm font-medium text-red-800 dark:text-red-200 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" />
