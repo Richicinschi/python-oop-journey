@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Bookmark, Trash2, ArrowRight, BookOpen, Calendar, FileCode, Hash, Search } from "lucide-react";
+import { Bookmark as BookmarkIcon, Trash2, ArrowRight, BookOpen, Calendar, FileCode, Hash, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -63,7 +63,7 @@ export default function BookmarksPage() {
     return (
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="text-center">
-          <Bookmark className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+          <BookmarkIcon className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
           <h1 className="text-2xl font-bold mb-2">No Bookmarks</h1>
           <p className="text-muted-foreground mb-6">
             Bookmark your favorite problems, days, or weeks to find them easily later.
