@@ -224,6 +224,9 @@ project.openFile(file.id);  // Error returns!
   - Line 120: `dialogState.item.id` ✓ fixed  
   - Line 126: `file.id` ✓ fixed (was lost, fixed again)
   - Line 161: `activeFile.id` ✓ fixed (was lost, fixed again)
+- `components/editor/rename-dialog.tsx` - `.name` access lost
+  - Line 42: `item.name` ✓ fixed (was lost, fixed again)
+  - Line 51: `item.name` ✓ fixed (was lost, fixed again)
 
 **Prevention:**
 - After any revert, re-scan previously fixed files
