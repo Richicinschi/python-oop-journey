@@ -97,3 +97,13 @@ export interface AnalyticsEvent {
   timestamp: number;
   metadata?: Record<string, unknown>;
 }
+
+// Tour step type for project tour
+export interface TourStep {
+  id: string;
+  title: string;
+  content: string;
+  targetSelector: string;
+  position: 'top' | 'bottom' | 'left' | 'right';
+  actionRequired?: string;
+}
