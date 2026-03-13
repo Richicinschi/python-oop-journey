@@ -123,7 +123,7 @@ export function MultiFileEditor({
   }, [dialogState.item, project]);
 
   const handleSelectFile = useCallback((file: ProjectFile) => {
-    project.openFile(file.id);
+    if (file.id) project.openFile(file.id);
   }, [project]);
 
   const handleToggleFolder = useCallback((folder: ProjectFolder) => {
