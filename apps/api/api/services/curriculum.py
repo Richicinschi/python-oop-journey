@@ -98,3 +98,15 @@ class CurriculumService:
     def invalidate_cache(self) -> None:
         """Invalidate curriculum cache."""
         self._cache = None
+
+
+# Singleton instance
+_curriculum_service: CurriculumService | None = None
+
+
+def get_curriculum_service() -> CurriculumService:
+    """Get singleton CurriculumService instance."""
+    global _curriculum_service
+    if _curriculum_service is None:
+        _curriculum_service = CurriculumService()
+    return _curriculum_service
