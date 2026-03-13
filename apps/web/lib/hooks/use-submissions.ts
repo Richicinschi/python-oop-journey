@@ -1,4 +1,4 @@
-"""React hooks for submissions."""
+/** React hooks for submissions. */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, SubmissionStatus, Submission, SubmissionList, SubmissionResponse, SubmissionChecklist, GamificationStats } from '@/lib/api';

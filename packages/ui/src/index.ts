@@ -3,8 +3,8 @@
  * UI component library for the Python OOP Journey application
  */
 
-// Styles
-import './styles/globals.css';
+// Styles - imported by consuming app
+// import './styles/globals.css';
 
 // Utilities
 export { cn, formatDuration, getDifficultyColor, getStatusColor } from './lib/utils';
