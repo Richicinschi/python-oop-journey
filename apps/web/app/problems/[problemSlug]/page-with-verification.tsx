@@ -66,7 +66,7 @@ export default function ProblemPageWithVerification({ params }: ProblemPageProps
     }
   }, []);
 
-  const allTestsPassed = verification?.all_tests_passed ?? false;
+  const allTestsPassed = verification?.success && verification?.summary.passed === verification?.summary.total;
 
   return (
     <div className="space-y-6">
