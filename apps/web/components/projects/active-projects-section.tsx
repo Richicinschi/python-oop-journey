@@ -49,7 +49,7 @@ export function ActiveProjectsSection({
       const activeProject: ActiveProject = {
         project,
         progress,
-        completionPercentage: calculateCompletion(progress),
+        completionPercentage: calculateCompletion(progress, project.totalTasks),
       };
 
       if (progress.status === 'in_progress') {
@@ -323,10 +323,9 @@ export function ActiveProjectsSection({
 }
 
 // Helper functions
-function calculateCompletion(progress: UserProjectProgress): number {
-  if (!progress.files.length) return 0;
-  const savedFiles = progress.files.filter(f => !f.isModified).length;
-  return Math.round((savedFiles / progress.files.length) * 100);
+function calculateCompletion(progress: UserProjectProgress, totalTasks?: number): number {
+  if (!totalTasks || totalTasks === 0) return 0;
+  return Math.round((progress.completedTasks.length / totalTasks) * 100);
 }
 
 function formatTime(seconds: number): string {
