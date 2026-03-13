@@ -19,6 +19,11 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Create enum types if they don't exist (idempotent)
+    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'problemstatus') THEN CREATE TYPE problemstatus AS ENUM ('NOT_STARTED', 'IN_PROGRESS', 'SOLVED', 'NEEDS_REVIEW'); END IF; END $$;")
+    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'itemtype') THEN CREATE TYPE itemtype AS ENUM ('PROBLEM', 'DAY', 'WEEK', 'THEORY'); END IF; END $$;")
+    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'activitytype') THEN CREATE TYPE activitytype AS ENUM ('STARTED_PROBLEM', 'SOLVED_PROBLEM', 'ATTEMPTED_PROBLEM', 'VIEWED_THEORY', 'VIEWED_WEEK', 'VIEWED_DAY', 'SAVED_DRAFT', 'CREATED_BOOKMARK', 'DELETED_BOOKMARK', 'LOGIN', 'LOGOUT'); END IF; END $$;")
+    
     # Create progress table
     op.create_table(
         'progress',
