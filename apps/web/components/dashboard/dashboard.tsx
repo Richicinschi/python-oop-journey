@@ -5,7 +5,7 @@ import { ProgressCard } from './progress-card';
 import { QuickActions } from './quick-actions';
 import { ActivityList } from './activity-item';
 import { StatCard } from './stat-card';
-import type { DashboardData } from '@/types/dashboard';
+import type { DashboardData, WeekProgress } from '@/types/dashboard';
 
 const mockData: DashboardData = {
   isLoggedIn: true,
@@ -25,6 +25,16 @@ const mockData: DashboardData = {
   currentPosition: null,
 };
 
+const mockWeek: WeekProgress = {
+  weekNumber: 1,
+  weekSlug: 'week-01-foundations',
+  weekTitle: 'Foundations',
+  totalProblems: 63,
+  completedProblems: 5,
+  isStarted: true,
+  isCompleted: false,
+};
+
 export function Dashboard() {
   const overallProgress = Math.round((mockData.stats.solvedProblems / mockData.stats.totalProblems) * 100);
 
@@ -32,7 +42,7 @@ export function Dashboard() {
     <div className="space-y-6">
       <HeroSection data={mockData} overallProgress={overallProgress} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <ProgressCard weekNumber={1} weekTitle="Week 1" completedProblems={5} totalProblems={10} />
+        <ProgressCard week={mockWeek} />
         <StatCard title="Problems Solved" value={42} trend={{ value: 12, positive: true }} />
         <StatCard title="Current Streak" value={7} trend={{ value: 2, positive: true }} />
       </div>
