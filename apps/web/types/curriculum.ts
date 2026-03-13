@@ -44,8 +44,8 @@ export interface Day {
 }
 
 export interface ProjectFile {
-  id?: string;
-  name?: string;
+  id: string;
+  name: string;
   path: string;
   content?: string;
   template?: string;
