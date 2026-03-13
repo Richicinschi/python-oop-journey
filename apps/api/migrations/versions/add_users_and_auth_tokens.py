@@ -19,7 +19,24 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create auth_tokens table
+    # Create users table FIRST
+    op.create_table(
+        'users',
+        sa.Column('id', sa.String(36), nullable=False),
+        sa.Column('email', sa.String(255), nullable=False),
+        sa.Column('display_name', sa.String(100), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column('last_login_at', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('is_active', sa.Boolean(), server_default='true', nullable=False),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('email'),
+    )
+    
+    # Create indexes for users
+    op.create_index('ix_users_email', 'users', ['email'], unique=True)
+    
+    # Create auth_tokens table SECOND (after users exists)
     op.create_table(
         'auth_tokens',
         sa.Column('id', sa.String(36), nullable=False),
@@ -35,20 +52,14 @@ def upgrade() -> None:
     # Create indexes for auth_tokens
     op.create_index('ix_auth_tokens_token_hash', 'auth_tokens', ['token_hash'])
     op.create_index('ix_auth_tokens_user_id_created_at', 'auth_tokens', ['user_id', 'created_at'])
-    
-    # Add new columns to users table
-    op.add_column('users', sa.Column('display_name', sa.String(100), nullable=True))
-    op.add_column('users', sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False))
-    op.add_column('users', sa.Column('last_login_at', sa.DateTime(timezone=True), nullable=True))
 
 
 def downgrade() -> None:
-    # Drop auth_tokens table
+    # Drop auth_tokens first (depends on users)
     op.drop_index('ix_auth_tokens_user_id_created_at', table_name='auth_tokens')
     op.drop_index('ix_auth_tokens_token_hash', table_name='auth_tokens')
     op.drop_table('auth_tokens')
     
-    # Remove new columns from users table
-    op.drop_column('users', 'last_login_at')
-    op.drop_column('users', 'updated_at')
-    op.drop_column('users', 'display_name')
+    # Drop users table last
+    op.drop_index('ix_users_email', table_name='users')
+    op.drop_table('users')
