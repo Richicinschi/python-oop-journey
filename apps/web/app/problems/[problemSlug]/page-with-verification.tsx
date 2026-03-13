@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { VerificationPanel } from "@/components/verification";
 import { useVerification } from "@/hooks/use-verification";
-import { getProblemBySlug, getDifficultyColor } from "@/lib/curriculum";
+import { findProblemBySlug, getDifficultyColor } from "@/lib/curriculum";
 import { cn } from "@/lib/utils";
 
 interface ProblemPageProps {
@@ -29,7 +29,7 @@ interface ProblemPageProps {
 }
 
 export default function ProblemPageWithVerification({ params }: ProblemPageProps) {
-  const problem = getProblemBySlug(params.problemSlug);
+  const problem = findProblemBySlug(params.problemSlug);
   const [code, setCode] = useState(problem?.starter_code || "");
   const [activeHint, setActiveHint] = useState<number | null>(null);
   
