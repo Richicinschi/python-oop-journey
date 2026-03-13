@@ -163,6 +163,11 @@ export async function addOperation(
 }
 
 /**
+ * Alias for addOperation - used by migration
+ */
+export const queueOperation = addOperation;
+
+/**
  * Get all pending operations, sorted by timestamp
  */
 export async function getPendingOperations(): Promise<SyncOperation[]> {

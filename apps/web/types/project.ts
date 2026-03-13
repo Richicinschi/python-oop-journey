@@ -54,3 +54,23 @@ export interface ProjectProgress {
   lastModified: string;
   files: Record<string, string>;
 }
+
+// Types for weekly project listings
+export interface WeeklyProject {
+  slug: string;
+  title: string;
+  description: string;
+  week: number;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  estimatedHours: number;
+  status: ProjectStatus;
+  completedTasks: number;
+  totalTasks: number;
+}
+
+export interface UserProjectProgress {
+  projectSlug: string;
+  status: ProjectStatus;
+  completedTasks: string[];
+  lastAccessed: string;
+}
