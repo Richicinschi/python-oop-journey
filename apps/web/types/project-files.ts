@@ -6,8 +6,8 @@
 
 /** Represents a file in the project */
 export interface ProjectFile {
-  id?: string;
-  name?: string;
+  id: string;
+  name: string;
   path: string;
   content?: string;
   language?: string;
