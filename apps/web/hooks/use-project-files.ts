@@ -401,7 +401,7 @@ export function useProjectFiles(options: UseProjectFilesOptions = {}): UseProjec
     }));
     
     // Auto-open the new file
-    openFile(newFile.id);
+    if (newFile.id) openFile(newFile.id);
     
     return newFile;
   }, [state.root]);
