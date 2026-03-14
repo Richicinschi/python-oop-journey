@@ -98,14 +98,17 @@ export function useProjectStore() {
           };
 
       // Initialize tabs with first file
-      const initialTabs: EditorTab[] = updated.files.slice(0, 3).map((file, index) => ({
-        id: `tab-${file.id}`,
-        fileId: file.id,
-        fileName: file.name,
-        filePath: file.path,
-        isModified: false,
-        isActive: index === 0,
-      }));
+      const initialTabs: EditorTab[] = updated.files
+        .filter((file): file is typeof file & { id: string; name: string } => !!file.id && !!file.name)
+        .slice(0, 3)
+        .map((file, index) => ({
+          id: `tab-${file.id}`,
+          fileId: file.id,
+          fileName: file.name,
+          filePath: file.path,
+          isModified: false,
+          isActive: index === 0,
+        }));
 
       return {
         ...prev,
