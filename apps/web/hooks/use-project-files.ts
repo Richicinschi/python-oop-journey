@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import type { ProjectFile, ProjectFolder, ProjectItem, ProjectState, OpenTab } from "@/types/project-files";
 import { isProjectFile, isProjectFolder, getLanguageFromExtension, getStarterCode } from "@/types/project-files";
-import { getDB, type IDBPDatabase } from "idb";
+import { openDB, type IDBPDatabase } from "idb";
 
 // Database configuration
 const PROJECT_DB_NAME = "oop-journey-projects";
