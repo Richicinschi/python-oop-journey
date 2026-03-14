@@ -98,7 +98,7 @@ export function useProjectStore() {
           };
 
       // Initialize tabs with first file
-      const initialTabs: EditorTab[] = updated.files
+      const initialTabs: EditorTab[] = (updated.files ?? [])
         .filter((file): file is typeof file & { id: string; name: string } => !!file.id && !!file.name)
         .slice(0, 3)
         .map((file, index) => ({
