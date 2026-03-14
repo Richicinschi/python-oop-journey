@@ -87,7 +87,7 @@ export function VerificationPanel({
   const [showOutput, setShowOutput] = useState(false);
   const [expandedTests, setExpandedTests] = useState<Set<string>>(new Set());
   
-  const { explainError } = useAIHints({
+  const { explainError, errorExplanation } = useAIHints({
     problemSlug: problemSlug || '',
     code: code || '',
   });
@@ -264,6 +264,7 @@ export function VerificationPanel({
                         code={code}
                         problemSlug={problemSlug}
                         onExplain={() => explainError(verification.stderr || '')}
+                        explanation={errorExplanation}
                         onHighlightLines={onHighlightLines}
                       />
                     </div>

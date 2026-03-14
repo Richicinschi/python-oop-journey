@@ -21,6 +21,7 @@ interface ErrorExplainerProps {
   code: string;
   problemSlug?: string;
   onExplain?: () => Promise<void>;
+  explanation?: ErrorExplanation | null;
   onHighlightLines?: (lines: number[]) => void;
 }
 
@@ -35,12 +36,14 @@ export function ErrorExplainer({
   code,
   problemSlug,
   onExplain,
+  explanation: explanationProp,
   onHighlightLines,
 }: ErrorExplainerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [explanation, setExplanation] = useState<ErrorExplanation | null>(null);
+  const [internalExplanation, setInternalExplanation] = useState<ErrorExplanation | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const explanation = explanationProp ?? internalExplanation;
 
   const handleExplain = async () => {
     if (!onExplain) return;
@@ -49,8 +52,7 @@ export function ErrorExplainer({
     setError(null);
 
     try {
-      const result = await onExplain();
-      setExplanation(result);
+      await onExplain();
       setIsOpen(true);
     } catch (err) {
       setError('Failed to explain error. Please try again.');
@@ -262,8 +264,7 @@ export function InlineErrorExplainer({
 
     setIsLoading(true);
     try {
-      const result = await onExplain();
-      setExplanation(result);
+      await onExplain();
       setShowExplanation(true);
     } catch {
       // Silently fail for inline version
