@@ -49,7 +49,7 @@ export interface CachedCurriculum {
 }
 
 // Sync state
-export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
+export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline' | 'conflict';
 
 export interface SyncState {
   status: SyncStatus;

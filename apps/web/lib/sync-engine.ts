@@ -28,7 +28,7 @@ import { api, ApiError } from './api';
 
 // ==================== Types ====================
 
-export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
+export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline' | 'conflict';
 
 export interface SyncState {
   status: SyncStatus;
