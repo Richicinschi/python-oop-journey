@@ -13,7 +13,7 @@ interface TestResultItemProps {
   testNumber: number;
   code?: string;
   problemSlug?: string;
-  onExplainError?: (errorMessage: string) => Promise<{ explanation: string; suggestion: string; relevantLines: number[] }>;
+  onExplainError?: (errorMessage: string) => Promise<void>;
 }
 
 const statusConfig = {
