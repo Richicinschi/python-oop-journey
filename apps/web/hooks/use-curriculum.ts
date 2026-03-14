@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Week, Day, Problem } from '@/types/curriculum';
-import { getWeeks, getWeekBySlug, getDayBySlug, getAllProblems, getProblemBySlug } from '@/lib/curriculum-loader';
+import { getWeeks, getWeekBySlug, getDayBySlug, getAllProblems, getProblemBySlugOnly } from '@/lib/curriculum-loader';
 
 export function useWeeks() {
   const [weeks, setWeeks] = useState<Week[]>([]);
@@ -62,7 +62,7 @@ export function useProblem(slug: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const data = getProblemBySlug(slug);
+    const data = getProblemBySlugOnly(slug);
     setProblem(data || null);
     setIsLoading(false);
   }, [slug]);

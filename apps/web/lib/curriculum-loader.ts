@@ -64,6 +64,20 @@ export function getProblemBySlug(
 }
 
 /**
+ * Get a problem by slug only (searches all weeks/days)
+ */
+export function getProblemBySlugOnly(problemSlug: string): Problem | undefined {
+  const weeks = getWeeks();
+  for (const week of weeks) {
+    for (const day of week.days) {
+      const problem = day.problems.find((p) => p.slug === problemSlug);
+      if (problem) return problem;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Get all problems across all weeks
  */
 export function getAllProblems(): Problem[] {
