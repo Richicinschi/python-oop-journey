@@ -4,7 +4,7 @@ import { CommandPalette } from './command-palette';
 
 interface SearchDialogProps {
   open: boolean;
-  onOpenChange?: (open: boolean) => void;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
