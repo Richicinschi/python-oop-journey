@@ -777,7 +777,7 @@ export function useProjectFiles(options: UseProjectFilesOptions = {}): UseProjec
     const JSZip = (await import("jszip")).default;
     const zip = new JSZip();
     
-    function addFolderToZip(folder: ProjectFolder, zipFolder: JSZip) {
+    function addFolderToZip(folder: ProjectFolder, zipFolder: InstanceType<typeof JSZip>) {
       for (const child of folder.children) {
         if (isProjectFile(child)) {
           if (child.name) zipFolder.file(child.name, child.content ?? '');
