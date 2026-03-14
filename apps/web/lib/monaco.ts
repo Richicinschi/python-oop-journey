@@ -277,7 +277,7 @@ export const initializeMonaco = (monaco: Monaco) => {
 export const getDefaultEditorOptions = (
   isDark: boolean,
   readOnly: boolean = false
-): monaco.editor.IStandaloneEditorConstructionOptions => ({
+): any => ({
   language: "python",
   theme: isDark ? "vs-code-dark" : "vs-code-light",
   automaticLayout: true,
