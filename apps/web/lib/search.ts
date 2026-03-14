@@ -98,3 +98,6 @@ export function getAllWeeks(index: SearchIndexItem[]): number[] {
 export function getProblems(index: SearchIndexItem[]): SearchIndexItem[] {
   return index.filter((item) => item.type === "problem");
 }
+
+// Aliases for backward compatibility
+export { getSearchIndex as buildSearchIndex, search as searchCurriculum };

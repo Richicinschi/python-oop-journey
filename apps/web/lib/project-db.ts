@@ -8,7 +8,8 @@
  */
 
 import { openDB, DBSchema, type IDBPDatabase } from 'idb';
-import type { ProjectState, ProjectFile } from '@/types/project-files';
+import type { ProjectState, ProjectFile, ProjectFolder } from '@/types/project-files';
+import { isProjectFile } from '@/types/project-files';
 
 const DB_NAME = 'oop-journey-projects';
 const DB_VERSION = 1;
@@ -200,12 +201,12 @@ export async function exportProject(projectId: string): Promise<{
   
   // Collect all file IDs from the project tree
   const fileIds: string[] = [];
-  function collectFiles(folder: { children: Array<{ id: string; children?: unknown }> }) {
+  function collectFiles(folder: ProjectFolder) {
     for (const child of folder.children) {
-      if (!child.children) {
-        fileIds.push(child.id);
+      if (isProjectFile(child)) {
+        if (child.id) fileIds.push(child.id);
       } else {
-        collectFiles(child as { children: Array<{ id: string; children?: unknown }> });
+        collectFiles(child);
       }
     }
   }

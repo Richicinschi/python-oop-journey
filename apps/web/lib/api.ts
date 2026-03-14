@@ -465,7 +465,7 @@ export interface ReviewItem {
   priority: number;
 }
 
-export interface ReviewQueue {
+export interface ReviewQueueResponse {
   items: ReviewItem[];
   total: number;
   dueToday: number;

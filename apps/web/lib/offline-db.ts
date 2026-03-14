@@ -163,9 +163,19 @@ export async function addOperation(
 }
 
 /**
- * Alias for addOperation - used by migration
+ * Queue an operation for sync - adds timestamp and clientId
  */
-export const queueOperation = addOperation;
+export async function queueOperation(params: {
+  type: OperationType;
+  action: OperationAction;
+  data: unknown;
+}): Promise<SyncOperation> {
+  return addOperation({
+    ...params,
+    timestamp: Date.now(),
+    clientId: 'offline-db',
+  } as Omit<SyncOperation, 'id' | 'retryCount'>);
+}
 
 /**
  * Get all pending operations, sorted by timestamp
@@ -434,37 +444,37 @@ export async function importData(data: {
 }): Promise<void> {
   const db = await getDB();
 
-  await db.transaction(
-    ['operations', 'drafts', 'progress', 'bookmarks', 'curriculum'],
-    'readwrite',
-    async (tx) => {
-      if (data.operations) {
-        for (const op of data.operations) {
-          await tx.objectStore('operations').put(op);
-        }
-      }
-      if (data.drafts) {
-        for (const draft of data.drafts) {
-          await tx.objectStore('drafts').put(draft);
-        }
-      }
-      if (data.progress) {
-        for (const prog of data.progress) {
-          await tx.objectStore('progress').put(prog);
-        }
-      }
-      if (data.bookmarks) {
-        for (const bookmark of data.bookmarks) {
-          await tx.objectStore('bookmarks').put(bookmark);
-        }
-      }
-      if (data.curriculum) {
-        for (const curr of data.curriculum) {
-          await tx.objectStore('curriculum').put(curr);
-        }
-      }
-    }
+  const tx = db.transaction(
+    ['operations', 'drafts', 'progress', 'bookmarks', 'curriculum'] as ('operations' | 'drafts' | 'progress' | 'bookmarks' | 'curriculum')[],
+    'readwrite'
   );
+  
+  if (data.operations) {
+    for (const op of data.operations) {
+      await tx.objectStore('operations').put(op);
+    }
+  }
+  if (data.drafts) {
+    for (const draft of data.drafts) {
+      await tx.objectStore('drafts').put(draft);
+    }
+  }
+  if (data.progress) {
+    for (const prog of data.progress) {
+      await tx.objectStore('progress').put(prog);
+    }
+  }
+  if (data.bookmarks) {
+    for (const bookmark of data.bookmarks) {
+      await tx.objectStore('bookmarks').put(bookmark);
+    }
+  }
+  if (data.curriculum) {
+    for (const curr of data.curriculum) {
+      await tx.objectStore('curriculum').put(curr);
+    }
+  }
+  await tx.done;
 }
 
 export default {

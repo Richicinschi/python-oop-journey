@@ -28,6 +28,8 @@ import { api, ApiError } from './api';
 
 // ==================== Types ====================
 
+export type { OperationType, OperationAction } from './offline-db';
+
 export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline' | 'conflict';
 
 export interface SyncState {
@@ -79,7 +81,7 @@ const DEFAULT_MAX_DELAY = 60000; // 60 seconds
 const SYNC_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 // Generate a unique client ID for this device/session
-const CLIENT_ID = typeof window !== 'undefined'
+export const CLIENT_ID = typeof window !== 'undefined'
   ? `${navigator.userAgent.slice(0, 20)}-${Date.now()}`
   : 'server';
 
@@ -177,7 +179,7 @@ export async function queueOperation(params: {
     ...params,
     timestamp: Date.now(),
     clientId: CLIENT_ID,
-  });
+  } as Omit<SyncOperation, 'id' | 'retryCount'>);
 
   await updatePendingCount();
 
@@ -446,7 +448,7 @@ async function registerBackgroundSync(): Promise<void> {
 
   try {
     const registration = await navigator.serviceWorker.ready;
-    await registration.sync.register('sync-pending-operations');
+    await (registration as any).sync.register('sync-pending-operations');
   } catch (error) {
     console.error('Background sync registration failed:', error);
   }

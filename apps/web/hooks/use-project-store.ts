@@ -230,8 +230,8 @@ export function useProjectStore() {
 
       const newTab: EditorTab = {
         id: `tab-${newFile.id}`,
-        fileId: newFile.id,
-        fileName: newFile.name,
+        fileId: newFile.id!,
+        fileName: newFile.name!,
         filePath: newFile.path,
         isModified: false,
         isActive: true,
@@ -248,7 +248,7 @@ export function useProjectStore() {
           },
         },
         activeTabs: prev.activeTabs.map(t => ({ ...t, isActive: false })).concat(newTab),
-        activeFileId: newFile.id,
+        activeFileId: (newFile.id ?? null) as string | null,
       };
     });
 
@@ -291,7 +291,7 @@ export function useProjectStore() {
     setStore(prev => {
       if (!prev.currentProject) return prev;
 
-      const file = prev.projects[prev.currentProject.slug]?.files.find(f => f.id === fileId);
+      const file = (prev.projects[prev.currentProject.slug]?.files ?? []).find(f => f.id === fileId);
       if (!file) return prev;
 
       const existingTab = prev.activeTabs.find(t => t.fileId === fileId);
@@ -305,10 +305,10 @@ export function useProjectStore() {
 
       const newTab: EditorTab = {
         id: `tab-${fileId}`,
-        fileId: file.id,
-        fileName: file.name,
+        fileId: file.id!,
+        fileName: file.name!,
         filePath: file.path,
-        isModified: file.isModified,
+        isModified: file.isModified ?? false,
         isActive: true,
       };
 
@@ -385,7 +385,7 @@ export function useProjectStore() {
 
   const getActiveFile = useCallback((): ProjectFile | undefined => {
     if (!store.currentProject || !store.activeFileId) return undefined;
-    return store.projects[store.currentProject.slug]?.files.find(f => f.id === store.activeFileId);
+    return (store.projects[store.currentProject.slug]?.files ?? []).find(f => f.id === store.activeFileId);
   }, [store.currentProject, store.activeFileId, store.projects]);
 
   // Analytics tracking

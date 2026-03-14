@@ -175,5 +175,9 @@ export function useVerification() {
   };
 }
 
+// Convenience exports for common operations
+export const verifySolution = verificationApi.verify;
+export const submitSolution = verificationApi.verifyForProblem;
+
 export { VerificationApiError };
 export default verificationApi;
