@@ -149,13 +149,13 @@ export function useProjectStore() {
       const project = prev.projects[projectSlug];
       if (!project) return prev;
 
-      const updatedFiles = project.files.map(f => 
+      const updatedFiles = (project.files ?? []).map(f => 
         f.id === fileId 
           ? { ...f, content, isModified: true, lastModified: Date.now() }
           : f
       );
 
-      const wasModified = project.files.find(f => f.id === fileId)?.content !== content;
+      const wasModified = (project.files ?? []).find(f => f.id === fileId)?.content !== content;
 
       // Update tabs to reflect modified state
       const updatedTabs = prev.activeTabs.map(tab => 
@@ -185,7 +185,7 @@ export function useProjectStore() {
       const project = prev.projects[projectSlug];
       if (!project) return prev;
 
-      const updatedFiles = project.files.map(f => 
+      const updatedFiles = (project.files ?? []).map(f => 
         f.id === fileId 
           ? { ...f, isModified: false }
           : f
@@ -243,7 +243,7 @@ export function useProjectStore() {
           ...prev.projects,
           [projectSlug]: { 
             ...project, 
-            files: [...project.files, newFile],
+            files: [...(project.files ?? []), newFile],
             lastActiveTime: Date.now(),
           },
         },
@@ -265,7 +265,7 @@ export function useProjectStore() {
       const project = prev.projects[projectSlug];
       if (!project) return prev;
 
-      const updatedFiles = project.files.filter(f => f.id !== fileId);
+      const updatedFiles = (project.files ?? []).filter(f => f.id !== fileId);
       const updatedTabs = prev.activeTabs.filter(t => t.fileId !== fileId);
       
       // Activate another tab if we closed the active one
@@ -356,7 +356,7 @@ export function useProjectStore() {
       if (!project) return prev;
 
       // Save all modified files first
-      const updatedFiles = project.files.map(f => ({ ...f, isModified: false }));
+      const updatedFiles = (project.files ?? []).map(f => ({ ...f, isModified: false }));
 
       return {
         ...prev,
