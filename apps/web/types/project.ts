@@ -73,8 +73,10 @@ export interface UserProjectProgress {
   completedTasks: string[];
   lastAccessed: string;
   // Optional fields used by project store
-  files?: { id?: string; isModified?: boolean }[];
+  files?: ProjectFile[];
   totalTimeSpent?: number;
+  startTime?: number;
+  lastActiveTime?: number;
 }
 
 export interface ActiveProject {
