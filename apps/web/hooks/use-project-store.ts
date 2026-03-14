@@ -89,7 +89,9 @@ export function useProjectStore() {
         : { 
             projectSlug: project.slug, 
             status: 'in_progress', 
-            files: [...project.starterFiles],
+            completedTasks: [],
+            lastAccessed: new Date().toISOString(),
+            files: [...(project.starterFiles ?? [])],
             startTime: Date.now(),
             lastActiveTime: Date.now(),
             totalTimeSpent: 0,
