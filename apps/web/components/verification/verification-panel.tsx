@@ -63,7 +63,7 @@ export interface HintSuggestion {
   confidence: string;
 }
 
-interface VerificationPanelProps {
+export interface VerificationPanelProps {
   verification: VerificationData | null;
   isLoading?: boolean;
   onRetry?: () => void;
