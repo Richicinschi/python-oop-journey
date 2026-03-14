@@ -3,7 +3,7 @@
 import { CommandPalette } from './command-palette';
 
 interface SearchDialogProps {
-  open?: boolean;
+  open: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
