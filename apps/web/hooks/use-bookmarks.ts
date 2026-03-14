@@ -418,3 +418,6 @@ export function useLocalBookmarks() {
     clearBookmarks,
   };
 }
+
+// Re-export types from API
+export type { ItemType } from '@/lib/api';
