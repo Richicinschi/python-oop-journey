@@ -62,6 +62,7 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.0",
     "@lhci/cli": "^0.13.0",
-    "@next/bundle-analyzer": "^14.1.0"
+    "@next/bundle-analyzer": "^14.1.0",
+    "critters": "^0.0.20"
   }
 }

@@ -39,3 +39,9 @@ coverage/
 type-errors.txt
 node.zip
 nodejs/
+
+# Documentation (keep in repo root, not in web app)
+/*.md
+!README.md
+!AGENTS.md
+!apps/web/**/*.md
