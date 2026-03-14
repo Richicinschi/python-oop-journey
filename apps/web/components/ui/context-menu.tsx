@@ -69,7 +69,7 @@ const ContextMenuContent = React.forwardRef<
     />
   </ContextMenuPrimitive.Portal>
 ))
-ContextMenuContent.displayName = ContextMenuPrimitive.displayName
+ContextMenuContent.displayName = ContextMenuPrimitive.Content.displayName ?? 'ContextMenuContent'
 
 const ContextMenuItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Item>,
