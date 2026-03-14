@@ -23,6 +23,8 @@ interface ProjectStore {
 const createDefaultProjectProgress = (projectSlug: string): UserProjectProgress => ({
   projectSlug,
   status: 'not_started',
+  completedTasks: [],
+  lastAccessed: new Date().toISOString(),
   files: [],
   totalTimeSpent: 0,
 });
