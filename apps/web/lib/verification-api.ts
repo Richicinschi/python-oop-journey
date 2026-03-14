@@ -37,6 +37,7 @@ export interface HintSuggestion {
 
 export interface VerificationResponse {
   success: boolean;
+  all_tests_passed?: boolean;
   summary: VerificationSummary;
   tests: TestResult[];
   stdout: string;
