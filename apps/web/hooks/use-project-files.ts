@@ -780,11 +780,13 @@ export function useProjectFiles(options: UseProjectFilesOptions = {}): UseProjec
     function addFolderToZip(folder: ProjectFolder, zipFolder: JSZip) {
       for (const child of folder.children) {
         if (isProjectFile(child)) {
-          zipFolder.file(child.name, child.content);
+          if (child.name) zipFolder.file(child.name, child.content ?? '');
         } else {
-          const newFolder = zipFolder.folder(child.name);
-          if (newFolder) {
-            addFolderToZip(child, newFolder);
+          if (child.name) {
+            const newFolder = zipFolder.folder(child.name);
+            if (newFolder) {
+              addFolderToZip(child, newFolder);
+            }
           }
         }
       }
