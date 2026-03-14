@@ -133,7 +133,7 @@ export function useProjectStore() {
           ...prev.projects,
           [projectSlug]: {
             ...project,
-            totalTimeSpent: project.totalTimeSpent + additionalSeconds,
+            totalTimeSpent: (project.totalTimeSpent ?? 0) + additionalSeconds,
             lastActiveTime: Date.now(),
           },
         },
