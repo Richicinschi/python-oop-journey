@@ -20,7 +20,7 @@ interface ErrorExplainerProps {
   errorMessage: string;
   code: string;
   problemSlug?: string;
-  onExplain?: () => Promise<ErrorExplanation>;
+  onExplain?: () => Promise<void>;
   onHighlightLines?: (lines: number[]) => void;
 }
 
@@ -248,7 +248,7 @@ export function InlineErrorExplainer({
   onExplain,
 }: {
   errorMessage: string;
-  onExplain?: () => Promise<ErrorExplanation>;
+  onExplain?: () => Promise<void>;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [explanation, setExplanation] = useState<ErrorExplanation | null>(null);
