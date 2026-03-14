@@ -33,7 +33,7 @@ export function initSentry(): void {
     replaysOnErrorSampleRate: 1.0,
     
     // Don't send errors in development
-    beforeSend(event) {
+    beforeSend(event: any) {
       if (ENVIRONMENT === 'development') {
         return null;
       }
@@ -101,7 +101,7 @@ export function clearSentryUser(): void {
  */
 export function captureException(error: Error, context?: Record<string, any>): void {
   if (context) {
-    Sentry.withScope((scope) => {
+    Sentry.withScope((scope: any) => {
       scope.setContext('additional', context);
       Sentry.captureException(error);
     });
