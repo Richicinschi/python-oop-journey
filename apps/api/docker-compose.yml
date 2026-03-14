@@ -1,0 +1,146 @@
+version: '3.8'
+
+services:
+  # Main API server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/oop_journey
+      - REDIS_URL=redis://redis:6379/0
+      - DOCKER_HOST=tcp://docker-socket-proxy:2375
+      - SANDBOX_IMAGE=oop-journey-sandbox:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - sandbox-tmp:/tmp/sandbox
+    depends_on:
+      - db
+      - redis
+      - docker-socket-proxy
+    networks:
+      - app-network
+
+  # Celery worker for async execution
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A api.celery_app worker --loglevel=info --concurrency=4
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/oop_journey
+      - REDIS_URL=redis://redis:6379/0
+      - DOCKER_HOST=tcp://docker-socket-proxy:2375
+      - SANDBOX_IMAGE=oop-journey-sandbox:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - sandbox-tmp:/tmp/sandbox
+    depends_on:
+      - db
+      - redis
+      - docker-socket-proxy
+    networks:
+      - app-network
+
+  # Celery beat for scheduled tasks
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A api.celery_app beat --loglevel=info
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+  # Flower for monitoring Celery
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A api.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+  # Secure Docker socket proxy
+  # This provides controlled access to Docker API without exposing the full socket
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    environment:
+      - CONTAINERS=1  # Allow container operations
+      - IMAGES=1      # Allow image operations
+      - POST=1        # Allow POST requests
+      - DELETE=1      # Allow DELETE requests
+      - INFO=1        # Allow info requests
+      - NETWORKS=0    # Deny network operations
+      - VOLUMES=0     # Deny volume operations (except through compose)
+      - BUILD=0       # Deny build operations
+      - SYSTEM=0      # Deny system operations
+      - DISTRIBUTION=0
+      - EXEC=0
+      - PLUGINS=0
+      - NODES=0
+      - SERVICES=0
+      - TASKS=0
+      - SECRETS=0
+      - CONFIGS=0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - app-network
+
+  # PostgreSQL database
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=oop_journey
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  # Redis for caching and Celery broker
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+
+  # Build the sandbox image (run once)
+  sandbox-builder:
+    build:
+      context: .
+      dockerfile: sandbox.Dockerfile
+    image: oop-journey-sandbox:latest
+    command: echo "Sandbox image built successfully"
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+  redis-data:
+  sandbox-tmp:
+
+networks:
+  app-network:
+    driver: bridge

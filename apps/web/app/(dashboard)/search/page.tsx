@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { getCurriculum, getWeeks, formatWeekNumber } from "@/lib/curriculum-loader";
 import { Problem, Week, Day } from "@/types/curriculum";
-import { Search, Grid, List, X, FileCode, Calendar, Layers, ArrowRight } from "lucide-react";
+import { Search, Grid, List, X, FileCode, Calendar, Layers, ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SearchFilters {
@@ -35,7 +36,7 @@ interface ProblemWithContext extends Problem {
   dayOrder: number;
 }
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialQuery = searchParams.get("q") || "";
@@ -363,5 +364,20 @@ export default function SearchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading search...</p>
+        </div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 }

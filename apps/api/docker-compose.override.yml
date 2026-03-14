@@ -1,0 +1,38 @@
+# Docker Compose override for local development
+# Copy this to docker-compose.override.yml and customize as needed
+
+version: '3.8'
+
+services:
+  api:
+    volumes:
+      # Mount source code for development (hot reload)
+      - .:/app
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+    command: uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+
+  worker:
+    volumes:
+      # Mount source code for development
+      - .:/app
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+    command: celery -A api.celery_app worker --loglevel=debug --concurrency=2
+
+  # Add localstack for testing AWS services (optional)
+  # localstack:
+  #   image: localstack/localstack:latest
+  #   ports:
+  #     - "4566:4566"
+  #   environment:
+  #     - SERVICES=s3
+  #     - DEFAULT_REGION=us-east-1
+  #   volumes:
+  #     - localstack-data:/var/lib/localstack
+
+volumes:
+  localstack-data:

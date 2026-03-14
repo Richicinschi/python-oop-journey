@@ -1,0 +1,40 @@
+apiVersion: 1
+
+datasources:
+  # Prometheus datasource
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "5s"
+
+  # Loki datasource for logs
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: false
+    jsonData:
+      maxLines: 1000
+
+  # PostgreSQL datasource (optional - for direct DB queries)
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: db:5432
+    database: oopjourney_production
+    user: postgres
+    editable: false
+    secureJsonData:
+      password: '${DB_PASSWORD}'
+    jsonData:
+      sslmode: "disable"
+      maxOpenConns: 100
+      maxIdleConns: 100
+      maxIdleConnsAuto: true
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false

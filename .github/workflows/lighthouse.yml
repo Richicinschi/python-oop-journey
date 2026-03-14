@@ -1,0 +1,194 @@
+name: Lighthouse CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lighthouse:
+    name: Lighthouse Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd apps/web
+          npm ci
+
+      - name: Build application
+        run: |
+          cd apps/web
+          npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli@0.12.x
+          lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        continue-on-error: true
+
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: ./lhci_reports
+
+  performance-budget:
+    name: Performance Budget Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd apps/web
+          npm ci
+
+      - name: Build and analyze bundle
+        run: |
+          cd apps/web
+          npm run build 2>&1 | tee build.log
+        env:
+          NODE_ENV: production
+          ANALYZE: true
+
+      - name: Check bundle size
+        run: |
+          cd apps/web/.next
+          
+          # Check main bundle size
+          MAIN_BUNDLE=$(find static/chunks -name "main-*.js" -exec wc -c {} \; | awk '{print $1}')
+          echo "Main bundle size: $MAIN_BUNDLE bytes"
+          
+          # Set limits (in bytes)
+          MAIN_LIMIT=512000  # 500KB
+          
+          if [ "$MAIN_BUNDLE" -gt "$MAIN_LIMIT" ]; then
+            echo "❌ Main bundle exceeds limit: $MAIN_BUNDLE > $MAIN_LIMIT"
+            exit 1
+          else
+            echo "✅ Main bundle within limit"
+          fi
+
+      - name: Comment PR with bundle size
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Read build output
+            const buildLog = fs.readFileSync('apps/web/build.log', 'utf8');
+            
+            // Extract bundle sizes
+            const bundleSizes = [];
+            const chunksDir = 'apps/web/.next/static/chunks';
+            
+            if (fs.existsSync(chunksDir)) {
+              const files = fs.readdirSync(chunksDir);
+              files.forEach(file => {
+                if (file.endsWith('.js')) {
+                  const size = fs.statSync(path.join(chunksDir, file)).size;
+                  bundleSizes.push({ file, size: (size / 1024).toFixed(2) });
+                }
+              });
+            }
+            
+            // Sort by size
+            bundleSizes.sort((a, b) => b.size - a.size);
+            
+            // Create comment body
+            const body = `## 📦 Bundle Size Report
+            
+            | Chunk | Size (KB) |
+            |-------|-----------|
+            ${bundleSizes.slice(0, 10).map(b => `| ${b.file} | ${b.size} |`).join('\n')}
+            
+            ${bundleSizes.length > 10 ? `*... and ${bundleSizes.length - 10} more chunks*` : ''}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  api-performance:
+    name: API Performance Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: oop_journey_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd apps/api
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Run performance tests
+        run: |
+          cd apps/api
+          pytest api/tests/test_performance.py -v --tb=short || true
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/oop_journey_test
+          REDIS_URL: redis://localhost:6379/0
+
+      - name: Load test with k6
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: tests/load-test.js
+          flags: --vus 10 --duration 30s
+        continue-on-error: true

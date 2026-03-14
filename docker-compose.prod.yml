@@ -1,0 +1,289 @@
+# Production Docker Compose Configuration
+# This file defines the complete production stack for the OOP Journey platform
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # Web Frontend (Next.js)
+  # =============================================================================
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: oopjourney-web
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://api.oopjourney.com}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://oopjourney.com}
+      - SENTRY_DSN=${SENTRY_DSN:-}
+    networks:
+      - oopjourney-network
+    depends_on:
+      - api
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =============================================================================
+  # API Backend (FastAPI)
+  # =============================================================================
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: oopjourney-api
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET:-${SECRET_KEY}}
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - FROM_EMAIL=${FROM_EMAIL:-noreply@oopjourney.com}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY:-}
+      - SANDBOX_TIMEOUT_SECONDS=${SANDBOX_TIMEOUT_SECONDS:-30}
+      - SANDBOX_MEMORY_LIMIT_MB=${SANDBOX_MEMORY_LIMIT_MB:-256}
+      - SANDBOX_CPU_LIMIT=${SANDBOX_CPU_LIMIT:-0.5}
+    volumes:
+      # Mount Docker socket for sandbox container spawning
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - oopjourney-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =============================================================================
+  # Database (PostgreSQL)
+  # =============================================================================
+  db:
+    image: postgres:15-alpine
+    container_name: oopjourney-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-oopjourney}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Backup directory
+      - ./backups:/backups
+    networks:
+      - oopjourney-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-oopjourney}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =============================================================================
+  # Cache (Redis)
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: oopjourney-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - oopjourney-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =============================================================================
+  # Background Task Worker (Celery)
+  # =============================================================================
+  worker:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: oopjourney-worker
+    restart: unless-stopped
+    command: celery -A api.celery_app worker --loglevel=info --concurrency=2
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - SECRET_KEY=${SECRET_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - oopjourney-network
+    depends_on:
+      - redis
+      - db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =============================================================================
+  # Task Scheduler (Celery Beat)
+  # =============================================================================
+  scheduler:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: oopjourney-scheduler
+    restart: unless-stopped
+    command: celery -A api.celery_app beat --loglevel=info
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - SECRET_KEY=${SECRET_KEY}
+    networks:
+      - oopjourney-network
+    depends_on:
+      - redis
+      - db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =============================================================================
+  # Nginx Reverse Proxy
+  # =============================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: oopjourney-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - certbot_data:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - oopjourney-network
+    depends_on:
+      - web
+      - api
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =============================================================================
+  # SSL Certificate Manager (Certbot)
+  # =============================================================================
+  certbot:
+    image: certbot/certbot
+    container_name: oopjourney-certbot
+    volumes:
+      - certbot_data:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - oopjourney-network
+
+  # =============================================================================
+  # Log Aggregation (Optional - Loki)
+  # =============================================================================
+  loki:
+    image: grafana/loki:latest
+    container_name: oopjourney-loki
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - oopjourney-network
+    profiles:
+      - monitoring
+
+  # =============================================================================
+  # Metrics (Optional - Prometheus)
+  # =============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: oopjourney-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - oopjourney-network
+    profiles:
+      - monitoring
+
+  # =============================================================================
+  # Dashboard (Optional - Grafana)
+  # =============================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: oopjourney-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3001:3000"
+    networks:
+      - oopjourney-network
+    profiles:
+      - monitoring
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  postgres_data:
+  redis_data:
+  certbot_data:
+  loki_data:
+  prometheus_data:
+  grafana_data:
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  oopjourney-network:
+    driver: bridge

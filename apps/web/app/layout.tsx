@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import Script from "next/script";
+import { Suspense } from "react";
 import { PerformanceMonitor, PreconnectHints } from "@/components/performance-monitor";
 
 const inter = Inter({ 
@@ -62,7 +63,9 @@ export default function RootLayout({
         </ThemeProvider>
         
         {/* Performance monitoring */}
-        <PerformanceMonitor />
+        <Suspense fallback={null}>
+          <PerformanceMonitor />
+        </Suspense>
         
         {/* Service Worker Registration */}
         <Script id="service-worker-registration" strategy="afterInteractive">

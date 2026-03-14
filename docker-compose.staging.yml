@@ -1,0 +1,132 @@
+# Staging Environment Docker Compose Configuration
+# This is a mirror of production with smaller instance sizes
+
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: oopjourney-web-staging
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=https://api.staging.oopjourney.com
+      - NEXT_PUBLIC_APP_URL=https://staging.oopjourney.com
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - NEXT_PUBLIC_ENVIRONMENT=staging
+    networks:
+      - oopjourney-staging-network
+    depends_on:
+      - api
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: oopjourney-api-staging
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=staging
+      - DEBUG=false
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET:-${SECRET_KEY}}
+      - SENTRY_DSN=${SENTRY_DSN:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - oopjourney-staging-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: postgres:15-alpine
+    container_name: oopjourney-db-staging
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-oopjourney_staging}
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    networks:
+      - oopjourney-staging-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-oopjourney_staging}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: oopjourney-redis-staging
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_staging_data:/data
+    networks:
+      - oopjourney-staging-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: oopjourney-worker-staging
+    restart: unless-stopped
+    command: celery -A api.celery_app worker --loglevel=info --concurrency=1
+    environment:
+      - ENVIRONMENT=staging
+      - DEBUG=false
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - SECRET_KEY=${SECRET_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - oopjourney-staging-network
+    depends_on:
+      - redis
+      - db
+
+  nginx:
+    image: nginx:alpine
+    container_name: oopjourney-nginx-staging
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.staging.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - oopjourney-staging-network
+    depends_on:
+      - web
+      - api
+
+volumes:
+  postgres_staging_data:
+  redis_staging_data:
+
+networks:
+  oopjourney-staging-network:
+    driver: bridge
