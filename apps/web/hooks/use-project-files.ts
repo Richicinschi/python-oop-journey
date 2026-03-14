@@ -189,7 +189,7 @@ function getAllFileIds(folder: ProjectFolder): string[] {
   const ids: string[] = [];
   for (const child of folder.children) {
     if (isProjectFile(child)) {
-      ids.push(child.id);
+      if (child.id) ids.push(child.id);
     } else {
       ids.push(...getAllFileIds(child));
     }
