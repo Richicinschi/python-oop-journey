@@ -122,6 +122,5 @@ export {
   useSubmissionChecklist,
   useSubmissionComments,
   useAddComment,
-  useReviewQueue,
   useReviewSubmission,
 } from '@/lib/hooks/use-submissions';
