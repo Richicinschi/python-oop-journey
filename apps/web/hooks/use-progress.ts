@@ -372,3 +372,6 @@ export function useLocalProgress() {
     updateStreak,
   };
 }
+
+// Re-export types from API
+export type { ProblemStatus } from '@/lib/api';
