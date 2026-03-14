@@ -163,6 +163,7 @@ export function useToggleBookmark(
           userId: '',
           itemType,
           itemSlug,
+          title: itemSlug, // Title will be fetched from server when needed
           notes: notes || null,
           createdAt: new Date().toISOString(),
         });
