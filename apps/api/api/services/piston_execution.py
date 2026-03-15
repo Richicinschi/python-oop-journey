@@ -10,7 +10,7 @@ from typing import Optional
 
 import httpx
 
-from api.schemas.execution import ExecutionRequest, ExecutionResult
+from api.schemas.execution import CodeExecutionRequest, ExecutionResult
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class PistonExecutionService:
         self.api_url = PISTON_API_URL.rstrip("/")
         self.client = httpx.AsyncClient(timeout=30.0)
 
-    async def execute(self, request: ExecutionRequest) -> ExecutionResult:
+    async def execute(self, request: CodeExecutionRequest) -> ExecutionResult:
         """Execute Python code via Piston API.
         
         Args:
@@ -123,8 +123,8 @@ except SyntaxError as e:
     print(f"SYNTAX_ERROR: {{e}}")
 """
             
-            request = ExecutionRequest(code=validation_code)
-            result = await self.execute(request)
+            validation_request = CodeExecutionRequest(code=validation_code)
+            result = await self.execute(validation_request)
             
             if "SYNTAX_OK" in result.stdout:
                 return True, None

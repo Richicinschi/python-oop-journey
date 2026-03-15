@@ -26,6 +26,5 @@ ENV PISTON_MAX_FILES=25
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:2000/api/v2/runtimes || exit 1
 
-# Use shell form to change to /tmp before starting
-SHELL ["/bin/sh", "-c"]
-ENTRYPOINT cd /tmp && piston-api
+# Start Piston API - use exec form
+ENTRYPOINT ["piston-api"]
