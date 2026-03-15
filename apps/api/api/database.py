@@ -1,6 +1,7 @@
 """SQLAlchemy async database configuration."""
 
 from typing import AsyncGenerator
+from urllib.parse import urlparse, parse_qs, urlencode
 
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -33,13 +34,45 @@ def _patched_get_server_version_info(self, connection):
 
 PGDialect._get_server_version_info = _patched_get_server_version_info
 
+
+def _build_database_url():
+    """Build database URL with proper asyncpg parameters.
+    
+    The prepare_threshold parameter is added as a query parameter instead of
+    connect_args to avoid asyncpg compatibility issues. Setting it to 0
+    disables prepared statement caching, which is needed for CockroachDB
+    compatibility and some connection pool configurations.
+    """
+    url = settings.database_url
+    
+    # Parse the URL
+    parsed = urlparse(url)
+    query_params = parse_qs(parsed.query)
+    
+    # Add prepare_threshold=0 to disable prepared statement caching
+    # This fixes compatibility with CockroachDB and some PostgreSQL setups
+    if "prepare_threshold" not in query_params:
+        query_params["prepare_threshold"] = ["0"]
+    
+    # Rebuild the query string
+    new_query = urlencode(query_params, doseq=True)
+    
+    # Reconstruct the URL
+    return parsed._replace(query=new_query).geturl()
+
+
+# Build the database URL with proper parameters
+database_url = _build_database_url()
+
 # Create async engine with CockroachDB compatibility
-connect_args = {"prepare_threshold": None}
+# Note: prepare_threshold is now passed via URL query params instead of connect_args
+# to avoid asyncpg driver compatibility issues
+connect_args = {}
 if "cockroach" in settings.database_url.lower():
     connect_args["server_settings"] = {"application_name": "oop-journey"}
 
 engine = create_async_engine(
-    settings.database_url,
+    database_url,
     echo=settings.debug,
     pool_size=settings.database_pool_size,
     max_overflow=settings.database_max_overflow,

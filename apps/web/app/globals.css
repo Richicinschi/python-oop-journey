@@ -61,6 +61,26 @@
   }
 }
 
+/* Monaco Editor fixes for production */
+.monaco-editor {
+  position: absolute !important;
+  left: 0;
+  top: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.monaco-editor .overflow-guard {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Ensure editor container is properly sized */
+[data-testid="monaco-editor"] {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* Custom scrollbar for code editor */
 .editor-scrollbar::-webkit-scrollbar {
   width: 10px;

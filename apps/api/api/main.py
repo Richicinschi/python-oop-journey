@@ -6,6 +6,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from api.config import get_settings
 from api.database import close_db, init_db
@@ -37,6 +42,10 @@ logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
+# Initialize rate limiter with IP-based key function
+# This is defined at module level so routers can import it
+limiter = Limiter(key_func=get_remote_address)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -67,6 +76,24 @@ def create_app() -> FastAPI:
         redoc_url="/redoc" if settings.is_development else None,
         lifespan=lifespan,
     )
+    
+    # Store limiter in app state for access in routers
+    app.state.limiter = limiter
+    
+    # Add rate limit error handler
+    @app.exception_handler(RateLimitExceeded)
+    async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+        return JSONResponse(
+            status_code=429,
+            content={
+                "error": "Rate limit exceeded",
+                "detail": "Too many requests. Please slow down and try again later.",
+                "retry_after": exc.detail if hasattr(exc, 'detail') else None,
+            },
+        )
+    
+    # Add rate limiting middleware
+    app.add_middleware(limiter.middleware_class)
 
     # CORS middleware
     app.add_middleware(

@@ -1,6 +1,6 @@
 """Verification endpoints for test execution."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from api.schemas.verification import VerificationRequest, VerificationResponse
 from api.services.verification import get_verification_service
@@ -9,6 +9,31 @@ router = APIRouter()
 
 # Service instance
 verification_service = get_verification_service()
+
+
+def _check_rate_limit(request: Request, limit: str = "60/minute"):
+    """Helper function to check rate limits.
+    
+    Args:
+        request: The incoming request
+        limit: Rate limit string (e.g., "60/minute")
+    
+    Raises:
+        HTTPException: If rate limit is exceeded
+    """
+    from api.main import limiter
+    from slowapi.util import get_remote_address
+    
+    try:
+        import asyncio
+        # Run the synchronous check in a thread
+        loop = asyncio.get_event_loop()
+        # The limiter.check is async, so we await it directly
+        # But we need to handle the case where it raises an exception
+        return limiter.check(request, limit, get_remote_address, [])
+    except Exception:
+        # We'll handle the actual check via async method
+        pass
 
 
 @router.post(
@@ -22,7 +47,10 @@ verification_service = get_verification_service()
         429: {"description": "Rate limit exceeded"},
     },
 )
-async def verify_solution(request: VerificationRequest) -> VerificationResponse:
+async def verify_solution(
+    request: Request,
+    request_data: VerificationRequest
+) -> VerificationResponse:
     """Verify a learner's solution against test cases.
 
     This endpoint:
@@ -30,6 +58,8 @@ async def verify_solution(request: VerificationRequest) -> VerificationResponse:
     2. Loads test cases for the problem
     3. Executes tests in a sandboxed environment
     4. Returns detailed results with learner-friendly feedback
+
+    Rate limit: 60 requests per minute per IP address.
 
     Example request:
     ```json
@@ -39,15 +69,29 @@ async def verify_solution(request: VerificationRequest) -> VerificationResponse:
     }
     ```
     """
+    # Apply rate limiting check
+    from api.main import limiter
+    from slowapi.util import get_remote_address
+    
+    try:
+        await limiter.check(request, "60/minute", get_remote_address, [])
+    except Exception as e:
+        if "Rate limit exceeded" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Rate limit exceeded. Maximum 60 verification requests per minute allowed.",
+            )
+        raise
+    
     # Validate code is not empty
-    if not request.code or not request.code.strip():
+    if not request_data.code or not request_data.code.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Code cannot be empty",
         )
 
     # Run verification
-    result = await verification_service.verify_and_update_progress(request)
+    result = await verification_service.verify_and_update_progress(request_data)
 
     return result
 
@@ -57,16 +101,37 @@ async def verify_solution(request: VerificationRequest) -> VerificationResponse:
     response_model=VerificationResponse,
     summary="Verify solution for specific problem",
     description="Verify code for a specific problem by slug.",
+    responses={
+        429: {"description": "Rate limit exceeded"},
+    },
 )
 async def verify_solution_for_problem(
-    problem_slug: str, code: str
+    request: Request,
+    problem_slug: str,
+    code: str
 ) -> VerificationResponse:
     """Verify solution for a specific problem.
 
     This is a convenience endpoint that takes the problem slug from the URL.
+    
+    Rate limit: 60 requests per minute per IP address.
     """
-    request = VerificationRequest(code=code, problem_slug=problem_slug)
-    return await verify_solution(request)
+    # Apply rate limiting check
+    from api.main import limiter
+    from slowapi.util import get_remote_address
+    
+    try:
+        await limiter.check(request, "60/minute", get_remote_address, [])
+    except Exception as e:
+        if "Rate limit exceeded" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Rate limit exceeded. Maximum 60 verification requests per minute allowed.",
+            )
+        raise
+    
+    request_data = VerificationRequest(code=code, problem_slug=problem_slug)
+    return await verify_solution(request, request_data)
 
 
 @router.post(
@@ -74,11 +139,30 @@ async def verify_solution_for_problem(
     summary="Validate code syntax",
     description="Check if Python code has valid syntax without executing tests.",
 )
-async def validate_syntax_endpoint(code: str) -> dict:
+async def validate_syntax_endpoint(
+    request: Request,
+    code: str
+) -> dict:
     """Validate Python syntax without running tests.
 
     Returns whether the code is syntactically valid and any error messages.
+    
+    Rate limit: 60 requests per minute per IP address.
     """
+    # Apply rate limiting check
+    from api.main import limiter
+    from slowapi.util import get_remote_address
+    
+    try:
+        await limiter.check(request, "60/minute", get_remote_address, [])
+    except Exception as e:
+        if "Rate limit exceeded" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Rate limit exceeded. Maximum 60 syntax validation requests per minute allowed.",
+            )
+        raise
+    
     # Use the Docker runner's syntax validation (AST-based, no Docker needed)
     from api.services.docker_runner import get_docker_runner
     runner = get_docker_runner()

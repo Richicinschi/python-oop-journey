@@ -100,7 +100,7 @@ class SimpleExecutionService:
                     stdout=stdout,
                     stderr=stderr,
                     exit_code=result.returncode,
-                    execution_time_ms=execution_time_ms,
+                    duration_ms=execution_time_ms,
                     timeout=False,
                 )
 
@@ -114,7 +114,7 @@ class SimpleExecutionService:
                     stdout=stdout,
                     stderr=stderr,
                     exit_code=1,
-                    execution_time_ms=execution_time_ms,
+                    duration_ms=execution_time_ms,
                     timeout=True,
                 )
 
@@ -134,7 +134,7 @@ class SimpleExecutionService:
                 stdout="",
                 stderr=f"Execution error: {str(e)}",
                 exit_code=1,
-                execution_time_ms=execution_time_ms,
+                duration_ms=execution_time_ms,
                 timeout=False,
                 error=str(e),
             )

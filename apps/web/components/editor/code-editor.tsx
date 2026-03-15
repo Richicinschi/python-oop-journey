@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Editor, { OnMount, BeforeMount, type Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useTheme } from "@/components/theme-provider";
@@ -50,6 +50,10 @@ export interface CodeEditorProps {
   onRun?: () => void;
 }
 
+// Global refs for useCodeEditor hook access
+const globalEditorRef = { current: null as editor.IStandaloneCodeEditor | null };
+const globalMonacoRef = { current: null as Monaco | null };
+
 export function CodeEditor({
   value,
   onChange,
@@ -68,6 +72,10 @@ export function CodeEditor({
   onRun,
 }: CodeEditorProps) {
   const { theme, systemTheme } = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  
+  // Use local refs that sync to global refs
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
 
@@ -75,27 +83,41 @@ export function CodeEditor({
   const effectiveTheme = theme === "system" ? systemTheme : theme;
   const isDark = effectiveTheme === "dark";
 
+  // Handle hydration - only render editor on client
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Handle editor mount
   const handleMount: OnMount = useCallback(
     (editorInstance, monacoInstance) => {
-      editorRef.current = editorInstance;
-      monacoRef.current = monacoInstance;
+      try {
+        editorRef.current = editorInstance;
+        monacoRef.current = monacoInstance;
+        
+        // Sync to global refs for useCodeEditor hook
+        globalEditorRef.current = editorInstance;
+        globalMonacoRef.current = monacoInstance;
 
-      // Initialize Python language support
-      initializeMonaco(monacoInstance);
+        // Initialize Python language support
+        initializeMonaco(monacoInstance);
 
-      // Add Ctrl+Enter keyboard shortcut
-      if (onRun) {
-        editorInstance.addCommand(
-          monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.Enter,
-          () => {
-            onRun();
-          }
-        );
+        // Add Ctrl+Enter keyboard shortcut
+        if (onRun) {
+          editorInstance.addCommand(
+            monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.Enter,
+            () => {
+              onRun();
+            }
+          );
+        }
+
+        // Call user's onMount callback
+        onMount?.(editorInstance, monacoInstance);
+      } catch (error) {
+        console.error("Monaco editor mount error:", error);
+        setHasError(true);
       }
-
-      // Call user's onMount callback
-      onMount?.(editorInstance, monacoInstance);
     },
     [onMount, onRun]
   );
@@ -103,8 +125,12 @@ export function CodeEditor({
   // Handle before mount
   const handleBeforeMount: BeforeMount = useCallback(
     (monaco) => {
-      initializeMonaco(monaco);
-      beforeMount?.(monaco);
+      try {
+        initializeMonaco(monaco);
+        beforeMount?.(monaco);
+      } catch (error) {
+        console.error("Monaco beforeMount error:", error);
+      }
     },
     [beforeMount]
   );
@@ -140,6 +166,42 @@ export function CodeEditor({
     ...options,
   };
 
+  // Error state
+  if (hasError) {
+    return (
+      <div
+        className={cn(
+          "relative rounded-md border border-border overflow-hidden",
+          "bg-muted flex items-center justify-center",
+          className
+        )}
+        style={{ height, width }}
+      >
+        <div className="text-center p-4">
+          <p className="text-destructive font-medium">Failed to load code editor</p>
+          <p className="text-muted-foreground text-sm mt-1">
+            Please refresh the page to try again
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Server-side or initial render - show skeleton
+  if (!isMounted) {
+    return (
+      <div
+        className={cn(
+          "relative rounded-md border border-border overflow-hidden",
+          className
+        )}
+        style={{ height, width }}
+      >
+        <EditorSkeleton height={height} />
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -147,10 +209,11 @@ export function CodeEditor({
         "bg-background",
         className
       )}
+      style={{ height, width }}
     >
       <Editor
-        height={height}
-        width={width}
+        height="100%"
+        width="100%"
         defaultLanguage={language}
         language={language}
         value={value ?? DEFAULT_STARTER_CODE}
@@ -159,8 +222,8 @@ export function CodeEditor({
         onChange={onChange}
         onMount={handleMount}
         beforeMount={handleBeforeMount}
-        loading={<EditorSkeleton height={height} />}
-        className="[&_.monaco-editor]:outline-none absolute inset-0"
+        loading={<EditorSkeleton height="100%" />}
+        className="min-h-0"
       />
     </div>
   );
@@ -169,11 +232,7 @@ export function CodeEditor({
 // Export hook to access editor instance
 export function useCodeEditor() {
   return {
-    getEditor: () => editorRef.current,
-    getMonaco: () => monacoRef.current,
+    getEditor: () => globalEditorRef.current,
+    getMonaco: () => globalMonacoRef.current,
   };
 }
-
-// Keep the refs accessible
-let editorRef = { current: null as editor.IStandaloneCodeEditor | null };
-let monacoRef = { current: null as Monaco | null };

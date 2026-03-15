@@ -128,3 +128,17 @@ export function groupByDate<T extends { visitedAt: string }>(
 
   return groups;
 }
+
+/**
+ * Escape HTML special characters to prevent XSS attacks.
+ * Converts <, >, &, ", and ' to their HTML entity equivalents.
+ * Use this when rendering untrusted text content that should be displayed as plain text.
+ */
+export function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}

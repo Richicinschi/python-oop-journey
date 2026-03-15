@@ -71,16 +71,18 @@ class PistonExecutionService:
                 stderr = compile_output["stderr"] + "\n" + stderr
             
             return ExecutionResult(
+                success=exit_code == 0,
                 stdout=stdout,
                 stderr=stderr,
                 exit_code=exit_code,
-                execution_time_ms=run.get("wallTime", 0) * 1000,
+                duration_ms=int(run.get("wallTime", 0) * 1000),
                 timeout=exit_code == 124,  # Piston uses 124 for timeout
             )
             
         except httpx.HTTPStatusError as e:
             logger.error(f"Piston API error: {e.response.status_code} - {e.response.text}")
             return ExecutionResult(
+                success=False,
                 stdout="",
                 stderr=f"Execution service error: {e.response.status_code}",
                 exit_code=1,
@@ -89,6 +91,7 @@ class PistonExecutionService:
         except httpx.RequestError as e:
             logger.error(f"Piston connection error: {e}")
             return ExecutionResult(
+                success=False,
                 stdout="",
                 stderr="Code execution service is temporarily unavailable. Please try again later.",
                 exit_code=1,
@@ -97,6 +100,7 @@ class PistonExecutionService:
         except Exception as e:
             logger.exception("Unexpected error during code execution")
             return ExecutionResult(
+                success=False,
                 stdout="",
                 stderr=f"Internal error: {str(e)}",
                 exit_code=1,

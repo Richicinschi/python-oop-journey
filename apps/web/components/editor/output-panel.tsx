@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Copy, Trash2, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, escapeHtml } from '@/lib/utils';
 
 interface TestResult {
   name: string;
@@ -131,14 +131,20 @@ export function OutputPanel({
                 {executionResult ? (
                   <>
                     {executionResult.stdout && (
-                      <pre className="whitespace-pre-wrap text-foreground">
-                        {executionResult.stdout}
-                      </pre>
+                      <pre
+                        className="whitespace-pre-wrap text-foreground"
+                        dangerouslySetInnerHTML={{
+                          __html: escapeHtml(executionResult.stdout),
+                        }}
+                      />
                     )}
                     {executionResult.stderr && (
-                      <pre className="whitespace-pre-wrap text-red-500 mt-2">
-                        {executionResult.stderr}
-                      </pre>
+                      <pre
+                        className="whitespace-pre-wrap text-red-500 mt-2"
+                        dangerouslySetInnerHTML={{
+                          __html: escapeHtml(executionResult.stderr),
+                        }}
+                      />
                     )}
                     {executionResult.exitCode !== 0 && (
                       <div className="text-red-500 mt-2">
@@ -201,9 +207,12 @@ export function OutputPanel({
                           <div className="flex-1">
                             <span className="font-medium">{test.name}</span>
                             {test.error && !test.passed && (
-                              <pre className="text-xs text-red-500 mt-1 whitespace-pre-wrap">
-                                {test.error}
-                              </pre>
+                              <pre
+                                className="text-xs text-red-500 mt-1 whitespace-pre-wrap"
+                                dangerouslySetInnerHTML={{
+                                  __html: escapeHtml(test.error),
+                                }}
+                              />
                             )}
                           </div>
                         </div>
