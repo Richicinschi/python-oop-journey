@@ -25,7 +25,7 @@ import { formatDistanceToNow } from '@/lib/utils';
 const statusConfig: Record<SubmissionStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
   pending_review: { label: 'Pending Review', variant: 'secondary', icon: <Clock className="w-3 h-3" /> },
   approved: { label: 'Approved', variant: 'default', icon: <CheckCircle className="w-3 h-3" /> },
-  needs_work: { label: 'Needs Work', variant: 'error', icon: <XCircle className="w-3 h-3" /> },
+  needs_work: { label: 'Needs Work', variant: 'destructive', icon: <XCircle className="w-3 h-3" /> },
   exemplary: { label: 'Exemplary', variant: 'default', icon: <Star className="w-3 h-3" /> },
 };
 

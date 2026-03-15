@@ -43,7 +43,7 @@ const statusConfig: Record<SubmissionStatus, { label: string; variant: 'default'
   },
   needs_work: { 
     label: 'Needs Work', 
-    variant: 'error', 
+    variant: 'destructive', 
     icon: <XCircle className="w-4 h-4" />,
     color: 'text-red-600'
   },

@@ -40,6 +40,8 @@ const badgeVariants = cva(
           'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
         locked:
           'border-transparent bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500',
+        destructive:
+          'border-transparent bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
       },
     },
     defaultVariants: {
