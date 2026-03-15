@@ -31,24 +31,7 @@ async def execute_code(
     request: Request,
     exec_request: CodeExecutionRequest,
 ) -> CodeExecutionResponse:
-    """Execute Python code safely in a subprocess with resource limits.
-    
-    Rate limit: 30 requests per minute per IP address.
-    """
-    # Apply rate limiting check
-    from api.main import limiter
-    from slowapi.util import get_remote_address
-    
-    try:
-        await limiter.check(request, "30/minute", get_remote_address, [])
-    except Exception as e:
-        if "Rate limit exceeded" in str(e):
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Rate limit exceeded. Maximum 30 execution requests per minute allowed.",
-            )
-        raise
-    
+    """Execute Python code safely in a subprocess with resource limits."""
     # Get execution service
     service = get_simple_execution_service()
     
@@ -95,24 +78,7 @@ async def check_syntax(
     request: Request,
     exec_request: CodeExecutionRequest
 ) -> ValidationResponse:
-    """Validate Python syntax without executing.
-    
-    Rate limit: 60 requests per minute per IP address.
-    """
-    # Apply rate limiting check
-    from api.main import limiter
-    from slowapi.util import get_remote_address
-    
-    try:
-        await limiter.check(request, "60/minute", get_remote_address, [])
-    except Exception as e:
-        if "Rate limit exceeded" in str(e):
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Rate limit exceeded. Maximum 60 syntax check requests per minute allowed.",
-            )
-        raise
-    
+    """Validate Python syntax without executing."""
     service = get_simple_execution_service()
     is_valid, error = service.validate_syntax(exec_request.code)
     
@@ -174,22 +140,5 @@ async def execute_code_legacy(
     request: Request,
     exec_request: CodeExecutionRequest,
 ) -> CodeExecutionResponse:
-    """Legacy execution endpoint.
-    
-    Rate limit: 30 requests per minute per IP address.
-    """
-    # Apply rate limiting check
-    from api.main import limiter
-    from slowapi.util import get_remote_address
-    
-    try:
-        await limiter.check(request, "30/minute", get_remote_address, [])
-    except Exception as e:
-        if "Rate limit exceeded" in str(e):
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Rate limit exceeded. Maximum 30 execution requests per minute allowed.",
-            )
-        raise
-    
+    """Legacy execution endpoint."""
     return await execute_code(request, exec_request)

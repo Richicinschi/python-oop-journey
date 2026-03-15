@@ -91,9 +91,6 @@ def create_app() -> FastAPI:
                 "retry_after": exc.detail if hasattr(exc, 'detail') else None,
             },
         )
-    
-    # Add rate limiting middleware
-    app.add_middleware(limiter.middleware_class)
 
     # CORS middleware
     app.add_middleware(

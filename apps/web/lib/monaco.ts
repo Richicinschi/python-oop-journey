@@ -188,7 +188,7 @@ export const initializeMonaco = (monaco: Monaco) => {
         ],
 
         docstringSingle: [
-          (/[^']+/, "string.docstring"),
+          [/[^']+/, "string.docstring"],
           [/'''/, "string.docstring", "@pop"],
         ],
       },
