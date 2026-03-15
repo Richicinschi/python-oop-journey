@@ -179,7 +179,14 @@ class ProgressService:
         }
 
     async def calculate_streak(self, user_id: str) -> int:
-        """Calculate current streak of consecutive days with activity."""
+        """Calculate current streak of consecutive days with activity.
+        
+        PERFORMANCE NOTE: This fetches all distinct dates and calculates the streak
+        in Python. For users with very high activity over many years, consider:
+        - Using a SQL window function approach with LAG() to find gaps
+        - Caching the streak result and updating incrementally
+        - Materializing streak counts in a user_stats table
+        """
         # Get activity dates for the last 365 days
         cutoff = datetime.utcnow() - timedelta(days=365)
         stmt = (

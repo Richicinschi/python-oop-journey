@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, type PropsWithChildren, type ComponentPropsWithoutRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import type { Components } from 'react-markdown';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Check, Copy } from 'lucide-react';
@@ -12,8 +13,13 @@ interface TheoryContentProps {
   className?: string;
 }
 
+interface CodeBlockProps {
+  language: string;
+  children: string;
+}
+
 // Code block component with copy functionality
-function CodeBlock({ language, children }: { language: string; children: string }) {
+function CodeBlock({ language, children }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -48,9 +54,25 @@ function CodeBlock({ language, children }: { language: string; children: string 
   );
 }
 
+// Type for code component props
+interface CodeComponentProps extends ComponentPropsWithoutRef<'code'> {
+  inline?: boolean;
+  className?: string;
+}
+
+// Type for heading component props
+interface HeadingComponentProps extends PropsWithChildren {
+  id?: string;
+}
+
+// Type for link component props
+interface LinkComponentProps extends ComponentPropsWithoutRef<'a'> {
+  href?: string;
+}
+
 // Custom components for ReactMarkdown
-const components = {
-  code({ inline, className, children, ...props }: any) {
+const components: Components = {
+  code({ inline, className, children, ...props }: CodeComponentProps) {
     const match = /language-(\w+)/.exec(className || '');
     const language = match ? match[1] : 'text';
     const codeString = String(children).replace(/\n$/, '');
@@ -68,7 +90,7 @@ const components = {
 
     return <CodeBlock language={language}>{codeString}</CodeBlock>;
   },
-  h1({ children }: any) {
+  h1({ children }: HeadingComponentProps) {
     const id = children?.toString().toLowerCase().replace(/[^\w]+/g, '-');
     return (
       <h1 
@@ -79,7 +101,7 @@ const components = {
       </h1>
     );
   },
-  h2({ children }: any) {
+  h2({ children }: HeadingComponentProps) {
     const id = children?.toString().toLowerCase().replace(/[^\w]+/g, '-');
     return (
       <h2 
@@ -90,7 +112,7 @@ const components = {
       </h2>
     );
   },
-  h3({ children }: any) {
+  h3({ children }: HeadingComponentProps) {
     const id = children?.toString().toLowerCase().replace(/[^\w]+/g, '-');
     return (
       <h3 
@@ -101,29 +123,29 @@ const components = {
       </h3>
     );
   },
-  h4({ children }: any) {
+  h4({ children }: PropsWithChildren) {
     return <h4 className="text-lg font-semibold mt-6 mb-2">{children}</h4>;
   },
-  p({ children }: any) {
+  p({ children }: PropsWithChildren) {
     return <p className="leading-7 mb-4">{children}</p>;
   },
-  ul({ children }: any) {
+  ul({ children }: PropsWithChildren) {
     return <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>;
   },
-  ol({ children }: any) {
+  ol({ children }: PropsWithChildren) {
     return <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>;
   },
-  li({ children }: any) {
+  li({ children }: PropsWithChildren) {
     return <li className="leading-7">{children}</li>;
   },
-  blockquote({ children }: any) {
+  blockquote({ children }: PropsWithChildren) {
     return (
       <blockquote className="border-l-4 border-primary pl-4 italic my-6 text-muted-foreground">
         {children}
       </blockquote>
     );
   },
-  table({ children }: any) {
+  table({ children }: PropsWithChildren) {
     return (
       <div className="overflow-x-auto my-6 rounded-lg border">
         <table className="w-full border-collapse">
@@ -132,17 +154,17 @@ const components = {
       </div>
     );
   },
-  thead({ children }: any) {
+  thead({ children }: PropsWithChildren) {
     return <thead className="bg-muted">{children}</thead>;
   },
-  th({ children }: any) {
+  th({ children }: PropsWithChildren) {
     return (
       <th className="border-b px-4 py-3 text-left font-semibold">
         {children}
       </th>
     );
   },
-  td({ children }: any) {
+  td({ children }: PropsWithChildren) {
     return (
       <td className="border-b px-4 py-3">
         {children}
@@ -152,22 +174,23 @@ const components = {
   hr() {
     return <hr className="my-8 border-border" />;
   },
-  a({ href, children }: any) {
+  a({ href, children, ...props }: LinkComponentProps) {
     return (
       <a 
         href={href}
         className="text-primary underline hover:text-primary/80 font-medium"
         target={href?.startsWith('http') ? '_blank' : undefined}
         rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+        {...props}
       >
         {children}
       </a>
     );
   },
-  strong({ children }: any) {
+  strong({ children }: PropsWithChildren) {
     return <strong className="font-semibold text-foreground">{children}</strong>;
   },
-  em({ children }: any) {
+  em({ children }: PropsWithChildren) {
     return <em className="italic">{children}</em>;
   },
 };

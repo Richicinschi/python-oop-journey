@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
+from api.dependencies.auth import get_current_user_id
 from api.schemas.progress import (
     Activity,
     ActivityCreate,
@@ -14,8 +15,9 @@ from api.services.activity import get_activity_service, ActivityService
 
 router = APIRouter()
 
-# Mock current user dependency - replace with actual auth
-current_user_id = "mock-user-id"
+# TODO: Replace with actual auth dependency that validates JWT tokens
+# For now, using a dependency that returns a mock user ID for development
+# See: api/dependencies/auth.py for implementation
 
 
 @router.get(
@@ -28,6 +30,7 @@ async def get_recent_activity(
     limit: int = 20,
     activity_type: str | None = None,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> ActivityList:
     """Get recent activity for the current user."""
     service = get_activity_service(db)
@@ -53,6 +56,7 @@ async def get_recent_activity(
 async def log_activity(
     activity_data: ActivityCreate,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> Activity:
     """Log a new activity."""
     service = get_activity_service(db)
@@ -76,6 +80,7 @@ async def log_activity(
 async def get_activity_summary(
     days: int = 7,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> ActivitySummary:
     """Get activity summary for the specified number of days."""
     service = get_activity_service(db)
@@ -85,12 +90,14 @@ async def get_activity_summary(
 
 @router.get(
     "/activity/stats",
+    response_model=dict,
     summary="Get activity stats",
     description="Get detailed activity statistics.",
 )
 async def get_activity_stats(
     days: int = 30,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> dict:
     """Get detailed activity statistics."""
     service = get_activity_service(db)

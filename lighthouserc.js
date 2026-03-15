@@ -2,7 +2,7 @@ module.exports = {
   ci: {
     collect: {
       // Use static build
-      staticDistDir: './apps/web/dist',
+      staticDistDir: './apps/web/out',
       // Or use startServerCommand for dynamic
       // startServerCommand: 'cd apps/web && npm run start',
       // startServerReadyPattern: 'Ready on',

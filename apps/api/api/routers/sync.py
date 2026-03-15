@@ -5,7 +5,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from pydantic import BaseModel, Field
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
@@ -244,6 +244,28 @@ async def handle_bookmark_sync(
     return True, None
 
 
+async def handle_operation(
+    operation: SyncOperation,
+    user: User,
+    db: AsyncSession,
+) -> tuple[bool, dict[str, Any] | None]:
+    """Route operation to appropriate handler."""
+    handlers = {
+        "progress": handle_progress_sync,
+        "draft": handle_draft_sync,
+        "bookmark": handle_bookmark_sync,
+    }
+    
+    handler = handlers.get(operation.type)
+    if not handler:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown operation type: {operation.type}",
+        )
+    
+    return await handler(operation, user, db)
+
+
 # ==================== Routes ====================
 
 @router.post(
@@ -286,28 +308,6 @@ async def batch_sync(
         applied=applied,
         conflicts=conflicts,
     )
-
-
-async def handle_operation(
-    operation: SyncOperation,
-    user: User,
-    db: AsyncSession,
-) -> tuple[bool, dict[str, Any] | None]:
-    """Route operation to appropriate handler."""
-    handlers = {
-        "progress": handle_progress_sync,
-        "draft": handle_draft_sync,
-        "bookmark": handle_bookmark_sync,
-    }
-    
-    handler = handlers.get(operation.type)
-    if not handler:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unknown operation type: {operation.type}",
-        )
-    
-    return await handler(operation, user, db)
 
 
 @router.post(
@@ -355,14 +355,14 @@ async def get_sync_status(
     """Get sync status for the current user."""
     # Get counts of each type
     progress_count = await db.scalar(
-        select(Progress).where(Progress.user_id == current_user.id).count()
-    )
+        select(func.count()).select_from(Progress).where(Progress.user_id == current_user.id)
+    ) or 0
     draft_count = await db.scalar(
-        select(Draft).where(Draft.user_id == current_user.id).count()
-    )
+        select(func.count()).select_from(Draft).where(Draft.user_id == current_user.id)
+    ) or 0
     bookmark_count = await db.scalar(
-        select(Bookmark).where(Bookmark.user_id == current_user.id).count()
-    )
+        select(func.count()).select_from(Bookmark).where(Bookmark.user_id == current_user.id)
+    ) or 0
 
     # Get latest updated timestamps
     latest_progress = await db.execute(

@@ -1,10 +1,22 @@
 """Application configuration using pydantic-settings."""
 
+import logging
+import secrets
 from functools import lru_cache
 from typing import List
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+logger = logging.getLogger(__name__)
+
+
+def _generate_secure_secret() -> str:
+    """Generate a cryptographically secure random secret.
+    
+    Used as default to prevent JWT forgery when SECRET_KEY is not explicitly set.
+    """
+    return secrets.token_urlsafe(64)
 
 
 class Settings(BaseSettings):
@@ -21,7 +33,26 @@ class Settings(BaseSettings):
     app_name: str = "Python OOP Journey API"
     debug: bool = False
     environment: str = "development"
-    secret_key: str = Field(default="dev-secret", description="Secret key for JWT and sessions")
+    secret_key: str = Field(
+        default_factory=_generate_secure_secret,
+        description="Secret key for JWT and sessions. MUST be explicitly set in production!"
+    )
+    
+    @field_validator('secret_key', mode='after')
+    @classmethod
+    def validate_secret_key(cls, v: str) -> str:
+        """Validate that a secure secret key is configured.
+        
+        In production, warns if the default random key is being used
+        (indicating SECRET_KEY environment variable is not set).
+        """
+        if len(v) < 32:
+            logger.warning(
+                "SECURITY WARNING: SECRET_KEY is shorter than 32 characters. "
+                "This is insecure for production use. "
+                "Please set a strong SECRET_KEY environment variable."
+            )
+        return v
 
     # Server
     host: str = "0.0.0.0"

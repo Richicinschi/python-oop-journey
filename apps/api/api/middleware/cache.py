@@ -207,7 +207,7 @@ def generate_request_key(request: Request, user_id: Optional[str] = None) -> str
     if user_id:
         key_data = f"{user_id}:{key_data}"
 
-    return hashlib.md5(key_data.encode()).hexdigest()
+    return hashlib.sha256(key_data.encode()).hexdigest()
 
 
 def cached(

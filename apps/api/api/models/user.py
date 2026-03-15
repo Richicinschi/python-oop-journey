@@ -54,6 +54,16 @@ class User(Base):
         default=True,
         nullable=False,
     )
+    avatar_url: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+    github_id: Mapped[str | None] = mapped_column(
+        String(50),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
 
     # Relationships
     progress: Mapped[list["Progress"]] = relationship(

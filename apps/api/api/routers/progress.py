@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
+from api.dependencies.auth import get_current_user_id
 from api.schemas.progress import (
     Progress,
     ProgressCreate,
@@ -21,8 +22,8 @@ from api.models.activity import ActivityType
 
 router = APIRouter()
 
-# Mock current user dependency - replace with actual auth
-current_user_id = "mock-user-id"
+# TODO: Replace with actual auth dependency that validates JWT tokens
+# For now, using a dependency that returns a mock user ID for development
 
 
 @router.get(
@@ -33,6 +34,7 @@ current_user_id = "mock-user-id"
 )
 async def get_all_progress(
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> ProgressList:
     """Get all progress entries for the current user."""
     service = get_progress_service(db)
@@ -52,6 +54,7 @@ async def get_all_progress(
 async def get_problem_progress(
     problem_slug: str,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> Progress:
     """Get progress for a specific problem."""
     service = get_progress_service(db)
@@ -76,6 +79,7 @@ async def update_progress(
     problem_slug: str,
     update: ProgressUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> Progress:
     """Update progress for a specific problem."""
     progress_service = get_progress_service(db)
@@ -125,6 +129,7 @@ async def update_progress(
 async def record_attempt(
     problem_slug: str,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> Progress:
     """Record an attempt on a problem."""
     progress_service = get_progress_service(db)
@@ -150,6 +155,7 @@ async def record_attempt(
 async def get_overall_stats(
     total_problems: int = 50,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> ProgressStats:
     """Get overall progress statistics."""
     service = get_progress_service(db)
@@ -166,6 +172,7 @@ async def get_overall_stats(
 async def get_week_progress(
     week_slug: str,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> WeekProgress:
     """Get progress for a specific week."""
     service = get_progress_service(db)

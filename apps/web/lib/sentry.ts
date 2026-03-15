@@ -6,6 +6,7 @@
  */
 
 import * as Sentry from '@sentry/nextjs';
+import type { Event, Scope } from '@sentry/nextjs';
 
 const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
 const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT || 'development';
@@ -33,7 +34,7 @@ export function initSentry(): void {
     replaysOnErrorSampleRate: 1.0,
     
     // Don't send errors in development
-    beforeSend(event: any) {
+    beforeSend(event: Event): Event | null {
       if (ENVIRONMENT === 'development') {
         return null;
       }
@@ -99,9 +100,9 @@ export function clearSentryUser(): void {
  * Capture an exception manually
  * Use this for caught errors that should still be reported
  */
-export function captureException(error: Error, context?: Record<string, any>): void {
+export function captureException(error: Error, context?: Record<string, unknown>): void {
   if (context) {
-    Sentry.withScope((scope: any) => {
+    Sentry.withScope((scope: Scope) => {
       scope.setContext('additional', context);
       Sentry.captureException(error);
     });
@@ -125,7 +126,7 @@ export function captureMessage(message: string, level: Sentry.SeverityLevel = 'i
 export function addBreadcrumb(
   message: string,
   category?: string,
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 ): void {
   Sentry.addBreadcrumb({
     message,

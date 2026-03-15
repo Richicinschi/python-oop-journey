@@ -6,7 +6,7 @@ import re
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from api.core.rate_limit import rate_limit_per_minute
-from api.schemas.verification import VerificationRequest, VerificationResponse
+from api.schemas.verification import VerificationRequest, VerificationResponse, SyntaxValidationResponse
 from api.services.curriculum import CurriculumService
 from api.services.verification import get_verification_service
 
@@ -93,6 +93,7 @@ async def verify_solution_for_problem(
 
 @router.post(
     "/validate-syntax",
+    response_model=SyntaxValidationResponse,
     summary="Validate code syntax",
     description="Check if Python code has valid syntax without executing tests.",
     responses={
@@ -103,7 +104,7 @@ async def verify_solution_for_problem(
 async def validate_syntax_endpoint(
     request: Request,
     code: str
-) -> dict:
+) -> SyntaxValidationResponse:
     """Validate Python syntax without running tests.
 
     Returns whether the code is syntactically valid and any error messages.
@@ -114,22 +115,22 @@ async def validate_syntax_endpoint(
         runner = get_docker_runner()
         is_valid, error_msg, line, col = runner.validate_syntax(code)
 
-        return {
-            "valid": is_valid,
-            "error": error_msg,
-            "line": line,
-            "column": col,
-            "message": "Syntax is valid" if is_valid else error_msg,
-        }
+        return SyntaxValidationResponse(
+            valid=is_valid,
+            error=error_msg,
+            line=line,
+            column=col,
+            message="Syntax is valid" if is_valid else (error_msg or "Syntax error"),
+        )
     except Exception as e:
         logger.error(f"Syntax validation failed: {e}")
-        return {
-            "valid": False,
-            "error": str(e),
-            "line": None,
-            "column": None,
-            "message": f"Syntax validation failed: {str(e)}",
-        }
+        return SyntaxValidationResponse(
+            valid=False,
+            error=str(e),
+            line=None,
+            column=None,
+            message=f"Syntax validation failed: {str(e)}",
+        )
 
 
 @router.get(

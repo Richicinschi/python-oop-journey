@@ -4,13 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
+from api.dependencies.auth import get_current_user_id
 from api.schemas.progress import Draft, DraftCreate, DraftList, DraftUpdate
 from api.services.draft import get_draft_service, DraftService
 
 router = APIRouter()
 
-# Mock current user dependency - replace with actual auth
-current_user_id = "mock-user-id"
+# TODO: Replace with actual auth dependency that validates JWT tokens
+# For now, using a dependency that returns a mock user ID for development
 
 
 @router.get(
@@ -23,6 +24,7 @@ async def list_drafts(
     limit: int = 100,
     offset: int = 0,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> DraftList:
     """List all drafts for the current user."""
     service = get_draft_service(db)
@@ -42,6 +44,7 @@ async def list_drafts(
 async def get_draft(
     problem_slug: str,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> Draft:
     """Get draft for a specific problem."""
     service = get_draft_service(db)
@@ -66,6 +69,7 @@ async def save_draft(
     problem_slug: str,
     draft_data: DraftUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> Draft:
     """Save or update a draft."""
     service = get_draft_service(db)
@@ -90,6 +94,7 @@ async def save_draft(
 async def delete_draft(
     problem_slug: str,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> None:
     """Delete draft for a specific problem."""
     service = get_draft_service(db)

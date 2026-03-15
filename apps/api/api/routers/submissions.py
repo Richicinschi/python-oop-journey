@@ -236,9 +236,12 @@ async def get_review_queue(
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
 ) -> ReviewQueue:
     """Get the review queue for mentors."""
-    # TODO: Check admin role
-    # if not user.is_admin:
-    #     raise HTTPException(status_code=403, detail="Admin access required")
+    # SECURITY: Enforce admin authorization
+    if not getattr(user, 'is_admin', False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
     
     service = get_submission_service(db)
     pending, total = await service.get_pending_reviews(limit=limit)
@@ -292,9 +295,12 @@ async def review_submission(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Submission:
     """Review a submission and update its status."""
-    # TODO: Check admin role
-    # if not user.is_admin:
-    #     raise HTTPException(status_code=403, detail="Admin access required")
+    # SECURITY: Enforce admin authorization
+    if not getattr(user, 'is_admin', False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
     
     service = get_submission_service(db)
     submission = await service.review_submission(submission_id, user.id, data)
@@ -343,7 +349,12 @@ async def batch_review(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> BatchReviewResult:
     """Review multiple submissions in batch."""
-    # TODO: Check admin role
+    # SECURITY: Enforce admin authorization
+    if not getattr(user, 'is_admin', False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
     
     service = get_submission_service(db)
     processed = 0

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
+from api.dependencies.auth import get_current_user_id
 from api.schemas.progress import (
     Bookmark,
     BookmarkCheck,
@@ -17,8 +18,8 @@ from api.models.activity import ActivityType
 
 router = APIRouter()
 
-# Mock current user dependency - replace with actual auth
-current_user_id = "mock-user-id"
+# TODO: Replace with actual auth dependency that validates JWT tokens
+# For now, using a dependency that returns a mock user ID for development
 
 
 @router.get(
@@ -32,6 +33,7 @@ async def list_bookmarks(
     limit: int = 100,
     offset: int = 0,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> BookmarkList:
     """List all bookmarks for the current user."""
     service = get_bookmark_service(db)
@@ -39,7 +41,7 @@ async def list_bookmarks(
     from api.schemas.progress import ItemType
     type_enum = ItemType(item_type) if item_type else None
     
-    bookmarks = await service.list_drafts(
+    bookmarks = await service.list_bookmarks(
         current_user_id,
         item_type=type_enum,
         limit=limit,
@@ -58,6 +60,7 @@ async def list_bookmarks(
 async def create_bookmark(
     bookmark_data: BookmarkCreate,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> Bookmark:
     """Create a new bookmark."""
     bookmark_service = get_bookmark_service(db)
@@ -93,6 +96,7 @@ async def create_bookmark(
 async def delete_bookmark(
     bookmark_id: str,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> None:
     """Delete a bookmark."""
     bookmark_service = get_bookmark_service(db)
@@ -129,6 +133,7 @@ async def check_bookmark(
     item_type: str,
     item_slug: str,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> BookmarkCheck:
     """Check if an item is bookmarked."""
     service = get_bookmark_service(db)
@@ -157,6 +162,7 @@ async def update_bookmark(
     bookmark_id: str,
     update_data: BookmarkUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> Bookmark:
     """Update bookmark notes."""
     service = get_bookmark_service(db)
@@ -185,6 +191,7 @@ async def update_bookmark(
 async def toggle_bookmark(
     bookmark_data: BookmarkCreate,
     db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id),
 ) -> BookmarkCheck:
     """Toggle bookmark status for an item."""
     bookmark_service = get_bookmark_service(db)

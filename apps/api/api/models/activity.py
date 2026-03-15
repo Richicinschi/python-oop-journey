@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum as PyEnum
 from uuid import uuid4
 
-from sqlalchemy import String, DateTime, ForeignKey, JSON
+from sqlalchemy import String, DateTime, ForeignKey, JSON, Index
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -31,6 +31,12 @@ class Activity(Base):
     """Activity log entry for user actions."""
 
     __tablename__ = "activities"
+    __table_args__ = (
+        # Composite index for user activity queries with date sorting
+        Index("idx_activity_user_created", "user_id", "created_at", postgresql_using="btree"),
+        # Composite index for filtering by user and activity type
+        Index("idx_activity_user_type", "user_id", "activity_type", postgresql_using="btree"),
+    )
 
     id: Mapped[str] = mapped_column(
         String(36),
@@ -54,7 +60,6 @@ class Activity(Base):
         index=True,
     )
     meta_data: Mapped[dict | None] = mapped_column(
-        "metadata",
         JSONB,
         nullable=True,
     )

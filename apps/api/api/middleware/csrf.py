@@ -126,7 +126,34 @@ class CSRFTokenStore:
 
 
 # Global token store instance
-# In production with multiple workers, use Redis or database
+# 
+# SECURITY NOTE FOR PRODUCTION:
+# This in-memory store works for single-instance deployments but has limitations:
+# - Tokens are not shared across multiple workers/processes
+# - Tokens are lost on server restart
+# - Memory usage grows with active sessions
+#
+# For production with multiple workers or horizontal scaling, implement a distributed
+# store using Redis or a database. Example Redis implementation:
+#
+#   import redis
+#   class RedisCSRFStore:
+#       def __init__(self, redis_url: str):
+#           self.redis = redis.from_url(redis_url)
+#       
+#       def generate_token(self, session_id: str) -> str:
+#           token = secrets.token_urlsafe(32)
+#           self.redis.setex(f"csrf:{session_id}", CSRF_TOKEN_EXPIRY_HOURS * 3600, token)
+#           return token
+#       
+#       def validate_token(self, session_id: str, token: str) -> bool:
+#           stored = self.redis.get(f"csrf:{session_id}")
+#           if not stored:
+#               return False
+#           return secrets.compare_digest(stored.decode(), token)
+#
+# Then replace: csrf_store = RedisCSRFStore(settings.redis_url)
+#
 csrf_store = CSRFTokenStore()
 
 

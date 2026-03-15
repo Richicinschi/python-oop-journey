@@ -3,15 +3,10 @@
  */
 
 import { ProjectFile } from './project-files';
+import type { ProjectTask } from './curriculum';
 
-export interface ProjectTask {
-  id: string;
-  description: string;
-  hint?: string;
-  completed?: boolean;
-  autoCheck?: boolean;
-  testName?: string;
-}
+// Re-export ProjectTask from curriculum.ts to avoid duplication
+export type { ProjectTask } from './curriculum';
 
 export type ProjectStatus = 'not_started' | 'in_progress' | 'submitted' | 'completed';
 

@@ -152,9 +152,10 @@ async def verify_magic_link_get(
     except Exception as e:
         logger.error(f"Failed to verify magic link: {e}")
         logger.exception("Full traceback:")
+        # SECURITY: Do not expose internal error details to client
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to verify magic link: {str(e)}",
+            detail="Failed to verify magic link. Please try again later.",
         )
 
 
@@ -298,9 +299,10 @@ async def refresh_token(
     except Exception as e:
         logger.error(f"Failed to refresh token: {e}")
         logger.exception("Full traceback:")
+        # SECURITY: Do not expose internal error details to client
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to refresh token: {str(e)}",
+            detail="Failed to refresh token. Please try again later.",
         )
 
 
@@ -351,9 +353,10 @@ async def logout(
     except Exception as e:
         logger.error(f"Failed to logout: {e}")
         logger.exception("Full traceback:")
+        # SECURITY: Do not expose internal error details to client
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to logout: {str(e)}",
+            detail="Failed to logout. Please try again later.",
         )
 
 
@@ -378,9 +381,10 @@ async def get_me(
     except Exception as e:
         logger.error(f"Failed to get user: {e}")
         logger.exception("Full traceback:")
+        # SECURITY: Do not expose internal error details to client
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get user: {str(e)}",
+            detail="Failed to get user information. Please try again later.",
         )
 
 
@@ -414,7 +418,8 @@ async def update_me(
     except Exception as e:
         logger.error(f"Failed to update user: {e}")
         logger.exception("Full traceback:")
+        # SECURITY: Do not expose internal error details to client
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update user: {str(e)}",
+            detail="Failed to update user. Please try again later.",
         )

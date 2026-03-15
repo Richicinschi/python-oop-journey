@@ -4,7 +4,7 @@ import json
 import logging
 from typing import Dict, Set
 
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket, WebSocketDisconnect, status
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +16,39 @@ class ConnectionManager:
         # Map user_id to set of active connections
         self.active_connections: Dict[str, Set[WebSocket]] = {}
 
-    async def connect(self, websocket: WebSocket, user_id: str):
-        """Accept and store a new connection."""
+    async def connect(self, websocket: WebSocket, user_id: str, authenticated_user_id: str | None = None):
+        """Accept and store a new connection.
+        
+        Args:
+            websocket: The WebSocket connection
+            user_id: The requested user_id from the path
+            authenticated_user_id: The authenticated user's ID (None if not authenticated)
+            
+        Raises:
+            WebSocketDisconnect: If authentication fails
+        """
+        # SECURITY: Reject anonymous connections or mismatched user IDs
+        if authenticated_user_id is None:
+            await websocket.accept()
+            await websocket.send_json({
+                "type": "error",
+                "message": "Authentication required"
+            })
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            logger.warning(f"WebSocket connection rejected: anonymous user attempted to connect for user_id={user_id}")
+            return False
+            
+        # SECURITY: Ensure users can only connect to their own progress channel
+        if authenticated_user_id != user_id:
+            await websocket.accept()
+            await websocket.send_json({
+                "type": "error",
+                "message": "Not authorized to access this user's progress"
+            })
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            logger.warning(f"WebSocket connection rejected: user {authenticated_user_id} attempted to access user {user_id}'s progress")
+            return False
+        
         await websocket.accept()
         
         if user_id not in self.active_connections:
@@ -25,6 +56,7 @@ class ConnectionManager:
         
         self.active_connections[user_id].add(websocket)
         logger.debug(f"WebSocket connected for user {user_id}. Total connections: {len(self.active_connections[user_id])}")
+        return True
 
     def disconnect(self, websocket: WebSocket, user_id: str):
         """Remove a disconnected WebSocket."""

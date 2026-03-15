@@ -88,18 +88,26 @@ async def check_syntax(
     # Parse line/column from error message if syntax error
     line = None
     col = None
-    if error and "line" in error:
+    if error and "line" in error.lower():
         try:
             # Try to extract line and column from error message
             import re
-            line_match = re.search(r'line (\d+)', error)
-            col_match = re.search(r'column (\d+)', error)
+            line_match = re.search(r'line (\d+)', error, re.IGNORECASE)
+            col_match = re.search(r'column (\d+)', error, re.IGNORECASE)
             if line_match:
-                line = int(line_match.group(1))
+                try:
+                    line = int(line_match.group(1))
+                except (ValueError, IndexError) as e:
+                    logger.warning(f"Failed to parse line number from error: {e}")
             if col_match:
-                col = int(col_match.group(1))
-        except Exception:
-            pass
+                try:
+                    col = int(col_match.group(1))
+                except (ValueError, IndexError) as e:
+                    logger.warning(f"Failed to parse column number from error: {e}")
+        except re.error as e:
+            logger.error(f"Regex error parsing syntax error message: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error parsing syntax error message: {e}")
     
     return ValidationResponse(
         valid=is_valid,

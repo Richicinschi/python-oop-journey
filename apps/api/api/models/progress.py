@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum as PyEnum
 from uuid import uuid4
 
-from sqlalchemy import String, DateTime, ForeignKey, Integer, Enum, UniqueConstraint
+from sqlalchemy import String, DateTime, ForeignKey, Integer, Enum, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from api.database import Base
@@ -25,6 +25,8 @@ class Progress(Base):
     __tablename__ = "progress"
     __table_args__ = (
         UniqueConstraint("user_id", "problem_slug", name="uq_user_problem_progress"),
+        # Composite index for user progress queries filtered by status
+        Index("idx_progress_user_status", "user_id", "status", postgresql_using="btree"),
     )
 
     id: Mapped[str] = mapped_column(

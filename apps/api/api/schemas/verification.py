@@ -73,6 +73,15 @@ class HintSuggestion(BaseModel):
     confidence: str = Field(..., description="Confidence level: low, medium, high")
 
 
+class SyntaxValidationResponse(BaseModel):
+    """API response for syntax validation endpoint."""
+    valid: bool = Field(..., description="Whether the syntax is valid")
+    error: str | None = Field(None, description="Error message if invalid")
+    line: int | None = Field(None, description="Line number of error")
+    column: int | None = Field(None, description="Column number of error")
+    message: str = Field(..., description="Human-readable message")
+
+
 class VerificationResponse(BaseModel):
     """API response for verification."""
     success: bool = Field(..., description="Whether the verification completed successfully")

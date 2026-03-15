@@ -20,6 +20,7 @@ class UserUpdate(BaseModel):
     """User update schema."""
 
     display_name: str | None = Field(None, max_length=100)
+    avatar_url: str | None = Field(None, max_length=500)
 
 
 class User(UserBase):
@@ -27,6 +28,8 @@ class User(UserBase):
 
     id: str
     display_name: str | None = None
+    avatar_url: str | None = None
+    auth_provider: str | None = None  # e.g., "email", "google", "github"
     created_at: datetime
     updated_at: datetime
     last_login_at: datetime | None = None
