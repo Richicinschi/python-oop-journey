@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import { CommandPalette } from '@/components/search';
+import searchIndexRaw from '@/data/search-index.json';
+import type { SearchIndexItem } from '@/lib/search';
+
+const searchIndex = searchIndexRaw as SearchIndexItem[];
 
 export default function DashboardLayout({
   children,
@@ -10,6 +15,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Prevent body scroll when mobile sidebar is open
   useEffect(() => {
@@ -70,11 +76,18 @@ export default function DashboardLayout({
         <Header 
           onMenuClick={() => setMobileSidebarOpen(true)}
           isMobileMenuOpen={mobileSidebarOpen}
+          onSearchClick={() => setSearchOpen(true)}
         />
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {children}
         </main>
       </div>
+      
+      <CommandPalette
+        searchIndex={searchIndex}
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+      />
     </div>
   );
 }

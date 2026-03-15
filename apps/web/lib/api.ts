@@ -32,10 +32,11 @@ async function apiClient<T>(
       'Content-Type': 'application/json',
       ...headers,
     },
-    credentials: 'include',
+    credentials: 'include',  // Always include cookies for authentication
   };
 
-  // Add auth token if provided
+  // Add auth token if provided (for backward compatibility)
+  // Note: With HttpOnly cookies, the browser sends them automatically
   if (token) {
     config.headers = {
       ...config.headers,
@@ -730,12 +731,9 @@ export const api = {
   // Auth
   auth: {
     me: () => apiClient<User>('/api/v1/auth/me'),
-    login: (email: string, password: string) =>
-      apiClient<{ token: string; user: User }>('/api/v1/auth/login', {
-        method: 'POST',
-        body: { email, password },
-      }),
-    logout: () => apiClient<void>('/api/v1/auth/logout', { method: 'POST' }),
+    logout: () => apiClient<void>('/api/v1/auth/logout', { 
+      method: 'POST',
+    }),
     magicLink: (email: string) =>
       apiClient<{ message: string; debugToken?: string }>('/api/v1/auth/magic-link', {
         method: 'POST',
@@ -743,18 +741,24 @@ export const api = {
       }),
     verifyMagicLink: (token: string) =>
       apiClient<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number }>(
+        `/api/v1/auth/verify?token=${encodeURIComponent(token)}`,
+        {
+          method: 'GET',
+        }
+      ),
+    verifyMagicLinkPost: (token: string) =>
+      apiClient<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number }>(
         '/api/v1/auth/verify',
         {
           method: 'POST',
           body: { token },
         }
       ),
-    refresh: (token: string) =>
+    refresh: () =>
       apiClient<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number }>(
         '/api/v1/auth/refresh',
         {
           method: 'POST',
-          body: { token },
         }
       ),
   },

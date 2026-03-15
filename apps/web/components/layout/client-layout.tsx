@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { Header } from "./header";
 import { CommandPalette } from "@/components/search";
 import searchIndexRaw from "@/data/search-index.json";
@@ -14,11 +13,10 @@ interface ClientLayoutProps {
 
 export function ClientLayout({ children }: ClientLayoutProps) {
   const [searchOpen, setSearchOpen] = React.useState(false);
-  const router = useRouter();
 
-  // Navigate to search page when search button is clicked
+  // Open command palette when search button is clicked
   const handleSearchClick = () => {
-    router.push("/search");
+    setSearchOpen(true);
   };
 
   return (

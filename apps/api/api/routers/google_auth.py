@@ -4,7 +4,7 @@ import os
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Response
 from fastapi.responses import RedirectResponse, JSONResponse
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
 from api.models.user import User
-from api.services.auth import generate_jwt
+from api.services.auth import AuthService
 
 router = APIRouter(prefix="/api/v1/auth/google", tags=["auth"])
 
@@ -22,6 +22,18 @@ logger = logging.getLogger(__name__)
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+# Cookie settings for security (must match auth.py)
+COOKIE_SETTINGS = {
+    "httponly": True,
+    "secure": True,  # HTTPS only
+    "samesite": "strict",  # CSRF protection
+    "path": "/",
+}
+ACCESS_TOKEN_COOKIE = "access_token"
+REFRESH_TOKEN_COOKIE = "refresh_token"
+ACCESS_TOKEN_MAX_AGE = 15 * 60  # 15 minutes in seconds
+REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60  # 7 days in seconds
 
 
 @router.get("/login")
@@ -60,7 +72,7 @@ async def google_callback(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Handle Google OAuth callback, create/find user, and issue JWT.
+    Handle Google OAuth callback, create/find user, and set secure cookies.
     """
     if error:
         logger.error(f"Google OAuth error: {error}")
@@ -143,13 +155,29 @@ async def google_callback(
             )
             logger.info(f"New user created: {email}")
         
-        # Generate JWT
-        jwt_token = generate_jwt(user.id)
+        # Generate tokens
+        auth_service = AuthService(db)
+        access_token = auth_service.generate_jwt(user)
+        refresh_token, _ = auth_service.create_refresh_token(user.id)
         
-        # Redirect to frontend with token
-        return RedirectResponse(
-            f"{FRONTEND_URL}/auth/callback?token={jwt_token}"
+        # Create response with redirect
+        response = RedirectResponse(f"{FRONTEND_URL}/auth/callback?success=true")
+        
+        # Set secure HttpOnly cookies
+        response.set_cookie(
+            ACCESS_TOKEN_COOKIE,
+            access_token,
+            max_age=ACCESS_TOKEN_MAX_AGE,
+            **COOKIE_SETTINGS,
         )
+        response.set_cookie(
+            REFRESH_TOKEN_COOKIE,
+            refresh_token,
+            max_age=REFRESH_TOKEN_MAX_AGE,
+            **COOKIE_SETTINGS,
+        )
+        
+        return response
         
     except Exception as e:
         logger.exception("Google OAuth callback error")

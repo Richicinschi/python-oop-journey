@@ -112,6 +112,16 @@ export type { ConnectionStatus, OnlineStatusState } from './use-online-status';
 export { useSync } from './use-sync';
 export type { UseSyncReturn } from './use-sync';
 
+// Settings hooks
+export {
+  useSettings,
+  defaultSettings,
+} from './use-settings';
+
+export type {
+  UserSettings,
+} from './use-settings';
+
 // Submissions hooks (from lib/hooks)
 export {
   useSubmissions,

@@ -11,6 +11,8 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSettings } from '@/hooks/use-settings';
+import { toast } from 'sonner';
 import { 
   ChevronLeft, 
   Settings, 
@@ -27,11 +29,64 @@ import {
   Clock,
   Mail,
   MessageSquare,
-  Trophy
+  Trophy,
+  Save,
+  RotateCcw,
+  Loader2
 } from 'lucide-react';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
+  const {
+    settings,
+    isLoading,
+    isSaving,
+    hasChanges,
+    updateSetting,
+    saveSettings,
+    resetSettings,
+    resetToDefaults,
+  } = useSettings();
+
+  // Handle save with toast notifications
+  const handleSave = async () => {
+    try {
+      await saveSettings();
+      toast.success('Settings saved', {
+        description: 'Your preferences have been saved successfully.',
+      });
+    } catch (error) {
+      toast.error('Failed to save settings', {
+        description: error instanceof Error ? error.message : 'Please try again.',
+      });
+    }
+  };
+
+  // Handle reset to defaults
+  const handleResetToDefaults = () => {
+    resetToDefaults();
+    toast.info('Settings reset', {
+      description: 'All settings have been reset to defaults. Click Save to apply.',
+    });
+  };
+
+  // Handle reset to last saved
+  const handleReset = () => {
+    resetSettings();
+    toast.info('Changes discarded', {
+      description: 'Your settings have been reverted to the last saved state.',
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -93,7 +148,10 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Theme */}
-              <ThemeSelector />
+              <ThemeSelector 
+                value={settings.theme} 
+                onChange={(value) => updateSetting('theme', value)} 
+              />
 
               <Separator />
 
@@ -103,7 +161,10 @@ export default function SettingsPage() {
                   <Globe className="h-4 w-4" />
                   Language
                 </Label>
-                <Select defaultValue="en">
+                <Select 
+                  value={settings.language}
+                  onValueChange={(value) => updateSetting('language', value)}
+                >
                   <SelectTrigger id="language" className="w-full sm:w-[280px]">
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
@@ -136,7 +197,11 @@ export default function SettingsPage() {
                         Minimize animations throughout the interface
                       </p>
                     </div>
-                    <Switch id="reduced-motion" />
+                    <Switch 
+                      id="reduced-motion" 
+                      checked={settings.reducedMotion}
+                      onCheckedChange={(checked) => updateSetting('reducedMotion', checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -145,7 +210,11 @@ export default function SettingsPage() {
                         Increase contrast for better visibility
                       </p>
                     </div>
-                    <Switch id="high-contrast" />
+                    <Switch 
+                      id="high-contrast" 
+                      checked={settings.highContrast}
+                      onCheckedChange={(checked) => updateSetting('highContrast', checked)}
+                    />
                   </div>
                 </div>
               </div>
@@ -191,7 +260,10 @@ export default function SettingsPage() {
                         Get a summary of your learning progress
                       </p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch 
+                      checked={settings.emailWeeklyReport}
+                      onCheckedChange={(checked) => updateSetting('emailWeeklyReport', checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -200,7 +272,10 @@ export default function SettingsPage() {
                         Be notified when new problems or features are added
                       </p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch 
+                      checked={settings.emailNewContent}
+                      onCheckedChange={(checked) => updateSetting('emailNewContent', checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -209,7 +284,10 @@ export default function SettingsPage() {
                         Reminders to keep your learning streak alive
                       </p>
                     </div>
-                    <Switch />
+                    <Switch 
+                      checked={settings.emailStreakReminders}
+                      onCheckedChange={(checked) => updateSetting('emailStreakReminders', checked)}
+                    />
                   </div>
                 </div>
               </div>
@@ -230,7 +308,10 @@ export default function SettingsPage() {
                         Enable desktop notifications for important updates
                       </p>
                     </div>
-                    <Switch />
+                    <Switch 
+                      checked={settings.pushNotifications}
+                      onCheckedChange={(checked) => updateSetting('pushNotifications', checked)}
+                    />
                   </div>
                 </div>
               </div>
@@ -251,7 +332,10 @@ export default function SettingsPage() {
                         Show notifications when you earn achievements
                       </p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch 
+                      checked={settings.achievementNotifications}
+                      onCheckedChange={(checked) => updateSetting('achievementNotifications', checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -260,7 +344,10 @@ export default function SettingsPage() {
                         Celebrate when you complete weeks or projects
                       </p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch 
+                      checked={settings.milestoneNotifications}
+                      onCheckedChange={(checked) => updateSetting('milestoneNotifications', checked)}
+                    />
                   </div>
                 </div>
               </div>
@@ -281,7 +368,10 @@ export default function SettingsPage() {
                         Pause non-essential notifications during set hours
                       </p>
                     </div>
-                    <Switch />
+                    <Switch 
+                      checked={settings.quietHours}
+                      onCheckedChange={(checked) => updateSetting('quietHours', checked)}
+                    />
                   </div>
                   <p className="text-sm text-muted-foreground mt-4">
                     Quiet hours configuration coming soon
@@ -308,7 +398,10 @@ export default function SettingsPage() {
               {/* Font Size */}
               <div className="space-y-3">
                 <Label htmlFor="font-size" className="text-base">Font Size</Label>
-                <Select defaultValue="14">
+                <Select 
+                  value={settings.fontSize}
+                  onValueChange={(value) => updateSetting('fontSize', value)}
+                >
                   <SelectTrigger id="font-size" className="w-full sm:w-[200px]">
                     <SelectValue placeholder="Select font size" />
                   </SelectTrigger>
@@ -335,7 +428,11 @@ export default function SettingsPage() {
                         Wrap long lines to fit the editor width
                       </p>
                     </div>
-                    <Switch id="word-wrap" defaultChecked />
+                    <Switch 
+                      id="word-wrap" 
+                      checked={settings.wordWrap}
+                      onCheckedChange={(checked) => updateSetting('wordWrap', checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -344,7 +441,11 @@ export default function SettingsPage() {
                         Show minimap overview of your code
                       </p>
                     </div>
-                    <Switch id="minimap" defaultChecked />
+                    <Switch 
+                      id="minimap" 
+                      checked={settings.minimap}
+                      onCheckedChange={(checked) => updateSetting('minimap', checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -353,7 +454,11 @@ export default function SettingsPage() {
                         Display line numbers in the editor
                       </p>
                     </div>
-                    <Switch id="line-numbers" defaultChecked />
+                    <Switch 
+                      id="line-numbers" 
+                      checked={settings.lineNumbers}
+                      onCheckedChange={(checked) => updateSetting('lineNumbers', checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -362,7 +467,11 @@ export default function SettingsPage() {
                         Automatically save your code while typing
                       </p>
                     </div>
-                    <Switch id="auto-save" />
+                    <Switch 
+                      id="auto-save" 
+                      checked={settings.autoSave}
+                      onCheckedChange={(checked) => updateSetting('autoSave', checked)}
+                    />
                   </div>
                 </div>
               </div>
@@ -425,7 +534,11 @@ export default function SettingsPage() {
                         Help us improve by sharing anonymous usage data
                       </p>
                     </div>
-                    <Switch id="analytics" defaultChecked />
+                    <Switch 
+                      id="analytics" 
+                      checked={settings.analyticsEnabled}
+                      onCheckedChange={(checked) => updateSetting('analyticsEnabled', checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -434,7 +547,11 @@ export default function SettingsPage() {
                         Allow others to see your progress on leaderboards
                       </p>
                     </div>
-                    <Switch id="public-profile" />
+                    <Switch 
+                      id="public-profile" 
+                      checked={settings.publicProfile}
+                      onCheckedChange={(checked) => updateSetting('publicProfile', checked)}
+                    />
                   </div>
                 </div>
               </div>
@@ -476,17 +593,51 @@ export default function SettingsPage() {
       </Tabs>
 
       {/* Save Changes Bar */}
-      <div className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4">
+      <div className={cn(
+        "fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 transition-transform duration-300",
+        hasChanges ? "translate-y-0" : "translate-y-full"
+      )}>
         <div className="container max-w-5xl mx-auto flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Some changes may require a page refresh to take effect
-          </p>
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+            <p className="text-sm text-muted-foreground">
+              You have unsaved changes
+            </p>
+          </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleReset}
+              disabled={isSaving}
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Discard
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleResetToDefaults}
+              disabled={isSaving}
+            >
               Reset to Defaults
             </Button>
-            <Button size="sm">
-              Save Changes
+            <Button 
+              size="sm" 
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Changes
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -499,18 +650,21 @@ export default function SettingsPage() {
 }
 
 // Theme selector component
-function ThemeSelector() {
-  const { theme, setTheme } = useTheme();
+interface ThemeSelectorProps {
+  value: 'light' | 'dark' | 'system';
+  onChange: (value: 'light' | 'dark' | 'system') => void;
+}
 
+function ThemeSelector({ value, onChange }: ThemeSelectorProps) {
   return (
     <div className="space-y-3">
       <Label className="text-base">Theme</Label>
       <div className="grid grid-cols-3 gap-4">
         <button
-          onClick={() => setTheme('light')}
+          onClick={() => onChange('light')}
           className={cn(
             "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors",
-            theme === 'light'
+            value === 'light'
               ? "border-primary bg-primary/5"
               : "border hover:border-primary/50"
           )}
@@ -519,10 +673,10 @@ function ThemeSelector() {
           <span className="text-sm font-medium">Light</span>
         </button>
         <button
-          onClick={() => setTheme('dark')}
+          onClick={() => onChange('dark')}
           className={cn(
             "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors",
-            theme === 'dark'
+            value === 'dark'
               ? "border-primary bg-primary/5"
               : "border hover:border-primary/50"
           )}
@@ -531,10 +685,10 @@ function ThemeSelector() {
           <span className="text-sm font-medium">Dark</span>
         </button>
         <button
-          onClick={() => setTheme('system')}
+          onClick={() => onChange('system')}
           className={cn(
             "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors",
-            theme === 'system'
+            value === 'system'
               ? "border-primary bg-primary/5"
               : "border hover:border-primary/50"
           )}

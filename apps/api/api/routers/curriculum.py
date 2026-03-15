@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, status
 
-from api.schemas.curriculum import Curriculum, Week
+from api.schemas.curriculum import Curriculum, ProblemDetailResponse, Week
 from api.services.curriculum import CurriculumService
 
 router = APIRouter()
@@ -54,13 +54,14 @@ async def list_problems():
 
 @router.get(
     "/curriculum/problems/{slug}",
+    response_model=ProblemDetailResponse,
     summary="Get problem details",
     description="Returns a specific problem with its context.",
     responses={
         404: {"description": "Problem not found"},
     },
 )
-async def get_problem(slug: str):
+async def get_problem(slug: str) -> ProblemDetailResponse:
     """Get a problem by slug."""
     problem_data = curriculum_service.get_problem(slug)
     if not problem_data:

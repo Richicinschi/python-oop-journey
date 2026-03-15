@@ -164,7 +164,7 @@ class AuthService:
         )
 
     def verify_jwt(self, token: str) -> dict | None:
-        """Verify and decode a JWT token.
+        """Verify and decode a JWT access token.
         
         Args:
             token: JWT token string
@@ -181,6 +181,28 @@ class AuthService:
             return payload
         except JWTError as e:
             logger.debug(f"JWT verification failed: {e}")
+            return None
+
+    def verify_token(self, token: str, token_type: str = "access") -> dict | None:
+        """Verify and decode a JWT token with specific type.
+        
+        Args:
+            token: JWT token string
+            token_type: Expected token type ("access" or "refresh")
+            
+        Returns:
+            Decoded payload if valid and type matches, None otherwise
+        """
+        try:
+            payload = jwt.decode(
+                token, settings.secret_key, algorithms=[settings.jwt_algorithm]
+            )
+            if payload.get("type") != token_type:
+                logger.debug(f"Token type mismatch: expected {token_type}, got {payload.get('type')}")
+                return None
+            return payload
+        except JWTError as e:
+            logger.debug(f"Token verification failed: {e}")
             return None
 
     async def revoke_all_user_tokens(self, user_id: str) -> int:

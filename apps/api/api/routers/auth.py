@@ -21,6 +21,19 @@ router = APIRouter()
 security = HTTPBearer(auto_error=False)
 settings = get_settings()
 
+# Cookie settings for security
+COOKIE_SETTINGS = {
+    "httponly": True,
+    "secure": True,  # HTTPS only
+    "samesite": "strict",  # CSRF protection
+    "path": "/",
+}
+
+ACCESS_TOKEN_COOKIE = "access_token"
+REFRESH_TOKEN_COOKIE = "refresh_token"
+ACCESS_TOKEN_MAX_AGE = 15 * 60  # 15 minutes in seconds
+REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60  # 7 days in seconds
+
 
 @router.post(
     "/magic-link",
@@ -68,19 +81,20 @@ async def send_magic_link(
     "/verify",
     response_model=TokenResponse,
     summary="Verify magic token",
-    description="Verify magic link token and return JWT access token.",
+    description="Verify magic link token and set JWT as HttpOnly cookie.",
     responses={
         401: {"description": "Invalid or expired token"},
     },
 )
 async def verify_magic_link_get(
     token: str,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ):
     """Verify magic link token from URL query parameter.
     
     This endpoint is called when the user clicks the magic link.
-    Returns JWT in JSON body (not redirect).
+    Sets JWT as HttpOnly cookie and returns user info.
     """
     auth_service = AuthService(db)
     
@@ -93,13 +107,29 @@ async def verify_magic_link_get(
             detail="Invalid or expired magic link",
         )
     
-    # Generate JWT
+    # Generate tokens
     access_token = auth_service.generate_jwt(user)
+    refresh_token, _ = auth_service.create_refresh_token(user.id)
+    
+    # Set secure HttpOnly cookies
+    response.set_cookie(
+        ACCESS_TOKEN_COOKIE,
+        access_token,
+        max_age=ACCESS_TOKEN_MAX_AGE,
+        **COOKIE_SETTINGS,
+    )
+    response.set_cookie(
+        REFRESH_TOKEN_COOKIE,
+        refresh_token,
+        max_age=REFRESH_TOKEN_MAX_AGE,
+        **COOKIE_SETTINGS,
+    )
     
     return TokenResponse(
         access_token=access_token,
+        refresh_token=refresh_token,
         token_type="bearer",
-        expires_in=settings.jwt_access_token_expire_days * 24 * 60 * 60,
+        expires_in=ACCESS_TOKEN_MAX_AGE,
     )
 
 
@@ -107,10 +137,11 @@ async def verify_magic_link_get(
     "/verify",
     response_model=TokenResponse,
     summary="Verify magic token (POST)",
-    description="Verify magic link token via POST request.",
+    description="Verify magic link token via POST request and set HttpOnly cookies.",
 )
 async def verify_magic_link_post(
     body: MagicLinkVerify,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ):
     """Verify magic link token via POST request."""
@@ -125,13 +156,29 @@ async def verify_magic_link_post(
             detail="Invalid or expired magic link",
         )
     
-    # Generate JWT
+    # Generate tokens
     access_token = auth_service.generate_jwt(user)
+    refresh_token, _ = auth_service.create_refresh_token(user.id)
+    
+    # Set secure HttpOnly cookies
+    response.set_cookie(
+        ACCESS_TOKEN_COOKIE,
+        access_token,
+        max_age=ACCESS_TOKEN_MAX_AGE,
+        **COOKIE_SETTINGS,
+    )
+    response.set_cookie(
+        REFRESH_TOKEN_COOKIE,
+        refresh_token,
+        max_age=REFRESH_TOKEN_MAX_AGE,
+        **COOKIE_SETTINGS,
+    )
     
     return TokenResponse(
         access_token=access_token,
+        refresh_token=refresh_token,
         token_type="bearer",
-        expires_in=settings.jwt_access_token_expire_days * 24 * 60 * 60,
+        expires_in=ACCESS_TOKEN_MAX_AGE,
     )
 
 
@@ -139,27 +186,68 @@ async def verify_magic_link_post(
     "/refresh",
     response_model=TokenResponse,
     summary="Refresh access token",
-    description="Get a new access token using current valid token.",
+    description="Get a new access token using refresh token cookie.",
 )
 async def refresh_token(
     request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
-    """Refresh access token before expiry.
+    """Refresh access token using refresh token cookie.
     
-    Requires a valid JWT in the Authorization header.
-    Returns a new JWT with fresh expiration.
+    Requires a valid refresh token in the refresh_token cookie.
+    Returns a new access token and rotates the refresh token.
     """
     auth_service = AuthService(db)
     
-    # Generate new JWT
-    access_token = auth_service.generate_jwt(current_user)
+    # Get refresh token from cookie
+    refresh_token = request.cookies.get(REFRESH_TOKEN_COOKIE)
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token required",
+        )
+    
+    # Verify refresh token
+    payload = auth_service.verify_token(refresh_token, token_type="refresh")
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token",
+        )
+    
+    # Get user
+    user_id = payload.get("sub")
+    user = await auth_service.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+    
+    # Generate new tokens (token rotation for security)
+    access_token = auth_service.generate_jwt(user)
+    new_refresh_token, _ = auth_service.create_refresh_token(user.id)
+    
+    # Set new secure HttpOnly cookies
+    response.set_cookie(
+        ACCESS_TOKEN_COOKIE,
+        access_token,
+        max_age=ACCESS_TOKEN_MAX_AGE,
+        **COOKIE_SETTINGS,
+    )
+    response.set_cookie(
+        REFRESH_TOKEN_COOKIE,
+        new_refresh_token,
+        max_age=REFRESH_TOKEN_MAX_AGE,
+        **COOKIE_SETTINGS,
+    )
     
     return TokenResponse(
         access_token=access_token,
+        refresh_token=new_refresh_token,
         token_type="bearer",
-        expires_in=settings.jwt_access_token_expire_days * 24 * 60 * 60,
+        expires_in=ACCESS_TOKEN_MAX_AGE,
     )
 
 
@@ -176,16 +264,28 @@ async def logout(
 ):
     """Logout user and invalidate JWT.
     
-    In a full implementation, this would add the JWT to a Redis denylist.
-    For now, we revoke all magic tokens for the user.
+    Clears all auth cookies and revokes tokens for the user.
     """
     auth_service = AuthService(db)
     
     # Revoke all magic tokens for this user
     await auth_service.revoke_all_user_tokens(current_user.id)
     
-    # Clear auth cookie if used
-    response.delete_cookie("access_token")
+    # Clear auth cookies with same settings used to set them
+    response.delete_cookie(
+        ACCESS_TOKEN_COOKIE,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        path="/",
+    )
+    response.delete_cookie(
+        REFRESH_TOKEN_COOKIE,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        path="/",
+    )
     
     return {"success": True, "message": "Logged out successfully"}
 
@@ -225,45 +325,4 @@ async def update_me(
     return current_user
 
 
-# Legacy endpoints for backward compatibility
 
-@router.post(
-    "/refresh",
-    response_model=TokenResponse,
-    summary="Refresh access token (legacy)",
-    description="Get a new access token using a refresh token.",
-    include_in_schema=False,
-)
-async def refresh_token_legacy(
-    request: MagicLinkVerify,  # Reuse schema as it just needs a token
-    db: AsyncSession = Depends(get_db),
-):
-    """Refresh access token using refresh token."""
-    auth_service = AuthService(db)
-
-    # Verify refresh token
-    payload = auth_service.verify_token(request.token, token_type="refresh")
-    if not payload:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired refresh token",
-        )
-
-    user_id = payload.get("sub")
-    user = await auth_service.get_user_by_id(user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-        )
-
-    # Create new tokens
-    access_token, _ = auth_service.create_access_token(user.id)
-    refresh_token, _ = auth_service.create_refresh_token(user.id)
-
-    return TokenResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        token_type="bearer",
-        expires_in=auth_service.get_settings().jwt_access_token_expire_minutes * 60,
-    )

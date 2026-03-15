@@ -31,29 +31,26 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refresh: () => Promise<boolean>;
   updateProfile: (data: { display_name: string }) => Promise<boolean>;
-  setToken: (token: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Storage key for JWT
-const TOKEN_KEY = "auth_token";
-const USER_KEY = "auth_user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state from storage
+  // Initialize auth state by checking if user is authenticated via cookies
   useEffect(() => {
-    const initAuth = () => {
+    const initAuth = async () => {
       try {
-        const storedUser = localStorage.getItem(USER_KEY);
-        const token = localStorage.getItem(TOKEN_KEY);
+        // Try to fetch current user - cookies are sent automatically
+        const response = await fetch(`${API_URL}/api/v1/auth/me`, {
+          credentials: "include",
+        });
 
-        if (storedUser && token) {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
         }
       } catch (error) {
         console.error("Failed to restore auth state:", error);
@@ -65,15 +62,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  // Store user in localStorage when it changes
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem(USER_KEY, JSON.stringify(user));
-    } else {
-      localStorage.removeItem(USER_KEY);
-    }
-  }, [user]);
-
   const login = useCallback(
     async (email: string): Promise<{ success: boolean; message: string }> => {
       try {
@@ -82,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({ email }),
         });
 
@@ -109,15 +98,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  // verifyToken is now handled by the backend setting cookies
+  // This method is kept for backward compatibility with magic link callbacks
   const verifyToken = useCallback(async (token: string): Promise<boolean> => {
     try {
       const response = await fetch(
         `${API_URL}/api/v1/auth/verify?token=${encodeURIComponent(token)}`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          credentials: "include",
         }
       );
 
@@ -125,23 +114,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      const data = await response.json();
+      // Cookies are set by backend, now fetch user
+      const userResponse = await fetch(`${API_URL}/api/v1/auth/me`, {
+        credentials: "include",
+      });
 
-      if (data.access_token) {
-        localStorage.setItem(TOKEN_KEY, data.access_token);
-
-        // Fetch user profile
-        const userResponse = await fetch(`${API_URL}/api/v1/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${data.access_token}`,
-          },
-        });
-
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          setUser(userData);
-          return true;
-        }
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        setUser(userData);
+        return true;
       }
 
       return false;
@@ -153,39 +134,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async (): Promise<void> => {
     try {
-      const token = localStorage.getItem(TOKEN_KEY);
-
-      if (token) {
-        await fetch(`${API_URL}/api/v1/auth/logout`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      }
+      await fetch(`${API_URL}/api/v1/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
       setUser(null);
     }
   }, []);
 
   const refresh = useCallback(async (): Promise<boolean> => {
     try {
-      const token = localStorage.getItem(TOKEN_KEY);
-
-      if (!token) {
-        return false;
-      }
-
       const response = await fetch(`${API_URL}/api/v1/auth/refresh`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -194,10 +158,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      const data = await response.json();
+      // Cookies are refreshed by backend, fetch user to update state
+      const userResponse = await fetch(`${API_URL}/api/v1/auth/me`, {
+        credentials: "include",
+      });
 
-      if (data.access_token) {
-        localStorage.setItem(TOKEN_KEY, data.access_token);
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        setUser(userData);
         return true;
       }
 
@@ -211,18 +179,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateProfile = useCallback(
     async (data: { display_name: string }): Promise<boolean> => {
       try {
-        const token = localStorage.getItem(TOKEN_KEY);
-
-        if (!token) {
-          return false;
-        }
-
         const response = await fetch(`${API_URL}/api/v1/auth/me`, {
           method: "PATCH",
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify(data),
         });
 
@@ -241,34 +203,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  // Set token from OAuth callback
-  const setToken = useCallback(async (token: string): Promise<boolean> => {
-    try {
-      localStorage.setItem(TOKEN_KEY, token);
-      
-      // Fetch user with the token
-      const response = await fetch(`${API_URL}/api/v1/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-        return true;
-      }
-      
-      // If fetching user fails, clear token
-      localStorage.removeItem(TOKEN_KEY);
-      return false;
-    } catch (error) {
-      console.error("Set token error:", error);
-      localStorage.removeItem(TOKEN_KEY);
-      return false;
-    }
-  }, []);
-
   const value: AuthContextType = {
     user,
     isLoading,
@@ -278,7 +212,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     refresh,
     updateProfile,
-    setToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -294,28 +227,18 @@ export function useAuth() {
   return context;
 }
 
-// Helper function to get auth token for API calls
-export function getAuthToken(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  return localStorage.getItem(TOKEN_KEY);
-}
-
 // Helper function to make authenticated API calls
+// Note: With HttpOnly cookies, we just need to include credentials
 export async function fetchWithAuth(
   url: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  const token = getAuthToken();
-
-  const headers = {
-    ...options.headers,
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-
   return fetch(url, {
     ...options,
-    headers,
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 }

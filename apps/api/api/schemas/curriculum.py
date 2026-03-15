@@ -12,6 +12,7 @@ class Problem(BaseModel):
     difficulty: str = Field(..., description="Problem difficulty level")
     starter_code: str = Field(default="", description="Starter code template")
     test_code: str = Field(default="", description="Test cases")
+    hints: list[str] = Field(default_factory=list, description="Problem hints")
 
     model_config = {"extra": "allow"}
 
@@ -44,5 +45,15 @@ class Curriculum(BaseModel):
 
     version: str = Field(default="1.0.0", description="Curriculum version")
     weeks: list[Week] = Field(default_factory=list)
+
+    model_config = {"extra": "allow"}
+
+
+class ProblemDetailResponse(BaseModel):
+    """Problem detail response with week and day context."""
+
+    week: Week
+    day: Day
+    problem: Problem
 
     model_config = {"extra": "allow"}
