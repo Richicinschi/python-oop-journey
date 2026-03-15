@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Script from "next/script";
 import { Suspense } from "react";
 import { PerformanceMonitor, PreconnectHints } from "@/components/performance-monitor";
+import { Providers } from "@/components/providers";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -58,9 +59,11 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ThemeProvider defaultTheme="system">
-          {children}
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider defaultTheme="system">
+            {children}
+          </ThemeProvider>
+        </Providers>
         
         {/* Performance monitoring */}
         <Suspense fallback={null}>
