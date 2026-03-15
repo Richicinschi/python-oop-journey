@@ -1,0 +1,34 @@
+# Piston Local Development Setup
+# Run: docker-compose up -d
+
+version: '3.8'
+
+services:
+  piston:
+    build: .
+    container_name: piston-api
+    ports:
+      - "2000:2000"
+    volumes:
+      - piston-runtimes:/piston/runtimes
+      - ./packages:/piston/packages:ro
+    environment:
+      - PISTON_COMPILE_TIMEOUT=60000
+      - PISTON_RUN_TIMEOUT=10000
+      - PISTON_OUTPUT_MAX_SIZE=10240
+      - PISTON_MAX_FILE_SIZE=65536
+      - PISTON_MAX_FILES=25
+    restart: unless-stopped
+    # Install Python runtime on startup
+    command: >
+      sh -c "
+        piston-api &
+        sleep 5
+        echo 'Installing Python runtime...'
+        ppman install python 3.12.0 || true
+        echo 'Python runtime installed'
+        wait
+      "
+
+volumes:
+  piston-runtimes:

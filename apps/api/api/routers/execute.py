@@ -1,6 +1,7 @@
-"""Code execution endpoints."""
+"""Code execution endpoints using Piston."""
 
 import logging
+import os
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
 
@@ -14,20 +15,23 @@ from api.schemas.execution import (
     ExecutionMetrics,
     ValidationResponse,
 )
-from api.services.execution import get_execution_service
-from api.services.monitoring import get_monitor
+
+# Use Piston on Render, Docker locally
+USE_PISTON = os.getenv("USE_PISTON", "true").lower() == "true"
+
+if USE_PISTON:
+    from api.services.piston_execution import get_piston_service
+    _execution_service = get_piston_service()
+else:
+    from api.services.execution import get_execution_service
+    _execution_service = get_execution_service()
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# Service instance (lazy initialization)
-_execution_service = None
 
 def get_execution_service_instance():
-    """Get execution service instance (lazy init for Render compatibility)."""
-    global _execution_service
-    if _execution_service is None:
-        _execution_service = get_execution_service()
+    """Get execution service instance."""
     return _execution_service
 
 
@@ -274,39 +278,67 @@ async def get_metrics(hours: int = 24) -> ExecutionMetrics:
 @router.get(
     "/execute/health",
     summary="Execution service health check",
-    description="Check the health of the Docker execution infrastructure.",
+    description="Check the health of the code execution service.",
 )
 async def execution_health():
     """Check execution service health."""
-    from api.services.docker_runner import get_docker_runner
+    import httpx
     
-    runner = get_docker_runner()
-    health = runner.health_check()
-    
-    if not health["docker_available"]:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "status": "unhealthy",
-                "error": "Docker not available",
-                "details": health,
-            },
-        )
-    
-    if not health["image_available"]:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "status": "unhealthy",
-                "error": f"Sandbox image not available",
-                "details": health,
-            },
-        )
-    
-    return {
-        "status": "healthy" if health["can_run_containers"] else "degraded",
-        "details": health,
-    }
+    if USE_PISTON:
+        # Check Piston health
+        from api.services.piston_execution import PISTON_API_URL
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(f"{PISTON_API_URL}/api/v2/runtimes", timeout=5.0)
+                if response.status_code == 200:
+                    runtimes = response.json()
+                    python_available = any(r.get("language") == "python" for r in runtimes)
+                    return {
+                        "status": "healthy" if python_available else "degraded",
+                        "mode": "piston",
+                        "python_runtime_available": python_available,
+                        "piston_url": PISTON_API_URL,
+                    }
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={
+                            "status": "unhealthy",
+                            "mode": "piston",
+                            "error": f"Piston returned {response.status_code}",
+                        },
+                    )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "status": "unhealthy",
+                    "mode": "piston",
+                    "error": str(e),
+                },
+            )
+    else:
+        # Check Docker health
+        from api.services.docker_runner import get_docker_runner
+        
+        runner = get_docker_runner()
+        health = runner.health_check()
+        
+        if not health["docker_available"]:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "status": "unhealthy",
+                    "error": "Docker not available",
+                    "details": health,
+                },
+            )
+        
+        return {
+            "status": "healthy" if health["can_run_containers"] else "degraded",
+            "mode": "docker",
+            "details": health,
+        }
 
 
 # Legacy endpoints for backward compatibility

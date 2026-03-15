@@ -33,6 +33,7 @@ const stats = [
 const weeks = [
   {
     number: 0,
+    slug: "week00_getting_started",
     title: "Getting Started",
     description: "Python basics, variables, types, and control flow",
     problems: 80,
@@ -41,6 +42,7 @@ const weeks = [
   },
   {
     number: 1,
+    slug: "week01_fundamentals",
     title: "Fundamentals",
     description: "Math, strings, arrays, and basic algorithms",
     problems: 63,
@@ -49,6 +51,7 @@ const weeks = [
   },
   {
     number: 2,
+    slug: "week02_fundamentals_advanced",
     title: "Advanced Fundamentals",
     description: "File I/O, exceptions, modules, and functional programming",
     problems: 54,
@@ -57,6 +60,7 @@ const weeks = [
   },
   {
     number: 3,
+    slug: "week03_oop_basics",
     title: "OOP Basics",
     description: "Classes, objects, methods, and encapsulation",
     problems: 52,
@@ -65,6 +69,7 @@ const weeks = [
   },
   {
     number: 4,
+    slug: "week04_oop_intermediate",
     title: "OOP Intermediate",
     description: "Inheritance, polymorphism, and special methods",
     problems: 38,
@@ -73,6 +78,7 @@ const weeks = [
   },
   {
     number: 5,
+    slug: "week05_oop_advanced",
     title: "OOP Advanced",
     description: "Abstract classes, descriptors, and metaclasses",
     problems: 51,
@@ -81,6 +87,7 @@ const weeks = [
   },
   {
     number: 6,
+    slug: "week06_patterns",
     title: "Design Patterns",
     description: "Singleton, Factory, Observer, and more patterns",
     problems: 30,
@@ -89,6 +96,7 @@ const weeks = [
   },
   {
     number: 7,
+    slug: "week07_real_world",
     title: "Real-World OOP",
     description: "Testing, documentation, and best practices",
     problems: 30,
@@ -97,6 +105,7 @@ const weeks = [
   },
   {
     number: 8,
+    slug: "week08_capstone",
     title: "Capstone Project",
     description: "Build a complete library management system",
     problems: 5,
@@ -127,7 +136,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="gap-2">
-                <Link href="/problems">
+                <Link href="/weeks">
                   <Zap className="h-4 w-4" />
                   Start Learning
                 </Link>
@@ -189,7 +198,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button asChild variant="ghost" className="w-full justify-start">
-                  <Link href="/problems">
+                  <Link href="/search">
                     <Code2 className="mr-2 h-4 w-4" />
                     All Problems
                   </Link>
@@ -242,6 +251,7 @@ function WeekCard({
 }: {
   week: {
     number: number;
+    slug: string;
     title: string;
     description: string;
     problems: number;
@@ -250,7 +260,7 @@ function WeekCard({
   };
 }) {
   return (
-    <Link href={`/weeks/${week.number}`}>
+    <Link href={`/weeks/${week.slug}`}>
       <Card className="h-full hover:shadow-md transition-shadow group">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">

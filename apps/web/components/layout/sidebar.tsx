@@ -20,7 +20,7 @@ import {
   Code, 
   Home,
   Settings,
-  Trophy,
+  Search,
   GraduationCap,
   FolderGit2,
   ChevronDown,
@@ -174,6 +174,7 @@ export function Sidebar({ className }: SidebarProps) {
             />
           )}
 
+          {/* TODO: Uncomment when /achievements page is created
           <SidebarItem
             href="/achievements"
             icon={Trophy}
@@ -181,6 +182,7 @@ export function Sidebar({ className }: SidebarProps) {
             collapsed={collapsed}
             active={pathname.startsWith('/achievements')}
           />
+          */}
         </nav>
 
         {!collapsed && (
@@ -192,7 +194,14 @@ export function Sidebar({ className }: SidebarProps) {
       </ScrollArea>
 
       {/* Footer */}
-      <div className="border-t p-2">
+      <div className="border-t p-2 space-y-2">
+        <SidebarItem
+          href="/search"
+          icon={Search}
+          label="Search"
+          collapsed={collapsed}
+          active={pathname === '/search'}
+        />
         <SidebarItem
           href="/settings"
           icon={Settings}

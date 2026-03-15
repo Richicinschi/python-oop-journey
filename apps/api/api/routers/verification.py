@@ -74,17 +74,22 @@ async def verify_solution_for_problem(
     summary="Validate code syntax",
     description="Check if Python code has valid syntax without executing tests.",
 )
-async def validate_syntax(code: str) -> dict:
+async def validate_syntax_endpoint(code: str) -> dict:
     """Validate Python syntax without running tests.
 
     Returns whether the code is syntactically valid and any error messages.
     """
-    valid, error = await verification_service.execution_service.validate_syntax(code)
+    # Use the Docker runner's syntax validation (AST-based, no Docker needed)
+    from api.services.docker_runner import get_docker_runner
+    runner = get_docker_runner()
+    is_valid, error_msg, line, col = runner.validate_syntax(code)
 
     return {
-        "valid": valid,
-        "error": error,
-        "message": "Syntax is valid" if valid else error,
+        "valid": is_valid,
+        "error": error_msg,
+        "line": line,
+        "column": col,
+        "message": "Syntax is valid" if is_valid else error_msg,
     }
 
 

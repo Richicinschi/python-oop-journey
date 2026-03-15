@@ -150,73 +150,65 @@ class VerificationService:
     async def _run_pytest(
         self, combined_code: str, problem_slug: str
     ) -> dict[str, Any]:
-        """Run pytest on the combined code and parse results."""
-        # Create temporary files
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Write learner code
-            solution_file = temp_path / "solution.py"
-            solution_file.write_text(combined_code, encoding="utf-8")
-
-            # Write pytest.ini
-            pytest_ini = temp_path / "pytest.ini"
-            pytest_ini.write_text(
-                """[pytest]
-testpaths = .
-python_files = solution.py
-""",
-                encoding="utf-8",
-            )
-
-            # Run pytest with JUnit XML output
-            junit_file = temp_path / "results.xml"
-
-            try:
-                result = subprocess.run(
-                    [
-                        "python",
-                        "-m",
-                        "pytest",
-                        str(solution_file),
-                        "-v",
-                        f"--junitxml={junit_file}",
-                        "--tb=short",
-                        "-p",
-                        "no:cacheprovider",
-                        "--capture=tee-sys",
-                    ],
-                    capture_output=True,
-                    text=True,
-                    timeout=self.timeout,
-                    cwd=str(temp_path),
-                )
-
-                # Parse JUnit XML if it exists
-                if junit_file.exists():
-                    return self._parse_junit_xml(junit_file, result)
-
-                # Fallback to parsing stdout
-                return self._parse_pytest_output(result)
-
-            except subprocess.TimeoutExpired:
-                return {
-                    "success": False,
-                    "summary": VerificationSummary(
-                        total=1, passed=0, failed=0, errors=1, skipped=0
-                    ),
-                    "tests": [
-                        TestResult(
-                            name="execution",
-                            status=TestStatus.TIMEOUT,
-                            message=f"Execution timed out after {self.timeout} seconds",
-                            error_category=ErrorCategory.TIMEOUT,
-                            hint="Your code took too long to run. Check for infinite loops or very slow operations.",
-                        )
-                    ],
-                    "stdout": "",
-                    "stderr": f"Timeout after {self.timeout} seconds",
-                }
+        """Run pytest on the combined code using Docker sandbox and parse results."""
+        from api.services.docker_runner import get_docker_runner
+        
+        runner = get_docker_runner()
+        
+        # Check if Docker is available
+        if not runner._client:
+            return {
+                "success": False,
+                "summary": VerificationSummary(
+                    total=0, passed=0, failed=0, errors=1, skipped=0
+                ),
+                "tests": [
+                    TestResult(
+                        name="execution",
+                        status=TestStatus.ERROR,
+                        message="Docker execution service is not available",
+                        error_category=ErrorCategory.UNKNOWN_ERROR,
+                        hint="The code execution service is temporarily unavailable. Please try again later.",
+                    )
+                ],
+                "stdout": "",
+                "stderr": "Docker execution service unavailable",
+            }
+        
+        # Run the code in Docker sandbox
+        result = runner.execute(combined_code, timeout=self.timeout)
+        
+        # Parse the output
+        if result.timeout:
+            return {
+                "success": False,
+                "summary": VerificationSummary(
+                    total=1, passed=0, failed=0, errors=1, skipped=0
+                ),
+                "tests": [
+                    TestResult(
+                        name="execution",
+                        status=TestStatus.TIMEOUT,
+                        message=f"Execution timed out after {self.timeout} seconds",
+                        error_category=ErrorCategory.TIMEOUT,
+                        hint="Your code took too long to run. Check for infinite loops or very slow operations.",
+                    )
+                ],
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+            }
+        
+        # Create a mock subprocess result for parsing
+        class MockResult:
+            def __init__(self, stdout, stderr, returncode):
+                self.stdout = stdout
+                self.stderr = stderr
+                self.returncode = returncode
+        
+        mock_result = MockResult(result.stdout, result.stderr, result.exit_code)
+        
+        # Parse pytest output
+        return self._parse_pytest_output(mock_result)
 
     def _parse_junit_xml(
         self, junit_file: Path, result: subprocess.CompletedProcess

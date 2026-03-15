@@ -1,0 +1,25 @@
+# Render Blueprint for Piston Code Execution Service
+# Deploy this as a separate service from the web app
+
+services:
+  - type: web
+    name: piston-code-execution
+    runtime: docker
+    repo: https://github.com/Richicinschi/python-oop-journey
+    branch: main
+    dockerfilePath: ./piston/Dockerfile
+    dockerContext: ./piston
+    envVars:
+      - key: PISTON_COMPILE_TIMEOUT
+        value: "60000"
+      - key: PISTON_RUN_TIMEOUT
+        value: "10000"
+      - key: PISTON_OUTPUT_MAX_SIZE
+        value: "10240"
+      - key: PISTON_MAX_FILE_SIZE
+        value: "65536"
+      - key: PISTON_MAX_FILES
+        value: "25"
+    healthCheckPath: /api/v2/runtimes
+    # Note: Install Python runtime after deployment
+    # docker exec -it <container> ppman install python 3.12.0
