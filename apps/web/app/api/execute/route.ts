@@ -22,6 +22,15 @@ interface ExecutionResponse {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 /**
+ * Get CSRF token from cookies
+ * The CSRF token is set by the backend in a non-HttpOnly cookie
+ */
+function getCsrfTokenFromCookies(request: NextRequest): string | null {
+  const csrfCookie = request.cookies.get('csrf_token');
+  return csrfCookie?.value || null;
+}
+
+/**
  * POST /api/execute
  * Execute Python code by forwarding to the backend API
  */
@@ -44,13 +53,23 @@ export async function POST(
       );
     }
 
+    // Get CSRF token from cookies
+    const csrfToken = getCsrfTokenFromCookies(request);
+    
+    // Prepare headers with CSRF token if available
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+
     if (mode === 'run') {
       // Call backend execution API
       const response = await fetch(`${API_BASE_URL}/api/v1/execute/run`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           code,
           language: 'python',

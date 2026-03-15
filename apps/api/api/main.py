@@ -6,12 +6,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
+from slowapi.middleware import SlowAPIMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, Response
 
+from api import limiter
 from api.config import get_settings
 from api.database import close_db, init_db
 from api.routers import (
@@ -19,6 +19,7 @@ from api.routers import (
     ai_router,
     auth_router,
     bookmarks_router,
+    csrf_router,
     curriculum_router,
     drafts_router,
     execute_router,
@@ -42,9 +43,8 @@ logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
-# Initialize rate limiter with IP-based key function
-# This is defined at module level so routers can import it
-limiter = Limiter(key_func=get_remote_address)
+# Rate limiter is imported from api package to avoid circular imports
+# It uses IP-based key function for tracking request rates
 
 
 @asynccontextmanager
@@ -77,8 +77,9 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     
-    # Store limiter in app state for access in routers
+    # Add slowapi middleware for rate limiting (required for decorators to work)
     app.state.limiter = limiter
+    app.add_middleware(SlowAPIMiddleware)
     
     # Add rate limit error handler
     @app.exception_handler(RateLimitExceeded)
@@ -103,10 +104,45 @@ def create_app() -> FastAPI:
     
     # Gzip compression middleware
     app.add_middleware(GZipMiddleware, minimum_size=1000)
+    
+    # CSRF protection middleware
+    # Must be after CORS, before auth middleware
+    from api.middleware.csrf import CSRFMiddleware
+    app.add_middleware(CSRFMiddleware)
+    
+    # Request size limit middleware (1MB max)
+    @app.middleware("http")
+    async def limit_request_size(request: Request, call_next):
+        """Middleware to limit request body size to 1MB."""
+        content_length = request.headers.get("content-length")
+        if content_length:
+            try:
+                size = int(content_length)
+                if size > 1024 * 1024:  # 1MB
+                    return JSONResponse(
+                        status_code=413,
+                        content={
+                            "error": "Request too large",
+                            "detail": "Request body exceeds maximum size of 1MB",
+                            "max_size_bytes": 1048576,
+                        },
+                    )
+            except ValueError:
+                return JSONResponse(
+                    status_code=400,
+                    content={
+                        "error": "Invalid Content-Length header",
+                        "detail": "Content-Length header must be a valid integer",
+                    },
+                )
+        return await call_next(request)
 
     # Include routers
     # Health checks (no prefix for load balancer compatibility)
     app.include_router(health_router, tags=["health"])
+    
+    # CSRF token endpoint (must be before CSRF middleware-protected routes)
+    app.include_router(csrf_router, prefix="/api/v1", tags=["csrf"])
     
     # API v1 routes
     app.include_router(curriculum_router, prefix="/api/v1", tags=["curriculum"])

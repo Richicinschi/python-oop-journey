@@ -4,6 +4,7 @@ from api.routers.activity import router as activity_router
 from api.routers.ai import router as ai_router
 from api.routers.auth import router as auth_router
 from api.routers.bookmarks import router as bookmarks_router
+from api.routers.csrf import router as csrf_router
 from api.routers.curriculum import router as curriculum_router
 from api.routers.drafts import router as drafts_router
 from api.routers.execute import router as execute_router
@@ -21,6 +22,7 @@ __all__ = [
     "ai_router",
     "auth_router",
     "bookmarks_router",
+    "csrf_router",
     "curriculum_router",
     "drafts_router",
     "execute_router",

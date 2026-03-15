@@ -5,6 +5,7 @@ interface ApiOptions {
   body?: unknown;
   headers?: Record<string, string>;
   token?: string;
+  csrfToken?: string;
 }
 
 class ApiError extends Error {
@@ -18,11 +19,29 @@ class ApiError extends Error {
   }
 }
 
+/**
+ * Get CSRF token from localStorage
+ */
+function getCsrfToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    return localStorage.getItem('csrf_token');
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * State-changing HTTP methods that require CSRF protection
+ */
+const STATE_CHANGING_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH'];
+
 async function apiClient<T>(
   endpoint: string,
   options: ApiOptions = {}
 ): Promise<T> {
-  const { method = 'GET', body, headers = {}, token } = options;
+  const { method = 'GET', body, headers = {}, token, csrfToken } = options;
 
   const url = `${API_BASE_URL}${endpoint}`;
 
@@ -44,12 +63,42 @@ async function apiClient<T>(
     };
   }
 
+  // Add CSRF token for state-changing requests
+  if (STATE_CHANGING_METHODS.includes(method)) {
+    const csrf = csrfToken || getCsrfToken();
+    if (csrf) {
+      config.headers = {
+        ...config.headers,
+        'X-CSRF-Token': csrf,
+      };
+    }
+  }
+
   if (body) {
     config.body = JSON.stringify(body);
   }
 
   try {
     const response = await fetch(url, config);
+    
+    // Handle 403 CSRF errors - token may have expired
+    if (response.status === 403) {
+      const data = await response.json().catch(() => null);
+      if (data?.error?.toLowerCase().includes('csrf')) {
+        // Clear expired token so next request fetches a new one
+        try {
+          localStorage.removeItem('csrf_token');
+          localStorage.removeItem('csrf_token_timestamp');
+        } catch {
+          // localStorage not available
+        }
+        throw new ApiError(
+          403,
+          'CSRF token expired. Please refresh the page and try again.',
+          data
+        );
+      }
+    }
     
     // Handle 204 No Content
     if (response.status === 204) {
@@ -61,7 +110,7 @@ async function apiClient<T>(
     if (!response.ok) {
       throw new ApiError(
         response.status,
-        data?.message || `HTTP error! status: ${response.status}`,
+        data?.message || data?.error || `HTTP error! status: ${response.status}`,
         data
       );
     }

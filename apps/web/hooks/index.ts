@@ -1,3 +1,10 @@
+// API hooks with CSRF protection
+export {
+  useApi,
+  useApiWithCsrf,
+  useMutation,
+} from './use-api';
+
 // AI Hints hooks
 export { useAIHints } from './use-ai-hints';
 
