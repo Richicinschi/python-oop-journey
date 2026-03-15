@@ -22,6 +22,9 @@ services:
       - key: SANDBOX_IMAGE
         value: oop-journey-sandbox:latest
     healthCheckPath: /health
+    # Increased start period to allow for migrations on first deploy
+    healthCheckTimeout: 30
+    healthCheckInterval: 30
 
   # Frontend web service
   - type: web
