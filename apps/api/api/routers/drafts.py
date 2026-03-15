@@ -1,6 +1,7 @@
 """Draft management endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
@@ -21,8 +22,8 @@ router = APIRouter()
     description="Get all saved code drafts for the current user.",
 )
 async def list_drafts(
-    limit: int = 100,
-    offset: int = 0,
+    limit: Annotated[int, Query(ge=1, le=1000)] = 100,
+    offset: Annotated[int, Query(ge=0)] = 0,
     db: AsyncSession = Depends(get_db),
     current_user_id: str = Depends(get_current_user_id),
 ) -> DraftList:

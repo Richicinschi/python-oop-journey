@@ -154,7 +154,7 @@ async def google_callback(
                 display_name=name,
                 avatar_url=picture,
                 auth_provider="google",
-                auth_provider_id=user_info.get("sub")
+                auth_provider_id=idinfo.get("sub")
             )
             logger.info(f"New user created: {email}")
         

@@ -207,7 +207,7 @@ export function useDashboardData() {
         recs.push({
           type: 'review',
           title: 'Review Difficult Problems',
-          description: `You have ${failedAttempts} problems that need attention. Review them to strengthen your understanding.`,
+          description: `You have ${activitySummary.failedAttempts} problems that need attention. Review them to strengthen your understanding.`,
           actionLabel: 'Review Problems',
           priority: 'medium',
         });

@@ -102,7 +102,7 @@ export default function RootLayout({
               window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js')
                   .then(function(registration) {
-                    if (process.env.NODE_ENV === 'development') {
+                    if ('${process.env.NODE_ENV}' === 'development') {
                       console.log('[SW] Registered:', registration.scope);
                     }
                     
@@ -117,7 +117,7 @@ export default function RootLayout({
                     });
                   })
                   .catch(function(error) {
-                    if (process.env.NODE_ENV === 'development') {
+                    if ('${process.env.NODE_ENV}' === 'development') {
                       console.log('[SW] Registration failed:', error);
                     }
                   });
