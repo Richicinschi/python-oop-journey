@@ -115,7 +115,28 @@ export function useSearch(options: UseSearchOptions): UseSearchReturn {
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
 
-  // Debounced search
+  // Memoize search index processing for better performance
+  const processedSearchIndex = useMemo(() => {
+    // Pre-process search index to normalize data once
+    return searchIndex.map(item => ({
+      ...item,
+      // Pre-compute normalized search fields
+      _searchFields: [
+        item.title,
+        item.description,
+        item.content,
+        ...item.topics,
+        ...item.keywords,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase(),
+      _titleLower: item.title.toLowerCase(),
+      _descLower: item.description.toLowerCase(),
+    }));
+  }, [searchIndex]);
+
+  // Debounced search with memoized results
   useEffect(() => {
     setIsSearching(true);
 
@@ -126,13 +147,13 @@ export function useSearch(options: UseSearchOptions): UseSearchReturn {
         return;
       }
 
-      const searchResults = fuzzySearch(searchIndex, query, filters);
+      const searchResults = fuzzySearch(processedSearchIndex, query, filters);
       setResults(searchResults.slice(0, maxResults));
       setIsSearching(false);
     }, options.debounceMs ?? 150);
 
     return () => clearTimeout(timeoutId);
-  }, [query, filters, searchIndex, minQueryLength, maxResults, options.debounceMs]);
+  }, [query, filters, processedSearchIndex, minQueryLength, maxResults, options.debounceMs]);
 
   const clearSearch = useCallback(() => {
     setQuery("");

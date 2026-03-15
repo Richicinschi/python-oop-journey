@@ -103,15 +103,10 @@ export async function deleteProject(projectId: string): Promise<void> {
   const db = await getProjectDB();
   await db.delete('projects', projectId);
   
-  // Also delete all associated files
-  const allFiles = await db.getAll('files');
-  const tx = db.transaction('files', 'readwrite');
-  for (const file of allFiles) {
-    // Files don't have projectId in current schema, 
-    // so we'd need to track which files belong to which project
-    // For now, we'll skip this cleanup
-  }
-  await tx.done;
+  // TODO: Also delete all associated files
+  // Files don't have projectId in current schema, 
+  // so we'd need to track which files belong to which project
+  // For now, we skip this cleanup
 }
 
 /**

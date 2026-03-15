@@ -219,9 +219,31 @@ def create_app() -> FastAPI:
     # WebSocket endpoint for real-time progress updates
     @app.websocket("/ws/progress")
     async def websocket_progress(websocket: WebSocket):
-        """WebSocket endpoint for real-time progress updates."""
-        # TODO: Replace with actual user authentication from token
-        user_id = websocket.query_params.get("user_id", "anonymous")
+        """WebSocket endpoint for real-time progress updates.
+        
+        Requires JWT token authentication via query parameter 'token'.
+        """
+        from api.dependencies.auth import verify_token_for_websocket
+        
+        # Get token from query parameter
+        token = websocket.query_params.get("token")
+        
+        if not token:
+            # Try to get from cookie as fallback
+            token = websocket.cookies.get("access_token")
+        
+        if not token:
+            await websocket.close(code=4001, reason="Authentication required")
+            return
+        
+        # Verify JWT token
+        payload = verify_token_for_websocket(token)
+        
+        if not payload:
+            await websocket.close(code=4001, reason="Invalid or expired token")
+            return
+        
+        user_id = payload.get("sub")
         await ProgressWebSocket.handle(websocket, user_id)
 
     return app

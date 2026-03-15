@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useMemo } from 'react';
 import { HeroSection } from './hero-section';
 import { ProgressCard } from './progress-card';
 import { QuickActions } from './quick-actions';
@@ -36,18 +37,57 @@ const mockWeek: WeekProgress = {
   isCompleted: false,
 };
 
-export function Dashboard() {
-  const overallProgress = Math.round((mockData.stats.solvedProblems / mockData.stats.totalProblems) * 100);
+// Memoized stat cards for better performance
+const MemoizedStatCard = React.memo(StatCard);
+const MemoizedProgressCard = React.memo(ProgressCard);
+const MemoizedHeroSection = React.memo(HeroSection);
+const MemoizedQuickActions = React.memo(QuickActions);
+
+MemoizedStatCard.displayName = 'MemoizedStatCard';
+MemoizedProgressCard.displayName = 'MemoizedProgressCard';
+MemoizedHeroSection.displayName = 'MemoizedHeroSection';
+MemoizedQuickActions.displayName = 'MemoizedQuickActions';
+
+export const Dashboard = React.memo(function Dashboard() {
+  // Memoize derived data calculations
+  const overallProgress = useMemo(() => 
+    Math.round((mockData.stats.solvedProblems / mockData.stats.totalProblems) * 100),
+    []
+  );
+
+  // Memoize stat card data to prevent unnecessary re-renders
+  const statCards = useMemo(() => [
+    { 
+      title: "Problems Solved", 
+      value: 42, 
+      icon: CheckCircle, 
+      trend: { value: 12, label: '+12%', positive: true } 
+    },
+    { 
+      title: "Current Streak", 
+      value: 7, 
+      icon: Flame, 
+      trend: { value: 2, label: '+2 days', positive: true } 
+    },
+  ], []);
 
   return (
     <div className="space-y-6">
-      <HeroSection data={mockData} overallProgress={overallProgress} />
+      <MemoizedHeroSection data={mockData} overallProgress={overallProgress} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <ProgressCard week={mockWeek} />
-        <StatCard title="Problems Solved" value={42} icon={CheckCircle} trend={{ value: 12, label: '+12%', positive: true }} />
-        <StatCard title="Current Streak" value={7} icon={Flame} trend={{ value: 2, label: '+2 days', positive: true }} />
+        <MemoizedProgressCard week={mockWeek} />
+        {statCards.map((stat, index) => (
+          <MemoizedStatCard 
+            key={stat.title}
+            title={stat.title} 
+            value={stat.value} 
+            icon={stat.icon} 
+            trend={stat.trend}
+            index={index}
+          />
+        ))}
       </div>
-      <QuickActions />
+      <MemoizedQuickActions />
     </div>
   );
-}
+});

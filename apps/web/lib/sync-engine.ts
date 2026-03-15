@@ -30,6 +30,15 @@ import { api, ApiError } from './api';
 
 export type { OperationType, OperationAction } from './offline-db';
 
+// Background Sync API types
+interface SyncManager {
+  register(tag: string): Promise<void>;
+}
+
+interface ServiceWorkerRegistrationWithSync extends ServiceWorkerRegistration {
+  sync?: SyncManager;
+}
+
 export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline' | 'conflict';
 
 export interface SyncState {
@@ -448,7 +457,7 @@ async function registerBackgroundSync(): Promise<void> {
 
   try {
     const registration = await navigator.serviceWorker.ready;
-    await (registration as any).sync.register('sync-pending-operations');
+    await (registration as ServiceWorkerRegistrationWithSync).sync?.register('sync-pending-operations');
   } catch (error) {
     console.error('Background sync registration failed:', error);
   }

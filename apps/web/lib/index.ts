@@ -62,15 +62,18 @@ export {
   // Import/Export
   exportAllData,
   importData,
-  // Types
-  type SyncOperation,
-  type OperationType,
-  type OperationAction,
-  type LocalDraft,
-  type LocalProgress,
-  type LocalBookmark,
-  type CachedCurriculum,
 } from './offline-db';
+
+// Re-export types from types/sync for convenience
+export type {
+  SyncOperation,
+  OperationType,
+  OperationAction,
+  LocalDraft,
+  LocalProgress,
+  LocalBookmark,
+  CachedCurriculum,
+} from '@/types/sync';
 
 // Multi-file Project Database (Agent 16)
 export {
@@ -112,12 +115,15 @@ export {
   syncDraft,
   syncBookmark,
   CLIENT_ID,
-  type SyncStatus,
-  type SyncState,
-  type ConflictResolution,
-  type BatchSyncResponse,
-  type SyncOptions,
-  type ConflictInfo,
+} from './sync-engine';
+
+export type {
+  SyncStatus,
+  SyncState,
+  ConflictResolution,
+  BatchSyncResponse,
+  SyncOptions,
+  ConflictInfo,
 } from './sync-engine';
 
 // Optimistic Updates

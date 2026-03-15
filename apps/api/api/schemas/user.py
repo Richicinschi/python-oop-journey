@@ -35,6 +35,7 @@ class User(UserBase):
     last_login_at: datetime | None = None
     last_seen: datetime
     is_active: bool
+    is_admin: bool
 
     model_config = {"from_attributes": True}
 

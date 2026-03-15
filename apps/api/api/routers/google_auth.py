@@ -2,6 +2,7 @@
 
 import os
 import logging
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Depends, Query, Response
@@ -11,7 +12,6 @@ from google.auth.transport import requests as google_requests
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
-from api.models.user import User
 from api.services.auth import AuthService
 
 router = APIRouter(prefix="/api/v1/auth/google", tags=["auth"])
@@ -137,26 +137,28 @@ async def google_callback(
         
         logger.info(f"Google auth successful for: {email}")
         
-        # Find or create user
-        user = await User.find_by_email(db, email)
+        # Find or create user using AuthService
+        auth_service = AuthService(db)
+        user = await auth_service.get_user_by_email(email)
         
         if user:
             # Update last login
-            await user.update_last_login(db)
+            user.last_seen = datetime.utcnow()
+            user.last_login_at = datetime.utcnow()
+            await db.commit()
             logger.info(f"Existing user logged in: {email}")
         else:
             # Create new user
-            user = await User.create(
-                db,
+            user = await auth_service.get_or_create_user(
                 email=email,
                 display_name=name,
                 avatar_url=picture,
-                auth_provider="google"
+                auth_provider="google",
+                auth_provider_id=user_info.get("sub")
             )
             logger.info(f"New user created: {email}")
         
         # Generate tokens
-        auth_service = AuthService(db)
         access_token = auth_service.generate_jwt(user)
         refresh_token, _ = auth_service.create_refresh_token(user.id)
         

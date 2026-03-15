@@ -62,6 +62,7 @@ export function useProjectStore() {
   }, [store.projects, isLoading]);
 
   // Track session time
+  const currentProjectSlug = store.currentProject?.slug;
   useEffect(() => {
     if (store.currentProject && store.projects[store.currentProject.slug]?.status === 'in_progress') {
       sessionStartTime.current = Date.now();
@@ -79,7 +80,7 @@ export function useProjectStore() {
         sessionStartTime.current = null;
       };
     }
-  }, [store.currentProject?.slug]);
+  }, [currentProjectSlug]);
 
   const startProject = useCallback((project: WeeklyProject) => {
     setStore(prev => {

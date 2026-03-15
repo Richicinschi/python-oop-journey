@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export interface MultiFileEditorProps {
   className?: string;
 }
 
-export function MultiFileEditor({
+export const MultiFileEditor = React.memo(function MultiFileEditor({
   projectId = "default",
   projectName = "My Project",
   initialFiles,
@@ -293,5 +293,7 @@ export function MultiFileEditor({
     </div>
   );
 }
+
+MultiFileEditor.displayName = 'MultiFileEditor';
 
 export default MultiFileEditor;

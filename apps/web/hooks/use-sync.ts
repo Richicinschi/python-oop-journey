@@ -13,8 +13,6 @@ import {
   syncPendingOperations,
   queueOperation,
   SyncState,
-  OperationType,
-  OperationAction,
   syncProgress,
   syncDraft,
   syncBookmark,
@@ -22,6 +20,7 @@ import {
   ConflictResolution,
   ConflictInfo,
 } from '@/lib/sync-engine';
+import type { OperationType, OperationAction } from '@/types/sync';
 
 export interface UseSyncReturn {
   state: SyncState;

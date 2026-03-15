@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Editor, { OnMount, BeforeMount, type Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useTheme } from "@/components/theme-provider";
@@ -50,7 +50,7 @@ export interface CodeEditorProps {
   onRun?: () => void;
 }
 
-export function CodeEditor({
+export const CodeEditor = React.memo(function CodeEditor({
   value,
   onChange,
   onMount,
@@ -282,6 +282,8 @@ export function CodeEditor({
       />
     </div>
   );
-}
+});
+
+CodeEditor.displayName = 'CodeEditor';
 
 

@@ -26,23 +26,46 @@ class AuthService:
         self.session = session
         self.email_service = get_email_service()
 
-    async def get_or_create_user(self, email: str) -> User:
-        """Get existing user or create new one."""
+    async def get_or_create_user(
+        self,
+        email: str,
+        display_name: str | None = None,
+        avatar_url: str | None = None,
+        auth_provider: str | None = None,
+        auth_provider_id: str | None = None,
+    ) -> User:
+        """Get existing user or create new one.
+        
+        Args:
+            email: User's email address
+            display_name: Optional display name for the user
+            avatar_url: Optional avatar URL
+            auth_provider: Optional auth provider (e.g., "google", "github")
+            auth_provider_id: Optional provider-specific user ID
+            
+        Returns:
+            Existing or newly created User
+        """
         stmt = select(User).where(User.email == email)
         result = await self.session.execute(stmt)
         user = result.scalar_one_or_none()
 
         if user:
             user.last_seen = datetime.utcnow()
+            user.last_login_at = datetime.utcnow()
             await self.session.commit()
             return user
 
         # Create new user
-        user = User(email=email)
+        user = User(
+            email=email,
+            display_name=display_name,
+            avatar_url=avatar_url,
+        )
         self.session.add(user)
         await self.session.commit()
         await self.session.refresh(user)
-        logger.info(f"Created new user: {email}")
+        logger.info(f"Created new user: {email} via {auth_provider or 'unknown'}")
         return user
 
     async def get_user_by_id(self, user_id: str) -> User | None:

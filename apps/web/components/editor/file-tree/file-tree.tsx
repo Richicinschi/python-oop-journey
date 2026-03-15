@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { FolderTree } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,7 +22,7 @@ export interface FileTreeProps {
   className?: string;
 }
 
-export function FileTree({
+export const FileTree = React.memo(function FileTree({
   root,
   activeFileId,
   onSelectFile,
@@ -185,5 +185,7 @@ export function FileTree({
     </div>
   );
 }
+
+FileTree.displayName = 'FileTree';
 
 export default FileTree;

@@ -35,6 +35,9 @@ const createDefaultWeeksProgress = (): WeekProgress[] =>
     isCompleted: false,
   }));
 
+// Memoized default weeks progress to prevent recreation
+const memoizedDefaultWeeksProgress = createDefaultWeeksProgress();
+
 function generateMockData(): DashboardData {
   // Simulate a user who has completed some problems
   const weeksProgress = createDefaultWeeksProgress();
@@ -102,15 +105,18 @@ function generateMockData(): DashboardData {
 }
 
 export function useDashboardData() {
-  const [data, setData] = useState<DashboardData>({
+  // Use memoized initial state to prevent recreation on every render
+  const initialData = useMemo<DashboardData>(() => ({
     userName: undefined,
     isLoggedIn: false,
     stats: defaultStats,
-    weeksProgress: createDefaultWeeksProgress(),
+    weeksProgress: [...memoizedDefaultWeeksProgress],
     recentActivity: [],
     recommendations: [],
     currentPosition: null,
-  });
+  }), []);
+
+  const [data, setData] = useState<DashboardData>(initialData);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load data from localStorage on mount
@@ -134,23 +140,39 @@ export function useDashboardData() {
     }
   }, [data, isLoading]);
 
-  // Calculate derived stats
+  // Calculate derived stats with memoized calculations
   const derivedStats = useMemo(() => {
-    const solvedProblems = data.weeksProgress.reduce(
-      (sum, w) => sum + w.completedProblems, 
-      0
+    // Use a single reduce for better performance
+    const stats = data.weeksProgress.reduce(
+      (acc, w) => ({
+        solvedProblems: acc.solvedProblems + w.completedProblems,
+        completedWeeks: acc.completedWeeks + (w.isCompleted ? 1 : 0),
+        inProgressWeeks: acc.inProgressWeeks + (w.isStarted && !w.isCompleted ? 1 : 0),
+      }),
+      { solvedProblems: 0, completedWeeks: 0, inProgressWeeks: 0 }
     );
-    const completedWeeks = data.weeksProgress.filter(w => w.isCompleted).length;
-    const inProgressWeeks = data.weeksProgress.filter(w => w.isStarted && !w.isCompleted).length;
-    const overallProgress = Math.round((solvedProblems / TOTAL_PROBLEMS) * 100);
+    
+    const overallProgress = Math.round((stats.solvedProblems / TOTAL_PROBLEMS) * 100);
     
     return {
-      solvedProblems,
-      completedWeeks,
-      inProgressWeeks,
+      ...stats,
       overallProgress,
     };
   }, [data.weeksProgress]);
+
+  // Memoize activity summaries to prevent recalculation
+  const activitySummary = useMemo(() => {
+    const failedAttempts = data.recentActivity.filter(a => a.status === 'failed').length;
+    const completedCount = data.recentActivity.filter(a => a.status === 'completed').length;
+    const attemptedCount = data.recentActivity.filter(a => a.status === 'attempted').length;
+    
+    return {
+      failedAttempts,
+      completedCount,
+      attemptedCount,
+      totalActivities: data.recentActivity.length,
+    };
+  }, [data.recentActivity]);
 
   // Generate recommendations based on progress
   const recommendations = useMemo((): Recommendation[] => {
@@ -181,8 +203,7 @@ export function useDashboardData() {
       }
       
       // Suggest review if there are failed attempts
-      const failedAttempts = data.recentActivity.filter(a => a.status === 'failed').length;
-      if (failedAttempts > 0) {
+      if (activitySummary.failedAttempts > 0) {
         recs.push({
           type: 'review',
           title: 'Review Difficult Problems',
@@ -203,7 +224,7 @@ export function useDashboardData() {
     }
     
     return recs;
-  }, [data.currentPosition, data.weeksProgress, data.recentActivity]);
+  }, [data.currentPosition, data.weeksProgress, activitySummary]);
 
   // Actions
   const updateProgress = useCallback((weekNumber: number, completedProblems: number) => {

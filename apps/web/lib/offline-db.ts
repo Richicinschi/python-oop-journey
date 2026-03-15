@@ -444,37 +444,33 @@ export async function importData(data: {
 }): Promise<void> {
   const db = await getDB();
 
-  const tx = db.transaction(
-    ['operations', 'drafts', 'progress', 'bookmarks', 'curriculum'] as ('operations' | 'drafts' | 'progress' | 'bookmarks' | 'curriculum')[],
-    'readwrite'
-  );
-  
+  // Use individual put operations without explicit transaction
+  // This avoids the IDBTransaction overload issues
   if (data.operations) {
     for (const op of data.operations) {
-      await tx.objectStore('operations').put(op);
+      await db.put('operations', op);
     }
   }
   if (data.drafts) {
     for (const draft of data.drafts) {
-      await tx.objectStore('drafts').put(draft);
+      await db.put('drafts', draft);
     }
   }
   if (data.progress) {
     for (const prog of data.progress) {
-      await tx.objectStore('progress').put(prog);
+      await db.put('progress', prog);
     }
   }
   if (data.bookmarks) {
     for (const bookmark of data.bookmarks) {
-      await tx.objectStore('bookmarks').put(bookmark);
+      await db.put('bookmarks', bookmark);
     }
   }
   if (data.curriculum) {
     for (const curr of data.curriculum) {
-      await tx.objectStore('curriculum').put(curr);
+      await db.put('curriculum', curr);
     }
   }
-  await tx.done;
 }
 
 export default {

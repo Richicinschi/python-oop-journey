@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -148,7 +148,7 @@ function SearchResultItem({
   );
 }
 
-export function CommandPalette({
+export const CommandPalette = React.memo(function CommandPalette({
   searchIndex,
   open,
   onOpenChange,
@@ -390,4 +390,6 @@ export function CommandPalette({
       </div>
     </CommandDialog>
   );
-}
+});
+
+CommandPalette.displayName = 'CommandPalette';

@@ -4,6 +4,10 @@ import { loader } from "@monaco-editor/react";
 import type { Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 
+// Re-export Monaco type for consumers
+export type { Monaco } from "@monaco-editor/react";
+export type { editor };
+
 // Track initialization state
 let isLoaderConfigured = false;
 let isMonacoInitialized = false;
