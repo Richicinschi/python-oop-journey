@@ -6,9 +6,9 @@ FROM ghcr.io/engineer-man/piston:latest
 # Switch to root to set up the container
 USER root
 
-# Find where piston runs from and create isolate directory there
-RUN mkdir -p /tmp/isolate /var/cache/isolate /piston/runtimes/packages /piston/packages /piston_api/isolate && \
-    chmod -R 777 /tmp /var/cache /piston /piston_api 2>/dev/null || true
+# Create isolate directories everywhere
+RUN mkdir -p /tmp/isolate /var/cache/isolate /piston/runtimes/packages /piston/packages && \
+    chmod -R 777 /tmp /var/cache /piston
 
 # The API will be available on port 2000
 EXPOSE 2000
@@ -26,4 +26,6 @@ ENV PISTON_MAX_FILES=25
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:2000/api/v2/runtimes || exit 1
 
-# Use base image defaults - don't override CMD/ENTRYPOINT
+# Use shell form to change to /tmp before starting
+SHELL ["/bin/sh", "-c"]
+ENTRYPOINT cd /tmp && piston-api
