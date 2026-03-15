@@ -19,8 +19,8 @@ export function useLocalStorage<T>(
       if (item) {
         setStoredValue(JSON.parse(item));
       }
-    } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
+    } catch (error: unknown) {
+      console.warn(`Error reading localStorage key "${key}":`, error as Error);
     }
     setIsInitialized(true);
   }, [key]);
@@ -39,8 +39,8 @@ export function useLocalStorage<T>(
           // Dispatch custom event for cross-tab synchronization
           window.dispatchEvent(new StorageEvent("storage", { key }));
         }
-      } catch (error) {
-        console.warn(`Error setting localStorage key "${key}":`, error);
+      } catch (error: unknown) {
+        console.warn(`Error setting localStorage key "${key}":`, error as Error);
       }
     },
     [key, storedValue]
@@ -54,8 +54,8 @@ export function useLocalStorage<T>(
         window.localStorage.removeItem(key);
         window.dispatchEvent(new StorageEvent("storage", { key }));
       }
-    } catch (error) {
-      console.warn(`Error removing localStorage key "${key}":`, error);
+    } catch (error: unknown) {
+      console.warn(`Error removing localStorage key "${key}":`, error as Error);
     }
   }, [key, initialValue]);
 
@@ -67,8 +67,8 @@ export function useLocalStorage<T>(
       if (event.key === key && event.newValue !== null) {
         try {
           setStoredValue(JSON.parse(event.newValue));
-        } catch (error) {
-          console.warn(`Error parsing localStorage change for key "${key}":`, error);
+        } catch (error: unknown) {
+          console.warn(`Error parsing localStorage change for key "${key}":`, error as Error);
         }
       }
     };

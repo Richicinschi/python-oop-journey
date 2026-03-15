@@ -15,11 +15,14 @@ from api.database import Base
 from api.models import (  # noqa: F401
     Activity,
     ActivityType,
+    AuthToken,
     Bookmark,
     Draft,
     ItemType,
     ProblemStatus,
     Progress,
+    Submission,
+    SubmissionComment,
     User,
 )
 

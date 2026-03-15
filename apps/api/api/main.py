@@ -1,11 +1,13 @@
 """FastAPI application entry point."""
 
 import logging
+import traceback
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi import FastAPI, HTTPException, WebSocket, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import JSONResponse
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
@@ -53,8 +55,12 @@ async def lifespan(app: FastAPI):
 
     # Initialize database (in production, use Alembic migrations instead)
     if settings.is_development:
-        await init_db()
-        logger.info("Database initialized")
+        try:
+            await init_db()
+            logger.info("Database initialized")
+        except Exception as e:
+            logger.error(f"Database initialization failed: {e}")
+            # Don't raise - allow app to start even if DB is temporarily unavailable
 
     yield
 
@@ -74,9 +80,27 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     
+    # Global exception handler for all unhandled exceptions
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception):
+        """Handle all unhandled exceptions to prevent 500 errors without details."""
+        error_id = logging.getLogger(__name__).name
+        logger.error(f"Unhandled exception: {exc}")
+        logger.error(traceback.format_exc())
+        
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": "Internal server error",
+                "message": "An unexpected error occurred. Please try again later.",
+                "detail": str(exc) if settings.is_development else None,
+            },
+        )
+    
     # Add rate limit error handler for HTTPException with 429 status
     @app.exception_handler(HTTPException)
     async def http_exception_handler(request: Request, exc: HTTPException):
+        """Handle HTTP exceptions, including rate limits."""
         if exc.status_code == 429:
             # Handle rate limit errors
             detail = exc.detail
@@ -92,8 +116,15 @@ def create_app() -> FastAPI:
                     "message": str(detail) if detail else "Too many requests. Please slow down and try again later.",
                 },
             )
-        # Re-raise other HTTP exceptions
-        raise exc
+        # Return proper JSON response for other HTTP exceptions
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "error": exc.detail or "HTTP Error",
+                "status_code": exc.status_code,
+            },
+            headers=exc.headers if hasattr(exc, 'headers') else None,
+        )
 
     # Security headers middleware (first for defense in depth)
     from api.core.security_headers import SecurityHeadersMiddleware
@@ -224,10 +255,13 @@ async def readiness_check():
         db_status = "connected"
     except Exception as e:
         db_status = f"error: {str(e)}"
-        return {
-            "status": "not_ready",
-            "database": db_status,
-        }, 503
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "not_ready",
+                "database": db_status,
+            },
+        )
     
     return {
         "status": "ready",

@@ -75,7 +75,7 @@ export function CodeEditor({
   // Component refs for editor instance access
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
-  const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Determine effective theme
   const effectiveTheme = theme === "system" ? systemTheme : theme;

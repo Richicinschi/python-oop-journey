@@ -2,6 +2,7 @@
 
 import { loader } from "@monaco-editor/react";
 import type { Monaco } from "@monaco-editor/react";
+import type { editor } from "monaco-editor";
 
 // Track initialization state
 let isLoaderConfigured = false;
@@ -28,8 +29,8 @@ export const configureMonacoLoader = () => {
     });
     
     isLoaderConfigured = true;
-  } catch (error) {
-    console.error("Failed to configure Monaco loader:", error);
+  } catch (error: unknown) {
+    console.error("Failed to configure Monaco loader:", error as Error);
   }
 };
 
@@ -298,8 +299,8 @@ export const initializeMonaco = (monaco: Monaco) => {
     if (process.env.NODE_ENV === 'development') {
 
     }
-  } catch (error) {
-    console.error("Failed to initialize Monaco:", error);
+  } catch (error: unknown) {
+    console.error("Failed to initialize Monaco:", error as Error);
     throw error;
   }
 };
@@ -308,7 +309,7 @@ export const initializeMonaco = (monaco: Monaco) => {
 export const getDefaultEditorOptions = (
   isDark: boolean,
   readOnly: boolean = false
-): any => ({
+): editor.IStandaloneEditorConstructionOptions => ({
   language: "python",
   theme: isDark ? "vs-code-dark" : "vs-code-light",
   automaticLayout: true,

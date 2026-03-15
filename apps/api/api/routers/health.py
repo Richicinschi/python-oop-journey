@@ -311,3 +311,43 @@ async def liveness_check():
         "alive": True,
         "timestamp": datetime.utcnow().isoformat(),
     }
+
+
+@router.get("/curriculum")
+async def curriculum_health_check():
+    """Curriculum data health check.
+    
+    Verifies the curriculum data file is accessible and valid.
+    """
+    try:
+        from api.services.curriculum import CurriculumService
+        
+        service = CurriculumService()
+        curriculum = service.get_curriculum()
+        
+        # Count total content
+        week_count = len(curriculum.weeks)
+        day_count = sum(len(week.days) for week in curriculum.weeks)
+        problem_count = sum(
+            len(day.problems) 
+            for week in curriculum.weeks 
+            for day in week.days
+        )
+        
+        return {
+            "status": "healthy",
+            "weeks": week_count,
+            "days": day_count,
+            "problems": problem_count,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    except Exception as e:
+        logger.error(f"Curriculum health check failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "status": "unhealthy",
+                "error": str(e),
+                "timestamp": datetime.utcnow().isoformat(),
+            },
+        )

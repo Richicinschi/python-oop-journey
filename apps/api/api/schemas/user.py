@@ -1,13 +1,13 @@
 """User and auth schemas."""
 
 from datetime import datetime
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class UserBase(BaseModel):
     """Base user schema."""
 
-    email: EmailStr
+    email: str = Field(..., pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 
 
 class UserCreate(UserBase):
@@ -89,7 +89,7 @@ class Draft(DraftBase):
 class MagicLinkRequest(BaseModel):
     """Magic link request schema."""
 
-    email: EmailStr
+    email: str = Field(..., pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 
 
 class MagicLinkVerify(BaseModel):

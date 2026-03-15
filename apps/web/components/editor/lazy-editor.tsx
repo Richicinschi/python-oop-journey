@@ -1,26 +1,29 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import dynamic, { type DynamicOptionsLoadingProps } from "next/dynamic";
 import { EditorSkeleton } from "./editor-skeleton";
+
+// Loading component for dynamic import
+const EditorLoadingComponent = ({ error, isLoading, pastDelay }: DynamicOptionsLoadingProps) => {
+  if (error) {
+    return (
+      <div className="p-4 text-red-500">
+        Failed to load editor. Please refresh the page.
+      </div>
+    );
+  }
+  if (pastDelay || isLoading) {
+    return <EditorSkeleton height="500px" />;
+  }
+  return null;
+};
 
 // Lazy load the code editor to reduce initial bundle size
 export const LazyCodeEditor = dynamic(
   () => import("./code-editor").then((mod) => ({ default: mod.CodeEditor })),
   {
     ssr: false,
-    loading: ({ error, isLoading, pastDelay }) => {
-      if (error) {
-        return (
-          <div className="p-4 text-red-500">
-            Failed to load editor. Please refresh the page.
-          </div>
-        );
-      }
-      if (pastDelay || isLoading) {
-        return <EditorSkeleton height="500px" />;
-      }
-      return null;
-    },
+    loading: EditorLoadingComponent,
   }
 );
 

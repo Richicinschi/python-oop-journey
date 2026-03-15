@@ -15,12 +15,14 @@ interface UseApiState<T> {
   error: ApiError | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ApiFunction<T> = (...args: any[]) => Promise<T>;
+
 interface UseApiReturn<T> extends UseApiState<T> {
-  execute: (...args: unknown[]) => Promise<T | null>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  execute: (...args: any[]) => Promise<T | null>;
   reset: () => void;
 }
-
-type ApiFunction<T> = (...args: unknown[]) => Promise<T>;
 
 /**
  * Hook for making API calls with automatic CSRF handling
@@ -46,8 +48,9 @@ export function useApi<T>(apiFunction: ApiFunction<T>): UseApiReturn<T> {
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const execute = useCallback(
-    async (...args: unknown[]): Promise<T | null> => {
+    async (...args: any[]): Promise<T | null> => {
       // Cancel previous request if exists
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();

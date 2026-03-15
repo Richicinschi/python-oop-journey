@@ -48,13 +48,19 @@ def upgrade() -> None:
             sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
             sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
             sa.Column('last_login_at', sa.DateTime(timezone=True), nullable=True),
+            sa.Column('last_seen', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
             sa.Column('is_active', sa.Boolean(), server_default='true', nullable=False),
+            sa.Column('avatar_url', sa.String(500), nullable=True),
+            sa.Column('github_id', sa.String(100), nullable=True),
             sa.PrimaryKeyConstraint('id'),
             sa.UniqueConstraint('email'),
+            sa.UniqueConstraint('github_id'),
         )
         
         # Create indexes for users
         op.create_index('ix_users_email', 'users', ['email'], unique=True)
+        op.create_index('ix_users_github_id', 'users', ['github_id'])
+        op.create_index('ix_users_is_active', 'users', ['is_active'])
     
     # Create auth_tokens table SECOND (after users exists, if not exists)
     if not table_exists('auth_tokens'):
@@ -84,5 +90,7 @@ def downgrade() -> None:
     
     # Drop users table last
     if table_exists('users'):
+        op.drop_index('ix_users_is_active', table_name='users')
+        op.drop_index('ix_users_github_id', table_name='users')
         op.drop_index('ix_users_email', table_name='users')
         op.drop_table('users')

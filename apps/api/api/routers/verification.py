@@ -1,12 +1,17 @@
 """Verification endpoints for test execution."""
 
+import logging
+import re
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from api.core.rate_limit import rate_limit_per_minute
 from api.schemas.verification import VerificationRequest, VerificationResponse
+from api.services.curriculum import CurriculumService
 from api.services.verification import get_verification_service
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Service instance
 verification_service = get_verification_service()
@@ -52,9 +57,15 @@ async def verify_solution(
         )
 
     # Run verification
-    result = await verification_service.verify_and_update_progress(request_data)
-
-    return result
+    try:
+        result = await verification_service.verify_and_update_progress(request_data)
+        return result
+    except Exception as e:
+        logger.error(f"Verification failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Verification failed: {str(e)}",
+        )
 
 
 @router.post(
@@ -97,52 +108,86 @@ async def validate_syntax_endpoint(
 
     Returns whether the code is syntactically valid and any error messages.
     """
-    # Use the Docker runner's syntax validation (AST-based, no Docker needed)
-    from api.services.docker_runner import get_docker_runner
-    runner = get_docker_runner()
-    is_valid, error_msg, line, col = runner.validate_syntax(code)
+    try:
+        # Use the Docker runner's syntax validation (AST-based, no Docker needed)
+        from api.services.docker_runner import get_docker_runner
+        runner = get_docker_runner()
+        is_valid, error_msg, line, col = runner.validate_syntax(code)
 
-    return {
-        "valid": is_valid,
-        "error": error_msg,
-        "line": line,
-        "column": col,
-        "message": "Syntax is valid" if is_valid else error_msg,
-    }
+        return {
+            "valid": is_valid,
+            "error": error_msg,
+            "line": line,
+            "column": col,
+            "message": "Syntax is valid" if is_valid else error_msg,
+        }
+    except Exception as e:
+        logger.error(f"Syntax validation failed: {e}")
+        return {
+            "valid": False,
+            "error": str(e),
+            "line": None,
+            "column": None,
+            "message": f"Syntax validation failed: {str(e)}",
+        }
 
 
 @router.get(
     "/test-info/{problem_slug}",
     summary="Get test information",
     description="Get information about tests for a problem without running them.",
+    responses={
+        404: {"description": "Problem not found"},
+        500: {"description": "Server error"},
+    },
 )
 async def get_test_info(problem_slug: str) -> dict:
     """Get test information for a problem.
 
     Returns metadata about the tests including count and names.
     """
-    from api.services.curriculum import CurriculumService
+    try:
+        curriculum_service = CurriculumService()
+        problem_data = curriculum_service.get_problem(problem_slug)
 
-    curriculum_service = CurriculumService()
-    problem_data = curriculum_service.get_problem(problem_slug)
+        if not problem_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Problem not found: {problem_slug}",
+            )
 
-    if not problem_data:
+        # Safely access problem data
+        problem = problem_data.get("problem")
+        if not problem:
+            logger.error(f"Problem data missing 'problem' key for slug: {problem_slug}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Problem data is corrupted",
+            )
+
+        # Get test_code safely
+        test_code = getattr(problem, 'test_code', None)
+        if test_code is None:
+            logger.warning(f"Problem {problem_slug} has no test_code attribute")
+            test_code = ""
+
+        # Extract test names from test code
+        test_names = re.findall(r"def\s+(test_\w+)", test_code)
+
+        return {
+            "problem_slug": problem_slug,
+            "problem_title": getattr(problem, 'title', 'Unknown'),
+            "test_count": len(test_names),
+            "test_names": test_names,
+            "has_tests": len(test_names) > 0,
+        }
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        logger.error(f"Error getting test info for {problem_slug}: {e}")
+        logger.exception("Full traceback:")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Problem not found: {problem_slug}",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get test info: {str(e)}",
         )
-
-    test_code = problem_data["problem"].test_code
-
-    # Extract test names from test code
-    import re
-
-    test_names = re.findall(r"def\s+(test_\w+)", test_code)
-
-    return {
-        "problem_slug": problem_slug,
-        "problem_title": problem_data["problem"].title,
-        "test_count": len(test_names),
-        "test_names": test_names,
-        "has_tests": len(test_names) > 0,
-    }

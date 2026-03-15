@@ -254,7 +254,8 @@ export function searchProblems(query: string): Problem[] {
 /**
  * Transform a raw ProjectFile to component-ready format
  */
-function transformProjectFile(rawFile: any, index: number): TransformedProjectFile {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformProjectFile(rawFile: Record<string, unknown>, index: number): TransformedProjectFile {
   return {
     id: rawFile.id || `file-${index}`,
     name: rawFile.name || rawFile.path?.split('/').pop() || 'unnamed',
@@ -326,9 +327,10 @@ function generateDefaultTasks(requirements: string[]): ProjectTask[] {
 /**
  * Transform a raw Project to component-ready format
  */
-function transformProject(rawProject: any, weekOrder: number): TransformedProject {
-  const requirements = rawProject.requirements || ['Complete the project'];
-  const files = rawProject.files?.map((f: any, i: number) => transformProjectFile(f, i)) 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformProject(rawProject: Record<string, unknown>, weekOrder: number): TransformedProject {
+  const requirements = (rawProject.requirements as string[]) || ['Complete the project'];
+  const files = (rawProject.files as Record<string, unknown>[])?.map((f, i) => transformProjectFile(f, i)) 
     || generateDefaultProjectFiles(rawProject.title);
   
   return {
@@ -351,10 +353,10 @@ function transformProject(rawProject: any, weekOrder: number): TransformedProjec
  * Transform a raw Problem to component-ready format
  */
 function transformProblem(
-  rawProblem: any, 
+  rawProblem: Record<string, unknown>, 
   weekOrder: number, 
   dayOrder: number,
-  allProblemsInDay: any[],
+  allProblemsInDay: Record<string, unknown>[],
   problemIndex: number
 ): TransformedProblem {
   const nextProblem = allProblemsInDay[problemIndex + 1];
@@ -383,8 +385,8 @@ function transformProblem(
 /**
  * Transform a raw Day to component-ready format
  */
-function transformDay(rawDay: any, weekOrder: number): TransformedDay {
-  const transformedProblems = rawDay.problems?.map((p: any, index: number) => 
+function transformDay(rawDay: Record<string, unknown>, weekOrder: number): TransformedDay {
+  const transformedProblems = (rawDay.problems as Record<string, unknown>[])?.map((p, index) => 
     transformProblem(p, weekOrder, rawDay.order, rawDay.problems, index)
   ) || [];
   
@@ -403,14 +405,14 @@ function transformDay(rawDay: any, weekOrder: number): TransformedDay {
 /**
  * Transform a raw Week to component-ready format
  */
-function transformWeek(rawWeek: any): TransformedWeek {
+function transformWeek(rawWeek: Record<string, unknown>): TransformedWeek {
   return {
-    slug: rawWeek.slug,
-    title: rawWeek.title,
-    order: rawWeek.order,
-    objective: rawWeek.objective || '',
-    prerequisites: rawWeek.prerequisites || [],
-    days: rawWeek.days?.map((d: any) => transformDay(d, rawWeek.order)) || [],
+    slug: rawWeek.slug as string,
+    title: rawWeek.title as string,
+    order: rawWeek.order as number,
+    objective: (rawWeek.objective as string) || '',
+    prerequisites: (rawWeek.prerequisites as string[]) || [],
+    days: (rawWeek.days as Record<string, unknown>[])?.map((d) => transformDay(d, rawWeek.order as number)) || [],
     project: rawWeek.project ? transformProject(rawWeek.project, rawWeek.order) : null,
   };
 }
@@ -418,10 +420,10 @@ function transformWeek(rawWeek: any): TransformedWeek {
 /**
  * Transform the full curriculum
  */
-function transformCurriculum(rawCurriculum: any): TransformedCurriculum {
+function transformCurriculum(rawCurriculum: Record<string, unknown>): TransformedCurriculum {
   return {
-    version: rawCurriculum.version,
-    weeks: rawCurriculum.weeks?.map((w: any) => transformWeek(w)) || [],
+    version: rawCurriculum.version as string,
+    weeks: (rawCurriculum.weeks as Record<string, unknown>[])?.map((w) => transformWeek(w)) || [],
   };
 }
 
