@@ -64,7 +64,7 @@ export function PostSolveRecommendations({
       toast({
         title: 'Failed to record review',
         description: 'Please try again later.',
-        variant: 'destructive',
+        variant: 'error',
       });
     }
   };
