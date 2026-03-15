@@ -129,7 +129,7 @@ export function CodeEditor({
 
         // Call user's onMount callback
         onMount?.(editorInstance, monacoInstance);
-        console.log('[CodeEditor] Monaco editor mounted successfully');
+
       } catch (error) {
         console.error("Monaco editor mount error:", error);
         setHasError(true);

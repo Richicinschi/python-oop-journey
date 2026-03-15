@@ -65,7 +65,6 @@ export default function ProblemPage() {
   // Load problem data
   useEffect(() => {
     try {
-      console.log('[ProblemPage] Loading problem:', problemSlug);
       const foundProblem = getTransformedProblemBySlug(problemSlug);
       
       if (!foundProblem) {
@@ -74,7 +73,6 @@ export default function ProblemPage() {
         return;
       }
 
-      console.log('[ProblemPage] Found problem:', foundProblem.title, 'weekSlug:', foundProblem.weekSlug, 'daySlug:', foundProblem.daySlug);
       setProblem(foundProblem);
 
       // Load week and day data
@@ -83,7 +81,6 @@ export default function ProblemPage() {
         ? getTransformedDayBySlug(foundProblem.weekSlug, foundProblem.daySlug) ?? null
         : null;
 
-      console.log('[ProblemPage] Found week:', foundWeek?.title || 'null', 'day:', foundDay?.title || 'null');
       setWeek(foundWeek);
       setDay(foundDay);
 

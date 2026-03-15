@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Chrome, BookOpen } from "lucide-react";
+import { Chrome, BookOpen, Heart } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -92,6 +92,21 @@ export default function LoginPage() {
             <div className="text-muted-foreground">Build real apps</div>
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="text-center text-sm text-muted-foreground pt-4">
+          <p className="flex items-center justify-center gap-1">
+            Made with <Heart className="h-3 w-3 text-red-500 fill-red-500" /> for learners
+          </p>
+          <div className="mt-2 flex items-center justify-center gap-4">
+            <Link href="/privacy" className="hover:underline">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:underline">
+              Terms
+            </Link>
+          </div>
+        </footer>
       </div>
     </div>
   );

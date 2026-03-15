@@ -84,7 +84,11 @@ async def verify_solution_for_problem(
     "/validate-syntax",
     summary="Validate code syntax",
     description="Check if Python code has valid syntax without executing tests.",
+    responses={
+        429: {"description": "Rate limit exceeded"},
+    },
 )
+@rate_limit_per_minute(120)
 async def validate_syntax_endpoint(
     request: Request,
     code: str

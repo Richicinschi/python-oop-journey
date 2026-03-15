@@ -27,8 +27,8 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
 
-    # CORS - Allow all origins in production for Render deployment
-    # In production, this should be restricted to your frontend domain
+    # CORS - Restricted to known frontend domains
+    # In production, wildcard (*) is NOT allowed for security
     allowed_origins_raw: str = Field(
         default="http://localhost:3000,https://oop-journey.netlify.app,https://oopjourney.com,https://www.oopjourney.com",
         alias="ALLOWED_ORIGINS"
@@ -37,7 +37,16 @@ class Settings(BaseSettings):
     @property
     def allowed_origins(self) -> List[str]:
         """Get allowed origins as list."""
-        return [origin.strip() for origin in self.allowed_origins_raw.split(",")]
+        origins = [origin.strip() for origin in self.allowed_origins_raw.split(",")]
+        
+        # Security: Never allow wildcard in production
+        if self.is_production and "*" in origins:
+            logger = logging.getLogger(__name__)
+            logger.error("SECURITY WARNING: Wildcard (*) found in ALLOWED_ORIGINS in production! "
+                        "This is a security vulnerability. Removing wildcard.")
+            origins = [o for o in origins if o != "*"]
+        
+        return origins
 
     # Database
     database_url: str = Field(

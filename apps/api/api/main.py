@@ -95,13 +95,19 @@ def create_app() -> FastAPI:
         # Re-raise other HTTP exceptions
         raise exc
 
+    # Security headers middleware (first for defense in depth)
+    from api.core.security_headers import SecurityHeadersMiddleware
+    app.add_middleware(SecurityHeadersMiddleware)
+    
     # CORS middleware
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.allowed_origins,
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allow_headers=["*"],
+        expose_headers=["X-CSRF-Token"],
+        max_age=600,  # Cache preflight for 10 minutes
     )
     
     # Gzip compression middleware
@@ -111,6 +117,11 @@ def create_app() -> FastAPI:
     # Must be after CORS, before auth middleware
     from api.middleware.csrf import CSRFMiddleware
     app.add_middleware(CSRFMiddleware)
+    
+    # HSTS middleware (only in production)
+    if settings.is_production:
+        from api.core.security_headers import HSTSHeaderMiddleware
+        app.add_middleware(HSTSHeaderMiddleware)
     
     # Request size limit middleware (1MB max)
     @app.middleware("http")

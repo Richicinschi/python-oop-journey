@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -13,7 +13,6 @@ import {
   Calendar,
   TrendingUp,
   ArrowRight,
-  Sparkles,
   Play,
   RotateCcw,
   ChevronRight,
@@ -31,7 +30,7 @@ import { RecommendationList } from '@/components/dashboard/recommendation-card';
 import { CircularProgress } from '@/components/dashboard/circular-progress';
 import { QuickActions, ActionButtons } from '@/components/dashboard/quick-actions';
 import { ActiveProjectsSection } from '@/components/projects';
-import { WeeklyProject, UserProjectProgress } from '@/types/project';
+import type { WeeklyProject, UserProjectProgress } from '@/types/project';
 
 // Hooks
 import { useDashboardData } from '@/hooks/use-dashboard-data';

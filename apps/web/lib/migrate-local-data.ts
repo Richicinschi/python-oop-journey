@@ -334,7 +334,7 @@ export function clearLegacyData(): void {
     localStorage.removeItem(key);
   }
 
-  console.log('[Migration] Cleared legacy data from localStorage');
+
 }
 
 /**

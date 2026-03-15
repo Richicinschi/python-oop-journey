@@ -98,18 +98,30 @@ async function apiClient<T>(
     config.body = JSON.stringify(body);
   }
 
-  const response = await fetch(url, config);
-  const data = await response.json().catch(() => null);
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json().catch(() => null);
 
-  if (!response.ok) {
+    if (!response.ok) {
+      throw new VerificationApiError(
+        response.status,
+        data?.detail || data?.message || `HTTP error! status: ${response.status}`,
+        data
+      );
+    }
+
+    return data as T;
+  } catch (error) {
+    if (error instanceof VerificationApiError) {
+      throw error;
+    }
+    // Handle network errors (offline, DNS failures, etc.)
     throw new VerificationApiError(
-      response.status,
-      data?.detail || data?.message || `HTTP error! status: ${response.status}`,
-      data
+      0,
+      error instanceof Error ? error.message : 'Network error. Please check your connection.',
+      null
     );
   }
-
-  return data as T;
 }
 
 /**

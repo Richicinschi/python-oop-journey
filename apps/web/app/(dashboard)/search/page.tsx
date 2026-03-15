@@ -195,6 +195,8 @@ function SearchContent() {
             variant={viewMode === "grid" ? "default" : "ghost"}
             size="icon"
             onClick={() => setViewMode("grid")}
+            aria-label="Grid view"
+            aria-pressed={viewMode === "grid"}
           >
             <Grid className="h-4 w-4" />
           </Button>
@@ -202,6 +204,8 @@ function SearchContent() {
             variant={viewMode === "list" ? "default" : "ghost"}
             size="icon"
             onClick={() => setViewMode("list")}
+            aria-label="List view"
+            aria-pressed={viewMode === "list"}
           >
             <List className="h-4 w-4" />
           </Button>

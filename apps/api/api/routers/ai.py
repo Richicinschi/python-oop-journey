@@ -12,7 +12,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from api.config import get_settings
-from api.core.rate_limit import rate_limit
+from api.core.rate_limit import rate_limit, rate_limit_per_minute
 from api.middleware.auth import get_optional_user as get_current_user_optional
 from api.schemas.ai_hints import (
     AIErrorRequest,
@@ -30,7 +30,11 @@ from api.services.curriculum import CurriculumService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+# Create router with global rate limit dependency
+# All AI endpoints have a global 100 requests/minute limit per IP across all AI endpoints
+router = APIRouter(
+    dependencies=[Depends(rate_limit_per_minute(100))]
+)
 
 # Initialize curriculum service for problem lookups
 curriculum_service = CurriculumService()

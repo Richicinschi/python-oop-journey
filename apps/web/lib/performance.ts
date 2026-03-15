@@ -309,8 +309,8 @@ export function initPerformanceMonitoring(): void {
     try {
       const longTaskObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          // Log long tasks (> 50ms)
-          if (entry.duration > 50) {
+          // Log long tasks (> 50ms) in development
+          if (entry.duration > 50 && process.env.NODE_ENV === 'development') {
             console.warn('[Performance] Long task detected:', {
               duration: entry.duration,
               startTime: entry.startTime,
@@ -325,22 +325,24 @@ export function initPerformanceMonitoring(): void {
     }
   }
   
-  // Log navigation timing
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      if (navigation) {
-        console.log('[Performance] Navigation Timing:', {
-          dns: Math.round(navigation.domainLookupEnd - navigation.domainLookupStart),
-          tcp: Math.round(navigation.connectEnd - navigation.connectStart),
-          ttfb: Math.round(navigation.responseStart - navigation.startTime),
-          domInteractive: Math.round(navigation.domInteractive),
-          domComplete: Math.round(navigation.domComplete),
-          loadComplete: Math.round(navigation.loadEventEnd),
-        });
-      }
-    }, 0);
-  });
+  // Log navigation timing in development
+  if (process.env.NODE_ENV === 'development') {
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        if (navigation) {
+          console.log('[Performance] Navigation Timing:', {
+            dns: Math.round(navigation.domainLookupEnd - navigation.domainLookupStart),
+            tcp: Math.round(navigation.connectEnd - navigation.connectStart),
+            ttfb: Math.round(navigation.responseStart - navigation.startTime),
+            domInteractive: Math.round(navigation.domInteractive),
+            domComplete: Math.round(navigation.domComplete),
+            loadComplete: Math.round(navigation.loadEventEnd),
+          });
+        }
+      }, 0);
+    });
+  }
 }
 
 // Type declarations for global gtag
