@@ -1,7 +1,7 @@
 """SQLAlchemy async database configuration."""
 
+import logging
 from typing import AsyncGenerator
-from urllib.parse import urlparse, parse_qs, urlencode
 
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -13,6 +13,7 @@ from sqlalchemy.dialects.postgresql.base import PGDialect
 
 from api.config import get_settings
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 
 # Monkey-patch for CockroachDB compatibility
@@ -35,48 +36,19 @@ def _patched_get_server_version_info(self, connection):
 PGDialect._get_server_version_info = _patched_get_server_version_info
 
 
-def _build_database_url():
-    """Build database URL with proper asyncpg parameters.
-    
-    The prepare_threshold parameter is added as a query parameter instead of
-    connect_args to avoid asyncpg compatibility issues. Setting it to 0
-    disables prepared statement caching, which is needed for CockroachDB
-    compatibility and some PostgreSQL setups.
-    
-    Note: This only applies to PostgreSQL URLs (postgresql+asyncpg).
-    SQLite and other databases are returned unchanged.
-    """
-    url = settings.database_url
-    
-    # Only modify PostgreSQL URLs with asyncpg driver
-    if not url.startswith("postgresql+asyncpg"):
-        return url
-    
-    # Parse the URL
-    parsed = urlparse(url)
-    query_params = parse_qs(parsed.query)
-    
-    # Add prepare_threshold=0 to disable prepared statement caching
-    # This fixes compatibility with CockroachDB and some PostgreSQL setups
-    if "prepare_threshold" not in query_params:
-        query_params["prepare_threshold"] = ["0"]
-    
-    # Rebuild the query string
-    new_query = urlencode(query_params, doseq=True)
-    
-    # Reconstruct the URL
-    return parsed._replace(query=new_query).geturl()
+# Use database URL directly without prepare_threshold modifications
+# The prepare_threshold parameter was causing compatibility issues with
+# certain PostgreSQL providers (Render, etc.) and asyncpg versions.
+# CockroachDB compatibility is handled via monkey-patch above.
+database_url = settings.database_url
 
-
-# Build the database URL with proper parameters
-database_url = _build_database_url()
-
-# Create async engine with CockroachDB compatibility
-# Note: prepare_threshold is now passed via URL query params instead of connect_args
-# to avoid asyncpg driver compatibility issues
+# Create async engine with minimal connect_args
+# prepare_threshold has been removed to fix compatibility issues
 connect_args = {}
 if "cockroach" in settings.database_url.lower():
     connect_args["server_settings"] = {"application_name": "oop-journey"}
+
+logger.info(f"Initializing database engine with URL: {database_url.replace(settings.database_url.split('@')[0] if '@' in settings.database_url else database_url, '***')}")
 
 engine = create_async_engine(
     database_url,

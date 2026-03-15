@@ -226,7 +226,7 @@ import sys
 import builtins
 
 # Remove dangerous builtins
-_safe_builtins = {
+_safe_builtins = {{
     'abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes',
     'callable', 'chr', 'classmethod', 'complex', 'delattr', 'dict',
     'dir', 'divmod', 'enumerate', 'filter', 'float', 'format', 'frozenset',
@@ -235,13 +235,13 @@ _safe_builtins = {
     'min', 'next', 'object', 'oct', 'ord', 'pow', 'print', 'property',
     'range', 'repr', 'reversed', 'round', 'set', 'setattr', 'slice', 'sorted',
     'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip',
-    '__build_class__', '__name__', '__doc__', '__package__', '__spec__',
-    '__annotations__', '__builtins__', '__cached__', '__file__',
+    '__build_class__', '__import__', '__name__', '__doc__', '__package__',
+    '__spec__', '__annotations__', '__builtins__', '__cached__', '__file__',
     'True', 'False', 'None', 'NotImplemented', 'Ellipsis',
-}
+}}
 
 # Create restricted builtins
-_restricted_builtins = {}
+_restricted_builtins = {{}}
 for name in _safe_builtins:
     if hasattr(builtins, name):
         _restricted_builtins[name] = getattr(builtins, name)

@@ -170,11 +170,15 @@ export default function ProjectPage() {
     onTest: () => handleTest(),
     onToggleFileTree: () => {
       // Toggle file tree visibility - would connect to layout state
-      console.log('Toggle file tree');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Toggle file tree');
+      }
     },
     onSplitEditor: () => {
       // Toggle split editor - would connect to layout state
-      console.log('Split editor');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Split editor');
+      }
     },
   });
 

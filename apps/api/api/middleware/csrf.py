@@ -36,6 +36,12 @@ EXEMPT_PATHS: Set[str] = {
     "/api/v1/auth/verify",
     "/api/v1/auth/refresh",
     "/api/v1/csrf-token",  # The token endpoint itself is exempt
+    "/api/v1/execute",  # Legacy code execution endpoint
+    "/api/v1/execute/run",  # Code execution endpoint
+    "/api/v1/execute/syntax-check",  # Syntax check endpoint
+    "/api/v1/execute/analyze",  # Code analysis endpoint
+    "/api/v1/execute/health",  # Execution health check
+    "/api/v1/verify",  # Solution verification endpoint
     "/health",
     "/ready",
     "/",
@@ -171,9 +177,11 @@ def is_exempt_path(path: str) -> bool:
     if path_lower in EXEMPT_PATHS:
         return True
     
-    # Prefix match for auth paths and health checks
+    # Prefix match for auth paths, execute paths, verify paths, and health checks
     exempt_prefixes = [
         "/api/v1/auth/",
+        "/api/v1/execute/",  # All execute endpoints (run, syntax-check, analyze, health)
+        "/api/v1/verify/",   # Dynamic verify paths like /verify/{problem_slug}
         "/health",
         "/ready",
         "/docs",

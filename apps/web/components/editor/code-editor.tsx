@@ -70,10 +70,12 @@ export function CodeEditor({
   const { theme, systemTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Component refs for editor instance access
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
+  const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Determine effective theme
   const effectiveTheme = theme === "system" ? systemTheme : theme;
@@ -82,7 +84,22 @@ export function CodeEditor({
   // Handle hydration - only render editor on client
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    
+    // Set a timeout to detect if Monaco fails to load
+    loadTimeoutRef.current = setTimeout(() => {
+      if (isLoading) {
+        console.warn('[CodeEditor] Monaco load timeout - falling back to textarea');
+        setHasError(true);
+        setIsLoading(false);
+      }
+    }, 10000); // 10 second timeout
+    
+    return () => {
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+    };
+  }, [isLoading]);
 
   // Handle editor mount
   const handleMount: OnMount = useCallback(
@@ -90,6 +107,12 @@ export function CodeEditor({
       try {
         editorRef.current = editorInstance;
         monacoRef.current = monacoInstance;
+        
+        // Mark loading as complete
+        setIsLoading(false);
+        if (loadTimeoutRef.current) {
+          clearTimeout(loadTimeoutRef.current);
+        }
         
         // Initialize Python language support
         initializeMonaco(monacoInstance);
@@ -106,9 +129,11 @@ export function CodeEditor({
 
         // Call user's onMount callback
         onMount?.(editorInstance, monacoInstance);
+        console.log('[CodeEditor] Monaco editor mounted successfully');
       } catch (error) {
         console.error("Monaco editor mount error:", error);
         setHasError(true);
+        setIsLoading(false);
       }
     },
     [onMount, onRun]
@@ -158,29 +183,67 @@ export function CodeEditor({
     ...options,
   };
 
-  // Error state
+  // Error state - fallback to textarea
   if (hasError) {
     return (
       <div
         className={cn(
           "relative rounded-md border border-border overflow-hidden",
-          "bg-muted flex items-center justify-center",
+          "bg-background flex flex-col",
           className
         )}
         style={{ height, width }}
       >
-        <div className="text-center p-4">
-          <p className="text-destructive font-medium">Failed to load code editor</p>
-          <p className="text-muted-foreground text-sm mt-1">
-            Please refresh the page to try again
-          </p>
+        <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-3 py-2 text-xs text-yellow-700 dark:text-yellow-400 flex items-center justify-between">
+          <span>⚠️ Editor failed to load - using fallback mode</span>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="underline hover:no-underline"
+          >
+            Retry
+          </button>
         </div>
+        <textarea
+          value={value ?? DEFAULT_STARTER_CODE}
+          onChange={(e) => onChange?.(e.target.value)}
+          readOnly={readOnly}
+          className={cn(
+            "flex-1 w-full p-4 font-mono text-sm resize-none focus:outline-none",
+            "bg-background text-foreground",
+            "border-0"
+          )}
+          style={{ 
+            fontSize: `${fontSize}px`,
+            lineHeight: '1.5',
+            tabSize: 4,
+          }}
+          spellCheck={false}
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+              e.preventDefault();
+              onRun?.();
+            }
+            // Handle Tab key for indentation
+            if (e.key === 'Tab' && !e.shiftKey && !readOnly) {
+              e.preventDefault();
+              const target = e.target as HTMLTextAreaElement;
+              const start = target.selectionStart;
+              const end = target.selectionEnd;
+              const newValue = value?.substring(0, start) + '    ' + value?.substring(end);
+              onChange?.(newValue);
+              // Set cursor position after tab
+              setTimeout(() => {
+                target.selectionStart = target.selectionEnd = start + 4;
+              }, 0);
+            }
+          }}
+        />
       </div>
     );
   }
 
   // Server-side or initial render - show skeleton
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
     return (
       <div
         className={cn(

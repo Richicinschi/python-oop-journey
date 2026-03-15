@@ -10,6 +10,10 @@ export interface EditorSkeletonProps {
   className?: string;
 }
 
+// Pre-computed width variations for consistent SSR/CSR rendering
+const LINE_WIDTHS = [45, 72, 58, 83, 37, 91, 64, 52, 78, 41];
+const LINE_OPACITIES = [0.5, 0.7, 0.6, 0.8, 0.5, 0.7, 0.6, 0.5, 0.7, 0.6];
+
 export function EditorSkeleton({
   height = "400px",
   className,
@@ -46,12 +50,12 @@ export function EditorSkeleton({
               {i > 2 && i < 7 && (
                 <Skeleton className="h-4 w-8 flex-shrink-0" />
               )}
-              {/* Code line */}
+              {/* Code line - use pre-computed values to avoid hydration mismatch */}
               <Skeleton
                 className="h-4"
                 style={{
-                  width: `${30 + Math.random() * 60}%`,
-                  opacity: 0.4 + Math.random() * 0.4,
+                  width: `${LINE_WIDTHS[i]}%`,
+                  opacity: LINE_OPACITIES[i],
                 }}
               />
             </div>

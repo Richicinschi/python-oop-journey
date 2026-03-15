@@ -3,15 +3,12 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
-from api import limiter
 from api.config import get_settings
 from api.database import close_db, init_db
 from api.routers import (
@@ -77,21 +74,26 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     
-    # Add slowapi middleware for rate limiting (required for decorators to work)
-    app.state.limiter = limiter
-    app.add_middleware(SlowAPIMiddleware)
-    
-    # Add rate limit error handler
-    @app.exception_handler(RateLimitExceeded)
-    async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
-        return JSONResponse(
-            status_code=429,
-            content={
-                "error": "Rate limit exceeded",
-                "detail": "Too many requests. Please slow down and try again later.",
-                "retry_after": exc.detail if hasattr(exc, 'detail') else None,
-            },
-        )
+    # Add rate limit error handler for HTTPException with 429 status
+    @app.exception_handler(HTTPException)
+    async def http_exception_handler(request: Request, exc: HTTPException):
+        if exc.status_code == 429:
+            # Handle rate limit errors
+            detail = exc.detail
+            if isinstance(detail, dict):
+                return JSONResponse(
+                    status_code=429,
+                    content=detail,
+                )
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "error": "Rate limit exceeded",
+                    "message": str(detail) if detail else "Too many requests. Please slow down and try again later.",
+                },
+            )
+        # Re-raise other HTTP exceptions
+        raise exc
 
     # CORS middleware
     app.add_middleware(

@@ -295,7 +295,9 @@ export const initializeMonaco = (monaco: Monaco) => {
     });
 
     isMonacoInitialized = true;
-    console.log("Monaco initialized with Python support");
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Monaco initialized with Python support");
+    }
   } catch (error) {
     console.error("Failed to initialize Monaco:", error);
     throw error;

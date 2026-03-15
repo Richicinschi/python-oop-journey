@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { ContinueLearningWidget } from "@/components/continue-learning";
 import { Badge } from "@/components/ui/badge";
+import { Footer } from "@/components/layout/footer";
 
 const stats = [
   { label: "Weeks", value: "9", icon: BookOpen },
@@ -242,6 +243,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

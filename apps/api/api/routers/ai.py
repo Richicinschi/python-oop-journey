@@ -10,10 +10,9 @@ import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 
 from api.config import get_settings
+from api.core.rate_limit import rate_limit
 from api.middleware.auth import get_optional_user as get_current_user_optional
 from api.schemas.ai_hints import (
     AIErrorRequest,
@@ -32,7 +31,6 @@ from api.services.curriculum import CurriculumService
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-limiter = Limiter(key_func=get_remote_address)
 
 # Initialize curriculum service for problem lookups
 curriculum_service = CurriculumService()
@@ -49,7 +47,7 @@ curriculum_service = CurriculumService()
         503: {"description": "AI service unavailable"},
     },
 )
-@limiter.limit("10/hour")
+@rate_limit(requests=10, window_seconds=3600)
 async def generate_hint(
     request: Request,
     hint_request: AIHintRequest,
@@ -121,7 +119,7 @@ async def generate_hint(
         503: {"description": "AI service unavailable"},
     },
 )
-@limiter.limit("20/hour")
+@rate_limit(requests=20, window_seconds=3600)
 async def explain_error(
     request: Request,
     error_request: AIErrorRequest,
@@ -185,7 +183,7 @@ async def explain_error(
         503: {"description": "AI service unavailable"},
     },
 )
-@limiter.limit("5/hour")
+@rate_limit(requests=5, window_seconds=3600)
 async def code_review(
     request: Request,
     review_request: CodeReviewRequest,
