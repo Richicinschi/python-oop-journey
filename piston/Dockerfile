@@ -3,8 +3,15 @@
 
 FROM ghcr.io/engineer-man/piston:latest
 
-# Create runtimes directory
-RUN mkdir -p /piston/runtimes
+# Set working directory to /tmp for writable space
+WORKDIR /tmp
+
+# Create necessary directories
+RUN mkdir -p /tmp/isolate /piston/runtimes/packages /piston/packages
+
+# Set environment variable for isolate root
+ENV ISOLATE_ROOT=/tmp/isolate
+ENV HOME=/tmp
 
 # The API will be available on port 2000
 EXPOSE 2000
@@ -20,5 +27,4 @@ ENV PISTON_MAX_FILES=25
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:2000/api/v2/runtimes || exit 1
 
-# The base image already has the correct ENTRYPOINT/CMD
-# Do NOT override CMD - let the base image handle startup
+# Base image handles the CMD/ENTRYPOINT
