@@ -12,6 +12,7 @@ from api.middleware.auth import get_current_user, get_optional_user
 from api.models.user import User
 from api.schemas.user import (
     MagicLinkRequest,
+    MagicLinkResponse,
     MagicLinkVerify,
     TokenResponse,
     User as UserSchema,
@@ -40,6 +41,7 @@ REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60  # 7 days in seconds
 
 @router.post(
     "/magic-link",
+    response_model=MagicLinkResponse,
     summary="Request magic link",
     description="Send a magic login link to the user's email.",
     status_code=status.HTTP_202_ACCEPTED,
@@ -48,7 +50,7 @@ async def send_magic_link(
     request: Request,
     body: MagicLinkRequest,
     db: AsyncSession = Depends(get_db),
-):
+) -> MagicLinkResponse:
     """Request a magic link for passwordless login.
     
     Always returns success to prevent email enumeration attacks.
@@ -73,22 +75,20 @@ async def send_magic_link(
         
         # Include debug info in development
         if settings.is_development:
-            response["debug"] = {
-                "magic_link": magic_link,
-                "email_sent": email_sent,
-            }
+            return MagicLinkResponse(
+                success=True,
+                message="Check your email for the magic link",
+                debug={"magic_link": magic_link, "email_sent": email_sent},
+            )
         
-        return response
+        return MagicLinkResponse(success=True, message="Check your email for the magic link")
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to send magic link: {e}")
         logger.exception("Full traceback:")
         # Still return success to prevent email enumeration
-        return {
-            "success": True,
-            "message": "Check your email for the magic link",
-        }
+        return MagicLinkResponse(success=True, message="Check your email for the magic link")
 
 
 @router.get(

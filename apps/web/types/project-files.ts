@@ -6,15 +6,14 @@
 
 /** Represents a file in the project */
 export interface ProjectFile {
-  id?: string;
-  name?: string;
+  id: string;
+  name: string;
   path: string;
-  content?: string;
-  language?: string;
-  isModified?: boolean;
-  isReadOnly?: boolean;
-  readOnly?: boolean;
-  lastModified?: number;
+  content: string;
+  language: string;
+  isModified: boolean;
+  isReadOnly: boolean;
+  lastModified: number;
   template?: string;
   isEntryPoint?: boolean;
 }
@@ -33,12 +32,12 @@ export type ProjectItem = ProjectFile | ProjectFolder;
 
 /** Check if an item is a file */
 export function isProjectFile(item: ProjectItem): item is ProjectFile {
-  return 'content' in item;
+  return 'content' in item && typeof (item as ProjectFile).content === 'string';
 }
 
 /** Check if an item is a folder */
 export function isProjectFolder(item: ProjectItem): item is ProjectFolder {
-  return 'children' in item;
+  return 'children' in item && Array.isArray((item as ProjectFolder).children);
 }
 
 /** Open file tab state */

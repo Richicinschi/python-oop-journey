@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { X, GripVertical, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { LucideProps } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -274,29 +275,29 @@ function getTabIcon(filename: string) {
 
   switch (iconType) {
     case "python":
-      return (props: any) => <FileCode {...props} className={cn(props.className, "text-yellow-500")} />;
+      return (props: LucideProps) => <FileCode {...props} className={cn(props.className, "text-yellow-500")} />;
     case "javascript":
-      return (props: any) => <FileCode {...props} className={cn(props.className, "text-yellow-400")} />;
+      return (props: LucideProps) => <FileCode {...props} className={cn(props.className, "text-yellow-400")} />;
     case "typescript":
-      return (props: any) => <FileCode {...props} className={cn(props.className, "text-blue-500")} />;
+      return (props: LucideProps) => <FileCode {...props} className={cn(props.className, "text-blue-500")} />;
     case "html":
-      return (props: any) => <FileCode {...props} className={cn(props.className, "text-orange-500")} />;
+      return (props: LucideProps) => <FileCode {...props} className={cn(props.className, "text-orange-500")} />;
     case "css":
-      return (props: any) => <FileCode {...props} className={cn(props.className, "text-blue-400")} />;
+      return (props: LucideProps) => <FileCode {...props} className={cn(props.className, "text-blue-400")} />;
     case "json":
-      return (props: any) => <FileJson {...props} className={cn(props.className, "text-green-500")} />;
+      return (props: LucideProps) => <FileJson {...props} className={cn(props.className, "text-green-500")} />;
     case "markdown":
-      return (props: any) => <FileText {...props} className={cn(props.className, "text-gray-500")} />;
+      return (props: LucideProps) => <FileText {...props} className={cn(props.className, "text-gray-500")} />;
     case "image":
-      return (props: any) => <Image {...props} className={cn(props.className, "text-purple-500")} />;
+      return (props: LucideProps) => <Image {...props} className={cn(props.className, "text-purple-500")} />;
     case "database":
-      return (props: any) => <Database {...props} className={cn(props.className, "text-cyan-500")} />;
+      return (props: LucideProps) => <Database {...props} className={cn(props.className, "text-cyan-500")} />;
     case "settings":
-      return (props: any) => <Settings {...props} className={cn(props.className, "text-gray-400")} />;
+      return (props: LucideProps) => <Settings {...props} className={cn(props.className, "text-gray-400")} />;
     case "terminal":
-      return (props: any) => <Terminal {...props} className={cn(props.className, "text-green-400")} />;
+      return (props: LucideProps) => <Terminal {...props} className={cn(props.className, "text-green-400")} />;
     default:
-      return (props: any) => <File {...props} className={cn(props.className, "text-gray-400")} />;
+      return (props: LucideProps) => <File {...props} className={cn(props.className, "text-gray-400")} />;
   }
 }
 

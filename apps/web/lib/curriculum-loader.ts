@@ -248,24 +248,47 @@ export function searchProblems(query: string): Problem[] {
 }
 
 // ============================================================================
+// TYPE-SAFE HELPER FUNCTIONS
+// ============================================================================
+
+function getString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function getNumber(value: unknown): number | undefined {
+  return typeof value === 'number' ? value : undefined;
+}
+
+function getBoolean(value: unknown): boolean | undefined {
+  return typeof value === 'boolean' ? value : undefined;
+}
+
+function getArray(value: unknown): unknown[] | undefined {
+  return Array.isArray(value) ? value : undefined;
+}
+
+// ============================================================================
 // TRANSFORMATION FUNCTIONS
 // ============================================================================
 
 /**
  * Transform a raw ProjectFile to component-ready format
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformProjectFile(rawFile: Record<string, unknown>, index: number): TransformedProjectFile {
+  const path = getString(rawFile.path) || '/';
+  const content = getString(rawFile.content);
+  const template = getString(rawFile.template);
+  
   return {
-    id: rawFile.id || `file-${index}`,
-    name: rawFile.name || rawFile.path?.split('/').pop() || 'unnamed',
-    path: rawFile.path || '/',
-    content: rawFile.content || rawFile.template || '',
-    language: rawFile.language || getLanguageFromExtension(rawFile.path || ''),
-    isModified: rawFile.isModified || false,
-    lastModified: rawFile.lastModified || Date.now(),
-    isEntryPoint: rawFile.isEntryPoint || false,
-    template: rawFile.template,
+    id: getString(rawFile.id) || `file-${index}`,
+    name: getString(rawFile.name) || path.split('/').pop() || 'unnamed',
+    path,
+    content: content || template || '',
+    language: getString(rawFile.language) || getLanguageFromExtension(path),
+    isModified: getBoolean(rawFile.isModified) || false,
+    lastModified: getNumber(rawFile.lastModified) || Date.now(),
+    isEntryPoint: getBoolean(rawFile.isEntryPoint) || false,
+    template,
   };
 }
 
@@ -327,25 +350,34 @@ function generateDefaultTasks(requirements: string[]): ProjectTask[] {
 /**
  * Transform a raw Project to component-ready format
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformProject(rawProject: Record<string, unknown>, weekOrder: number): TransformedProject {
-  const requirements = (rawProject.requirements as string[]) || ['Complete the project'];
-  const files = (rawProject.files as Record<string, unknown>[])?.map((f, i) => transformProjectFile(f, i)) 
-    || generateDefaultProjectFiles(rawProject.title);
+  const rawRequirements = getArray(rawProject.requirements);
+  const requirements = rawRequirements?.every(r => typeof r === 'string') 
+    ? rawRequirements as string[] 
+    : ['Complete the project'];
+  
+  const rawFiles = getArray(rawProject.files);
+  const title = getString(rawProject.title) || 'Untitled Project';
+  const files = rawFiles?.every(f => typeof f === 'object' && f !== null)
+    ? rawFiles.map((f, i) => transformProjectFile(f as Record<string, unknown>, i))
+    : generateDefaultProjectFiles(title);
+  
+  const rawHints = getArray(rawProject.hints);
+  const hints = rawHints?.every(h => typeof h === 'string') ? rawHints as string[] : [];
   
   return {
-    slug: rawProject.slug,
-    title: rawProject.title,
-    description: rawProject.description,
-    overview: rawProject.overview || rawProject.description,
-    entryPoint: rawProject.entryPoint || 'main.py',
-    starterPath: rawProject.starter_path || null,
-    solutionPath: rawProject.solution_path || null,
-    testPath: rawProject.test_path || null,
+    slug: getString(rawProject.slug) || '',
+    title,
+    description: getString(rawProject.description) || '',
+    overview: getString(rawProject.overview) || getString(rawProject.description) || '',
+    entryPoint: getString(rawProject.entryPoint) || 'main.py',
+    starterPath: getString(rawProject.starter_path) || null,
+    solutionPath: getString(rawProject.solution_path) || null,
+    testPath: getString(rawProject.test_path) || null,
     requirements,
-    hints: rawProject.hints || [],
+    hints,
     files,
-    tasks: rawProject.tasks || generateDefaultTasks(requirements),
+    tasks: rawProject.tasks as ProjectTask[] || generateDefaultTasks(requirements),
   };
 }
 
@@ -362,23 +394,26 @@ function transformProblem(
   const nextProblem = allProblemsInDay[problemIndex + 1];
   const prevProblem = allProblemsInDay[problemIndex - 1];
   
+  const rawHints = getArray(rawProblem.hints);
+  const hints = rawHints?.every(h => typeof h === 'string') ? rawHints as string[] : [];
+  
   return {
-    slug: rawProblem.slug,
-    title: rawProblem.title,
-    topic: rawProblem.topic,
-    difficulty: rawProblem.difficulty,
-    order: rawProblem.order,
-    instructions: rawProblem.instructions,
-    hints: rawProblem.hints || [],
-    weekSlug: rawProblem.week_slug,
-    daySlug: rawProblem.day_slug,
+    slug: getString(rawProblem.slug) || '',
+    title: getString(rawProblem.title) || '',
+    topic: getString(rawProblem.topic) || '',
+    difficulty: getString(rawProblem.difficulty) || 'medium',
+    order: getNumber(rawProblem.order) || 0,
+    instructions: getString(rawProblem.instructions) || '',
+    hints,
+    weekSlug: getString(rawProblem.week_slug) || '',
+    daySlug: getString(rawProblem.day_slug) || '',
     weekNumber: weekOrder,
     dayNumber: dayOrder,
-    starterCode: rawProblem.starter_code || '',
-    solutionCode: rawProblem.solution_code || '',
-    testCode: rawProblem.test_code || '',
-    nextProblemSlug: nextProblem?.slug || null,
-    prevProblemSlug: prevProblem?.slug || null,
+    starterCode: getString(rawProblem.starter_code) || '',
+    solutionCode: getString(rawProblem.solution_code) || '',
+    testCode: getString(rawProblem.test_code) || '',
+    nextProblemSlug: getString(nextProblem?.slug) || null,
+    prevProblemSlug: getString(prevProblem?.slug) || null,
   };
 }
 
@@ -386,19 +421,31 @@ function transformProblem(
  * Transform a raw Day to component-ready format
  */
 function transformDay(rawDay: Record<string, unknown>, weekOrder: number): TransformedDay {
-  const transformedProblems = (rawDay.problems as Record<string, unknown>[])?.map((p, index) => 
-    transformProblem(p, weekOrder, rawDay.order, rawDay.problems, index)
-  ) || [];
+  const rawProblems = getArray(rawDay.problems);
+  const allProblemsInDay: Record<string, unknown>[] = rawProblems?.every(
+    p => typeof p === 'object' && p !== null
+  ) ? rawProblems as Record<string, unknown>[] : [];
+  
+  const dayOrder = getNumber(rawDay.order) || 0;
+  
+  const transformedProblems = allProblemsInDay.map((p, index) => 
+    transformProblem(p, weekOrder, dayOrder, allProblemsInDay, index)
+  );
+  
+  const rawLearningObjectives = getArray(rawDay.learning_objectives);
+  const learningObjectives = rawLearningObjectives?.every(lo => typeof lo === 'string') 
+    ? rawLearningObjectives as string[] 
+    : [];
   
   return {
-    slug: rawDay.slug,
-    title: rawDay.title,
-    order: rawDay.order,
+    slug: getString(rawDay.slug) || '',
+    title: getString(rawDay.title) || '',
+    order: dayOrder,
     problems: transformedProblems,
-    weekSlug: rawDay.week_slug,
-    theoryPath: rawDay.theory_path || null,
-    theoryContent: rawDay.theory_content || '',
-    learningObjectives: rawDay.learning_objectives || [],
+    weekSlug: getString(rawDay.week_slug) || '',
+    theoryPath: getString(rawDay.theory_path) || null,
+    theoryContent: getString(rawDay.theory_content) || '',
+    learningObjectives,
   };
 }
 
@@ -406,14 +453,31 @@ function transformDay(rawDay: Record<string, unknown>, weekOrder: number): Trans
  * Transform a raw Week to component-ready format
  */
 function transformWeek(rawWeek: Record<string, unknown>): TransformedWeek {
+  const weekOrder = getNumber(rawWeek.order) || 0;
+  
+  const rawDays = getArray(rawWeek.days);
+  const days = rawDays?.every(d => typeof d === 'object' && d !== null)
+    ? (rawDays as Record<string, unknown>[]).map((d) => transformDay(d, weekOrder))
+    : [];
+  
+  const rawPrerequisites = getArray(rawWeek.prerequisites);
+  const prerequisites = rawPrerequisites?.every(p => typeof p === 'string') 
+    ? rawPrerequisites as string[] 
+    : [];
+  
+  const rawProject = rawWeek.project;
+  const project = rawProject && typeof rawProject === 'object' 
+    ? transformProject(rawProject as Record<string, unknown>, weekOrder) 
+    : null;
+  
   return {
-    slug: rawWeek.slug as string,
-    title: rawWeek.title as string,
-    order: rawWeek.order as number,
-    objective: (rawWeek.objective as string) || '',
-    prerequisites: (rawWeek.prerequisites as string[]) || [],
-    days: (rawWeek.days as Record<string, unknown>[])?.map((d) => transformDay(d, rawWeek.order as number)) || [],
-    project: rawWeek.project ? transformProject(rawWeek.project, rawWeek.order) : null,
+    slug: getString(rawWeek.slug) || '',
+    title: getString(rawWeek.title) || '',
+    order: weekOrder,
+    objective: getString(rawWeek.objective) || '',
+    prerequisites,
+    days,
+    project,
   };
 }
 
@@ -421,9 +485,14 @@ function transformWeek(rawWeek: Record<string, unknown>): TransformedWeek {
  * Transform the full curriculum
  */
 function transformCurriculum(rawCurriculum: Record<string, unknown>): TransformedCurriculum {
+  const rawWeeks = getArray(rawCurriculum.weeks);
+  const weeks = rawWeeks?.every(w => typeof w === 'object' && w !== null)
+    ? (rawWeeks as Record<string, unknown>[]).map((w) => transformWeek(w))
+    : [];
+  
   return {
-    version: rawCurriculum.version as string,
-    weeks: (rawCurriculum.weeks as Record<string, unknown>[])?.map((w) => transformWeek(w)) || [],
+    version: getString(rawCurriculum.version) || '1.0.0',
+    weeks,
   };
 }
 

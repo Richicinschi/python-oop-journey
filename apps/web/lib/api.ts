@@ -8,6 +8,12 @@ interface ApiOptions {
   csrfToken?: string;
 }
 
+interface ApiErrorResponse {
+  error?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
 class ApiError extends Error {
   constructor(
     public status: number,
@@ -17,6 +23,23 @@ class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
   }
+}
+
+/**
+ * Type guard for API error responses
+ */
+function isApiErrorResponse(data: unknown): data is ApiErrorResponse {
+  return typeof data === 'object' && data !== null;
+}
+
+/**
+ * Get error message from API response
+ */
+function getApiErrorMessage(data: unknown, defaultMessage: string): string {
+  if (isApiErrorResponse(data)) {
+    return data.message || data.error || defaultMessage;
+  }
+  return defaultMessage;
 }
 
 /**
@@ -35,7 +58,7 @@ function getCsrfToken(): string | null {
 /**
  * State-changing HTTP methods that require CSRF protection
  */
-const STATE_CHANGING_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH'];
+const STATE_CHANGING_METHODS: readonly string[] = ['POST', 'PUT', 'DELETE', 'PATCH'];
 
 async function apiClient<T>(
   endpoint: string,
@@ -83,8 +106,8 @@ async function apiClient<T>(
     
     // Handle 403 CSRF errors - token may have expired
     if (response.status === 403) {
-      const data = await response.json().catch(() => null);
-      if (data?.error?.toLowerCase().includes('csrf')) {
+      const data: unknown = await response.json().catch(() => null);
+      if (isApiErrorResponse(data) && data.error?.toLowerCase().includes('csrf')) {
         // Clear expired token so next request fetches a new one
         try {
           localStorage.removeItem('csrf_token');
@@ -105,22 +128,25 @@ async function apiClient<T>(
       return undefined as T;
     }
     
-    const data = await response.json().catch(() => null);
+    const data: unknown = await response.json().catch(() => null);
 
     if (!response.ok) {
       throw new ApiError(
         response.status,
-        data?.message || data?.error || `HTTP error! status: ${response.status}`,
+        getApiErrorMessage(data, `HTTP error! status: ${response.status}`),
         data
       );
     }
 
     return data as T;
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError(500, error instanceof Error ? error.message : 'Network error');
+    if (error instanceof Error) {
+      throw new ApiError(500, error.message || 'Network error');
+    }
+    throw new ApiError(500, 'Network error');
   }
 }
 
@@ -665,14 +691,14 @@ export interface AIReportRequest {
 export const api = {
   // Problems
   problems: {
-    list: () => apiClient<Problem[]>('/api/v1/problems'),
-    get: (slug: string) => apiClient<Problem>(`/api/v1/problems/${slug}`),
-    submit: (slug: string, code: string) =>
+    list: (): Promise<Problem[]> => apiClient<Problem[]>('/api/v1/problems'),
+    get: (slug: string): Promise<Problem> => apiClient<Problem>(`/api/v1/problems/${slug}`),
+    submit: (slug: string, code: string): Promise<SubmissionResult> =>
       apiClient<SubmissionResult>(`/api/v1/problems/${slug}/submit`, {
         method: 'POST',
         body: { code },
       }),
-    run: (slug: string, code: string) =>
+    run: (slug: string, code: string): Promise<RunResult> =>
       apiClient<RunResult>(`/api/v1/problems/${slug}/run`, {
         method: 'POST',
         body: { code },
@@ -681,36 +707,36 @@ export const api = {
 
   // Progress
   progress: {
-    getAll: () => apiClient<ProgressList>('/api/v1/progress'),
-    get: (problemSlug: string) => 
+    getAll: (): Promise<ProgressList> => apiClient<ProgressList>('/api/v1/progress'),
+    get: (problemSlug: string): Promise<Progress> => 
       apiClient<Progress>(`/api/v1/progress/${problemSlug}`),
-    update: (problemSlug: string, data: ProgressUpdate) =>
+    update: (problemSlug: string, data: ProgressUpdate): Promise<Progress> =>
       apiClient<Progress>(`/api/v1/progress/${problemSlug}`, {
         method: 'POST',
         body: data,
       }),
-    recordAttempt: (problemSlug: string) =>
+    recordAttempt: (problemSlug: string): Promise<Progress> =>
       apiClient<Progress>(`/api/v1/progress/${problemSlug}/attempt`, {
         method: 'POST',
       }),
-    getStats: () => 
+    getStats: (): Promise<ProgressStats> => 
       apiClient<ProgressStats>('/api/v1/progress/stats/overall'),
-    getWeekProgress: (weekSlug: string) =>
+    getWeekProgress: (weekSlug: string): Promise<WeekProgress> =>
       apiClient<WeekProgress>(`/api/v1/progress/week/${weekSlug}`),
   },
 
   // Drafts
   drafts: {
-    list: (limit?: number, offset?: number) => 
+    list: (limit?: number, offset?: number): Promise<DraftList> => 
       apiClient<DraftList>(`/api/v1/drafts?limit=${limit || 100}&offset=${offset || 0}`),
-    get: (problemSlug: string) =>
+    get: (problemSlug: string): Promise<Draft> =>
       apiClient<Draft>(`/api/v1/drafts/${problemSlug}`),
-    save: (problemSlug: string, data: DraftUpdate) =>
+    save: (problemSlug: string, data: DraftUpdate): Promise<Draft> =>
       apiClient<Draft>(`/api/v1/drafts/${problemSlug}`, {
         method: 'POST',
         body: data,
       }),
-    delete: (problemSlug: string) =>
+    delete: (problemSlug: string): Promise<void> =>
       apiClient<void>(`/api/v1/drafts/${problemSlug}`, {
         method: 'DELETE',
       }),
@@ -718,30 +744,30 @@ export const api = {
 
   // Bookmarks
   bookmarks: {
-    list: (itemType?: ItemType, limit?: number, offset?: number) => {
+    list: (itemType?: ItemType, limit?: number, offset?: number): Promise<BookmarkList> => {
       const params = new URLSearchParams();
       if (itemType) params.append('item_type', itemType);
       if (limit) params.append('limit', limit.toString());
       if (offset) params.append('offset', offset.toString());
       return apiClient<BookmarkList>(`/api/v1/bookmarks?${params.toString()}`);
     },
-    create: (data: BookmarkCreate) =>
+    create: (data: BookmarkCreate): Promise<Bookmark> =>
       apiClient<Bookmark>('/api/v1/bookmarks', {
         method: 'POST',
         body: data,
       }),
-    delete: (bookmarkId: string) =>
+    delete: (bookmarkId: string): Promise<void> =>
       apiClient<void>(`/api/v1/bookmarks/${bookmarkId}`, {
         method: 'DELETE',
       }),
-    check: (itemType: ItemType, itemSlug: string) =>
+    check: (itemType: ItemType, itemSlug: string): Promise<BookmarkCheck> =>
       apiClient<BookmarkCheck>(`/api/v1/bookmarks/check?item_type=${itemType}&item_slug=${itemSlug}`),
-    update: (bookmarkId: string, data: BookmarkUpdate) =>
+    update: (bookmarkId: string, data: BookmarkUpdate): Promise<Bookmark> =>
       apiClient<Bookmark>(`/api/v1/bookmarks/${bookmarkId}`, {
         method: 'PATCH',
         body: data,
       }),
-    toggle: (data: BookmarkCreate) =>
+    toggle: (data: BookmarkCreate): Promise<BookmarkCheck> =>
       apiClient<BookmarkCheck>('/api/v1/bookmarks/toggle', {
         method: 'POST',
         body: data,
@@ -750,20 +776,20 @@ export const api = {
 
   // Activity
   activity: {
-    list: (limit?: number, activityType?: ActivityType) => {
+    list: (limit?: number, activityType?: ActivityType): Promise<ActivityList> => {
       const params = new URLSearchParams();
       if (limit) params.append('limit', limit.toString());
       if (activityType) params.append('activity_type', activityType);
       return apiClient<ActivityList>(`/api/v1/activity?${params.toString()}`);
     },
-    log: (data: ActivityCreate) =>
+    log: (data: ActivityCreate): Promise<Activity> =>
       apiClient<Activity>('/api/v1/activity', {
         method: 'POST',
         body: data,
       }),
-    getSummary: (days?: number) =>
+    getSummary: (days?: number): Promise<ActivitySummary> =>
       apiClient<ActivitySummary>(`/api/v1/activity/summary?days=${days || 7}`),
-    getStats: (days?: number) =>
+    getStats: (days?: number): Promise<{ periodDays: number; byType: Record<string, number>; dailyActivity: { date: string; count: number }[]; total: number }> =>
       apiClient<{ periodDays: number; byType: Record<string, number>; dailyActivity: { date: string; count: number }[]; total: number }>(
         `/api/v1/activity/stats?days=${days || 30}`
       ),
@@ -771,31 +797,31 @@ export const api = {
 
   // Curriculum
   curriculum: {
-    weeks: () => apiClient<Week[]>('/api/v1/curriculum/weeks'),
-    week: (slug: string) => apiClient<Week>(`/api/v1/curriculum/weeks/${slug}`),
-    theory: (weekSlug: string, daySlug: string) =>
+    weeks: (): Promise<Week[]> => apiClient<Week[]>('/api/v1/curriculum/weeks'),
+    week: (slug: string): Promise<Week> => apiClient<Week>(`/api/v1/curriculum/weeks/${slug}`),
+    theory: (weekSlug: string, daySlug: string): Promise<Theory> =>
       apiClient<Theory>(`/api/v1/curriculum/weeks/${weekSlug}/days/${daySlug}/theory`),
   },
 
   // Auth
   auth: {
-    me: () => apiClient<User>('/api/v1/auth/me'),
-    logout: () => apiClient<void>('/api/v1/auth/logout', { 
+    me: (): Promise<User> => apiClient<User>('/api/v1/auth/me'),
+    logout: (): Promise<void> => apiClient<void>('/api/v1/auth/logout', { 
       method: 'POST',
     }),
-    magicLink: (email: string) =>
+    magicLink: (email: string): Promise<{ message: string; debugToken?: string }> =>
       apiClient<{ message: string; debugToken?: string }>('/api/v1/auth/magic-link', {
         method: 'POST',
         body: { email },
       }),
-    verifyMagicLink: (token: string) =>
+    verifyMagicLink: (token: string): Promise<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number }> =>
       apiClient<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number }>(
         `/api/v1/auth/verify?token=${encodeURIComponent(token)}`,
         {
           method: 'GET',
         }
       ),
-    verifyMagicLinkPost: (token: string) =>
+    verifyMagicLinkPost: (token: string): Promise<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number }> =>
       apiClient<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number }>(
         '/api/v1/auth/verify',
         {
@@ -803,7 +829,7 @@ export const api = {
           body: { token },
         }
       ),
-    refresh: () =>
+    refresh: (): Promise<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number }> =>
       apiClient<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number }>(
         '/api/v1/auth/refresh',
         {
@@ -814,16 +840,16 @@ export const api = {
 
   // Submissions
   submissions: {
-    list: (status?: SubmissionStatus, limit?: number, offset?: number) => {
+    list: (status?: SubmissionStatus, limit?: number, offset?: number): Promise<SubmissionList> => {
       const params = new URLSearchParams();
       if (status) params.append('status', status);
       if (limit) params.append('limit', limit.toString());
       if (offset) params.append('offset', offset.toString());
       return apiClient<SubmissionList>(`/api/v1/submissions?${params.toString()}`);
     },
-    get: (id: string) => apiClient<Submission>(`/api/v1/submissions/${id}`),
-    getFiles: (id: string) => apiClient<Record<string, string>>(`/api/v1/submissions/${id}/files`),
-    submit: (projectSlug: string, files: Record<string, string>, options?: { weekSlug?: string; daySlug?: string; showcaseOptIn?: boolean }) =>
+    get: (id: string): Promise<Submission> => apiClient<Submission>(`/api/v1/submissions/${id}`),
+    getFiles: (id: string): Promise<Record<string, string>> => apiClient<Record<string, string>>(`/api/v1/submissions/${id}/files`),
+    submit: (projectSlug: string, files: Record<string, string>, options?: { weekSlug?: string; daySlug?: string; showcaseOptIn?: boolean }): Promise<SubmissionResponse> =>
       apiClient<SubmissionResponse>(`/api/v1/projects/${projectSlug}/submit`, {
         method: 'POST',
         body: {
@@ -834,34 +860,34 @@ export const api = {
           showcaseOptIn: options?.showcaseOptIn ?? false,
         },
       }),
-    getChecklist: (projectSlug: string, files: Record<string, string>) =>
+    getChecklist: (projectSlug: string, files: Record<string, string>): Promise<SubmissionChecklist> =>
       apiClient<SubmissionChecklist>(`/api/v1/projects/${projectSlug}/checklist`, {
         method: 'POST',
         body: { files },
       }),
-    getComments: (submissionId: string, filePath?: string) => {
+    getComments: (submissionId: string, filePath?: string): Promise<SubmissionCommentList> => {
       const params = new URLSearchParams();
       if (filePath) params.append('file_path', filePath);
       return apiClient<SubmissionCommentList>(`/api/v1/submissions/${submissionId}/comments?${params.toString()}`);
     },
-    addComment: (submissionId: string, data: { filePath: string; lineNumber: number; content: string }) =>
+    addComment: (submissionId: string, data: { filePath: string; lineNumber: number; content: string }): Promise<SubmissionComment> =>
       apiClient<SubmissionComment>(`/api/v1/submissions/${submissionId}/comments`, {
         method: 'POST',
         body: data,
       }),
-    getGamificationStats: () => apiClient<GamificationStats>('/api/v1/submissions/gamification/stats'),
+    getGamificationStats: (): Promise<GamificationStats> => apiClient<GamificationStats>('/api/v1/submissions/gamification/stats'),
   },
 
   // Admin / Reviewer endpoints
   admin: {
-    getReviewQueue: (limit?: number) =>
+    getReviewQueue: (limit?: number): Promise<ReviewQueue> =>
       apiClient<ReviewQueue>(`/api/v1/admin/reviews/queue?limit=${limit || 50}`),
-    reviewSubmission: (submissionId: string, data: { status: SubmissionStatus; reviewerNotes?: string; isExemplary?: boolean }) =>
+    reviewSubmission: (submissionId: string, data: { status: SubmissionStatus; reviewerNotes?: string; isExemplary?: boolean }): Promise<Submission> =>
       apiClient<Submission>(`/api/v1/admin/submissions/${submissionId}/review`, {
         method: 'POST',
         body: data,
       }),
-    batchReview: (data: { submissionIds: string[]; status: SubmissionStatus; reviewerNotes?: string }) =>
+    batchReview: (data: { submissionIds: string[]; status: SubmissionStatus; reviewerNotes?: string }): Promise<{ processed: number; failed: number; errors: string[] }> =>
       apiClient<{ processed: number; failed: number; errors: string[] }>('/api/v1/admin/reviews/batch', {
         method: 'POST',
         body: data,
@@ -870,32 +896,32 @@ export const api = {
 
   // AI Hints and Assistance
   ai: {
-    generateHint: (data: AIHintRequest) =>
+    generateHint: (data: AIHintRequest): Promise<AIHint> =>
       apiClient<AIHint>('/api/v1/ai/hint', {
         method: 'POST',
         body: data,
       }),
-    explainError: (data: AIErrorRequest) =>
+    explainError: (data: AIErrorRequest): Promise<AIErrorExplanation> =>
       apiClient<AIErrorExplanation>('/api/v1/ai/explain-error', {
         method: 'POST',
         body: data,
       }),
-    reviewCode: (data: CodeReviewRequest) =>
+    reviewCode: (data: CodeReviewRequest): Promise<CodeReviewResult> =>
       apiClient<CodeReviewResult>('/api/v1/ai/code-review', {
         method: 'POST',
         body: data,
       }),
-    submitFeedback: (data: AIHintFeedback) =>
+    submitFeedback: (data: AIHintFeedback): Promise<void> =>
       apiClient<void>('/api/v1/ai/hint-feedback', {
         method: 'POST',
         body: data,
       }),
-    reportHint: (data: AIReportRequest) =>
+    reportHint: (data: AIReportRequest): Promise<void> =>
       apiClient<void>('/api/v1/ai/report-hint', {
         method: 'POST',
         body: data,
       }),
-    healthCheck: () =>
+    healthCheck: (): Promise<{ status: string; providers: Record<string, boolean>; models: Record<string, string> }> =>
       apiClient<{ status: string; providers: Record<string, boolean>; models: Record<string, string> }>(
         '/api/v1/ai/health'
       ),
@@ -903,23 +929,23 @@ export const api = {
 
   // Smart Recommendations
   recommendations: {
-    getNext: () => apiClient<Recommendation>('/api/v1/recommendations/next'),
-    getAll: (limit?: number) => 
+    getNext: (): Promise<Recommendation> => apiClient<Recommendation>('/api/v1/recommendations/next'),
+    getAll: (limit?: number): Promise<Recommendation[]> => 
       apiClient<Recommendation[]>(`/api/v1/recommendations/all?limit=${limit || 10}`),
-    getReviewQueue: (limit?: number) => 
+    getReviewQueue: (limit?: number): Promise<ReviewQueue> => 
       apiClient<ReviewQueue>(`/api/v1/recommendations/review?limit=${limit || 10}`),
-    getReviewStats: () => apiClient<ReviewStats>('/api/v1/recommendations/review/stats'),
-    recordReview: (problemSlug: string, quality: number) =>
+    getReviewStats: (): Promise<ReviewStats> => apiClient<ReviewStats>('/api/v1/recommendations/review/stats'),
+    recordReview: (problemSlug: string, quality: number): Promise<RecordReviewResponse> =>
       apiClient<RecordReviewResponse>(`/api/v1/recommendations/review/${problemSlug}`, {
         method: 'POST',
         body: { quality },
       }),
-    getWeakAreas: (limit?: number) => 
+    getWeakAreas: (limit?: number): Promise<WeakArea[]> => 
       apiClient<WeakArea[]>(`/api/v1/recommendations/weak-areas?limit=${limit || 5}`),
-    getLearningPath: () => apiClient<LearningPath>('/api/v1/recommendations/path'),
-    getDifficultySuggestion: () => apiClient<DifficultySuggestion | null>('/api/v1/recommendations/difficulty'),
-    getStats: () => apiClient<LearningStats>('/api/v1/recommendations/stats'),
-    getStreak: () => apiClient<StreakInfo>('/api/v1/recommendations/streak'),
+    getLearningPath: (): Promise<LearningPath> => apiClient<LearningPath>('/api/v1/recommendations/path'),
+    getDifficultySuggestion: (): Promise<DifficultySuggestion | null> => apiClient<DifficultySuggestion | null>('/api/v1/recommendations/difficulty'),
+    getStats: (): Promise<LearningStats> => apiClient<LearningStats>('/api/v1/recommendations/stats'),
+    getStreak: (): Promise<StreakInfo> => apiClient<StreakInfo>('/api/v1/recommendations/streak'),
   },
 };
 

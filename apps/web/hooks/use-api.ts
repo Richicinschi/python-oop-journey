@@ -15,12 +15,10 @@ interface UseApiState<T> {
   error: ApiError | null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ApiFunction<T> = (...args: any[]) => Promise<T>;
+type ApiFunction<T> = (...args: unknown[]) => Promise<T>;
 
 interface UseApiReturn<T> extends UseApiState<T> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  execute: (...args: any[]) => Promise<T | null>;
+  execute: (...args: unknown[]) => Promise<T | null>;
   reset: () => void;
 }
 
@@ -48,9 +46,8 @@ export function useApi<T>(apiFunction: ApiFunction<T>): UseApiReturn<T> {
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const execute = useCallback(
-    async (...args: any[]): Promise<T | null> => {
+    async (...args: unknown[]): Promise<T | null> => {
       // Cancel previous request if exists
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();

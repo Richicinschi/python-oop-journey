@@ -98,6 +98,15 @@ class MagicLinkVerify(BaseModel):
     token: str
 
 
+class MagicLinkResponse(BaseModel):
+    """Magic link response schema."""
+
+    success: bool
+    message: str
+
+    model_config = {"extra": "allow"}
+
+
 class TokenResponse(BaseModel):
     """Token response schema."""
 

@@ -5,11 +5,20 @@
 
 import { ProjectFile } from './project-files';
 
+/** Difficulty levels for problems */
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
+/** Item types for bookmarks and activities */
+export type ItemType = 'problem' | 'day' | 'week' | 'theory';
+
+/** Problem status for tracking progress */
+export type ProblemStatus = 'not_started' | 'in_progress' | 'solved' | 'needs_review';
+
 export interface Problem {
   slug: string;
   title: string;
   topic: string;
-  difficulty: string;
+  difficulty: Difficulty;
   order: number;
   week_slug: string;
   day_slug: string;
@@ -109,7 +118,7 @@ export interface LegacyProblem {
   slug: string;
   title: string;
   description: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: Difficulty;
   weekNumber: number;
   dayNumber: number;
 }
@@ -163,7 +172,7 @@ export interface TransformedProblem {
   slug: string;
   title: string;
   topic: string;
-  difficulty: string;
+  difficulty: Difficulty;
   order: number;
   instructions: string;
   hints: string[];
@@ -221,4 +230,30 @@ export interface TransformedWeek {
 export interface TransformedCurriculum {
   version: string;
   weeks: TransformedWeek[];
+}
+
+// ============================================================================
+// TYPE GUARDS
+// ============================================================================
+
+/**
+ * Type guard to check if a value is a valid Difficulty
+ */
+export function isDifficulty(value: unknown): value is Difficulty {
+  return typeof value === 'string' && ['easy', 'medium', 'hard'].includes(value);
+}
+
+/**
+ * Type guard to check if a value is a valid ItemType
+ */
+export function isItemType(value: unknown): value is ItemType {
+  return typeof value === 'string' && ['problem', 'day', 'week', 'theory'].includes(value);
+}
+
+/**
+ * Type guard to check if a value is a valid ProblemStatus
+ */
+export function isProblemStatus(value: unknown): value is ProblemStatus {
+  return typeof value === 'string' && 
+    ['not_started', 'in_progress', 'solved', 'needs_review'].includes(value);
 }

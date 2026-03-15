@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 // Note: Resizable panels can be added later if needed
 import { useProjectFiles } from "@/hooks/use-project-files";
-import type { ProjectItem, ProjectFile } from "@/types/project-files";
+import type { ProjectItem, ProjectFile, ProjectFolder } from "@/types/project-files";
 import { FileTree } from "./file-tree/file-tree";
 import { FileTabs } from "./file-tabs/file-tabs";
 import { SplitEditor } from "./split-editor";
@@ -293,8 +293,5 @@ export function MultiFileEditor({
     </div>
   );
 }
-
-// Need to import ProjectFolder for type
-import type { ProjectFolder } from "@/types/project-files";
 
 export default MultiFileEditor;

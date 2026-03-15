@@ -297,7 +297,7 @@ export const initializeMonaco = (monaco: Monaco) => {
 
     isMonacoInitialized = true;
     if (process.env.NODE_ENV === 'development') {
-
+      // Development-only logging can be added here
     }
   } catch (error: unknown) {
     console.error("Failed to initialize Monaco:", error as Error);

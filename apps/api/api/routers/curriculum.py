@@ -4,7 +4,12 @@ import logging
 
 from fastapi import APIRouter, HTTPException, status
 
-from api.schemas.curriculum import Curriculum, ProblemDetailResponse, Week
+from api.schemas.curriculum import (
+    Curriculum,
+    ProblemDetailResponse,
+    ProblemListItem,
+    Week,
+)
 from api.services.curriculum import CurriculumService
 
 router = APIRouter()
@@ -66,13 +71,14 @@ async def get_week(slug: str) -> Week:
 
 @router.get(
     "/curriculum/problems",
+    response_model=list[ProblemListItem],
     summary="List all problems",
     description="Returns a list of all problems with metadata.",
     responses={
         500: {"description": "Server error"},
     },
 )
-async def list_problems():
+async def list_problems() -> list[ProblemListItem]:
     """List all problems."""
     try:
         return curriculum_service.list_problems()
