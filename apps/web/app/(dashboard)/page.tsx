@@ -16,7 +16,8 @@ import {
   Play,
   RotateCcw,
   ChevronRight,
-  FolderGit2
+  FolderGit2,
+  Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 
