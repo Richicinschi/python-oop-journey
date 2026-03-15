@@ -3,8 +3,7 @@
 
 FROM ghcr.io/engineer-man/piston:latest
 
-# Install Python 3.12 runtime
-# Piston uses "ppman" (Piston Package Manager) to install runtimes
+# Create runtimes directory
 RUN mkdir -p /piston/runtimes
 
 # The API will be available on port 2000
@@ -21,5 +20,5 @@ ENV PISTON_MAX_FILES=25
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:2000/api/v2/runtimes || exit 1
 
-# Start Piston API
-CMD ["piston-api"]
+# The base image already has the correct ENTRYPOINT/CMD
+# Do NOT override CMD - let the base image handle startup
