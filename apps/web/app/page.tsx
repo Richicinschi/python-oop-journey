@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { ContinueLearningWidget } from "@/components/continue-learning";
 import { Badge } from "@/components/ui/badge";
+import { getWeeks, getWeekProblemCount } from "@/lib/curriculum-loader";
 
 const stats = [
   { label: "Weeks", value: "9", icon: BookOpen },
@@ -30,82 +31,22 @@ const stats = [
   { label: "Projects", value: "9", icon: Trophy },
 ];
 
-const weeks = [
-  {
-    number: 0,
-    title: "Getting Started",
-    description: "Python basics, variables, types, and control flow",
-    problems: 80,
-    difficulty: "Beginner",
-    color: "bg-green-500",
-  },
-  {
-    number: 1,
-    title: "Fundamentals",
-    description: "Math, strings, arrays, and basic algorithms",
-    problems: 63,
-    difficulty: "Beginner",
-    color: "bg-blue-500",
-  },
-  {
-    number: 2,
-    title: "Advanced Fundamentals",
-    description: "File I/O, exceptions, modules, and functional programming",
-    problems: 54,
-    difficulty: "Intermediate",
-    color: "bg-indigo-500",
-  },
-  {
-    number: 3,
-    title: "OOP Basics",
-    description: "Classes, objects, methods, and encapsulation",
-    problems: 52,
-    difficulty: "Intermediate",
-    color: "bg-purple-500",
-  },
-  {
-    number: 4,
-    title: "OOP Intermediate",
-    description: "Inheritance, polymorphism, and special methods",
-    problems: 38,
-    difficulty: "Intermediate",
-    color: "bg-pink-500",
-  },
-  {
-    number: 5,
-    title: "OOP Advanced",
-    description: "Abstract classes, descriptors, and metaclasses",
-    problems: 51,
-    difficulty: "Advanced",
-    color: "bg-orange-500",
-  },
-  {
-    number: 6,
-    title: "Design Patterns",
-    description: "Singleton, Factory, Observer, and more patterns",
-    problems: 30,
-    difficulty: "Advanced",
-    color: "bg-red-500",
-  },
-  {
-    number: 7,
-    title: "Real-World OOP",
-    description: "Testing, documentation, and best practices",
-    problems: 30,
-    difficulty: "Advanced",
-    color: "bg-yellow-500",
-  },
-  {
-    number: 8,
-    title: "Capstone Project",
-    description: "Build a complete library management system",
-    problems: 5,
-    difficulty: "Expert",
-    color: "bg-emerald-500",
-  },
-];
+const weekColors: Record<number, string> = {
+  0: "bg-green-500",
+  1: "bg-blue-500",
+  2: "bg-indigo-500",
+  3: "bg-purple-500",
+  4: "bg-pink-500",
+  5: "bg-orange-500",
+  6: "bg-red-500",
+  7: "bg-yellow-500",
+  8: "bg-emerald-500",
+};
 
 export default function HomePage() {
+  // Get actual weeks data from curriculum
+  const weeks = getWeeks();
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -127,7 +68,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="gap-2">
-                <Link href="/problems">
+                <Link href="/weeks">
                   <Zap className="h-4 w-4" />
                   Start Learning
                 </Link>
@@ -174,7 +115,18 @@ export default function HomePage() {
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               {weeks.map((week) => (
-                <WeekCard key={week.number} week={week} />
+                <WeekCard 
+                  key={week.slug} 
+                  week={{
+                    slug: week.slug,
+                    number: week.order,
+                    title: week.title.replace(`Week ${week.order}: `, '').replace('Week 0: ', '').replace('Week 00: ', ''),
+                    description: week.objective || `Master ${week.days.length} days of content`,
+                    problems: getWeekProblemCount(week),
+                    difficulty: week.order <= 1 ? "Beginner" : week.order <= 4 ? "Intermediate" : week.order <= 6 ? "Advanced" : "Expert",
+                    color: weekColors[week.order] || "bg-gray-500",
+                  }} 
+                />
               ))}
             </div>
           </div>
@@ -189,7 +141,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button asChild variant="ghost" className="w-full justify-start">
-                  <Link href="/problems">
+                  <Link href="/weeks">
                     <Code2 className="mr-2 h-4 w-4" />
                     All Problems
                   </Link>
@@ -241,6 +193,7 @@ function WeekCard({
   week,
 }: {
   week: {
+    slug: string;
     number: number;
     title: string;
     description: string;
@@ -250,7 +203,7 @@ function WeekCard({
   };
 }) {
   return (
-    <Link href={`/weeks/${week.number}`}>
+    <Link href={`/weeks/${week.slug}`}>
       <Card className="h-full hover:shadow-md transition-shadow group">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
