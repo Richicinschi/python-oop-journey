@@ -160,7 +160,7 @@ export function CodeEditor({
         onMount={handleMount}
         beforeMount={handleBeforeMount}
         loading={<EditorSkeleton height={height} />}
-        className="[&_.monaco-editor]:outline-none"
+        className="[&_.monaco-editor]:outline-none absolute inset-0"
       />
     </div>
   );

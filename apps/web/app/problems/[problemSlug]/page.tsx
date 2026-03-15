@@ -400,7 +400,7 @@ export default function ProblemPage() {
             onWordWrapChange={setWordWrap}
           />
 
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 relative min-h-0">
             <CodeEditor
               value={code}
               onChange={(value) => value !== undefined && setCode(value)}
@@ -409,6 +409,7 @@ export default function ProblemPage() {
               wordWrap={wordWrap ? 'on' : 'off'}
               minimap={true}
               onRun={handleRun}
+              className="absolute inset-0"
             />
           </div>
 
