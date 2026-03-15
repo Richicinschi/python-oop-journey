@@ -1,66 +1,26 @@
-"""Code execution endpoints using Piston."""
+"""Code execution endpoints using simple subprocess-based sandbox."""
 
 import logging
 import os
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request, status
 
 from api.schemas.execution import (
     CodeExecutionRequest,
     CodeExecutionResponse,
-    CodeValidationExecutionRequest,
-    CodeValidationExecutionResponse,
-    ExecutionJobResponse,
-    ExecutionJobResult,
-    ExecutionMetrics,
     ValidationResponse,
 )
-
-# Use Piston on Render, Docker locally
-USE_PISTON = os.getenv("USE_PISTON", "true").lower() == "true"
-
-if USE_PISTON:
-    from api.services.piston_execution import get_piston_service
-    _execution_service = get_piston_service()
-else:
-    from api.services.execution import get_execution_service
-    _execution_service = get_execution_service()
+from api.services.simple_execution import get_simple_execution_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-
-def get_execution_service_instance():
-    """Get execution service instance."""
-    return _execution_service
-
-
-async def get_client_info(request: Request) -> tuple[str | None, str | None]:
-    """Extract client IP and user agent from request.
-    
-    Args:
-        request: FastAPI request object
-        
-    Returns:
-        Tuple of (ip_address, user_agent)
-    """
-    # Get IP address
-    if "x-forwarded-for" in request.headers:
-        ip = request.headers["x-forwarded-for"].split(",")[0].strip()
-    else:
-        ip = request.client.host if request.client else None
-    
-    # Get user agent
-    user_agent = request.headers.get("user-agent")
-    
-    return ip, user_agent
 
 
 @router.post(
     "/execute/run",
     response_model=CodeExecutionResponse,
     summary="Execute Python code",
-    description="Safely execute Python code in a Docker sandbox with resource limits.",
+    description="Safely execute Python code with resource limits.",
     responses={
         400: {"description": "Invalid code or syntax error"},
         429: {"description": "Rate limit exceeded"},
@@ -71,174 +31,35 @@ async def execute_code(
     request: Request,
     exec_request: CodeExecutionRequest,
 ) -> CodeExecutionResponse:
-    """Execute Python code safely.
-    
-    The code is executed in an isolated Docker container with:
-    - 256MB memory limit
-    - 0.5 CPU limit
-    - No network access
-    - Read-only filesystem
-    - 10 second timeout (configurable up to 60s)
-    """
-    # Get client info
-    ip_address, user_agent = await get_client_info(request)
-    
-    # Check rate limit (TODO: Get actual user_id from auth)
-    user_id = None  # Will come from auth token
-    allowed, current_count, limit = await get_execution_service_instance().check_rate_limit(
-        user_id, ip_address
-    )
-    
-    if not allowed:
-        logger.warning(f"Rate limit exceeded for {ip_address}")
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Rate limit exceeded. Maximum {limit} executions per minute.",
-        )
+    """Execute Python code safely in a subprocess with resource limits."""
+    # Get execution service
+    service = get_simple_execution_service()
     
     # Validate syntax first
-    validation = await get_execution_service_instance().validate_syntax(exec_request.code)
-    if not validation.valid:
+    is_valid, error = service.validate_syntax(exec_request.code)
+    if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
-                "error": validation.error,
-                "line": validation.syntax_error_line,
-                "column": validation.syntax_error_col,
-            },
+            detail={"error": error},
         )
     
-    # Execute the code
-    result = await get_execution_service_instance().execute(
-        exec_request,
-        user_id=user_id,
-        ip_address=ip_address,
-        user_agent=user_agent,
+    # Execute the code (synchronous call wrapped)
+    import asyncio
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None,  # Default executor
+        service.execute,
+        exec_request
     )
     
-    return result
-
-
-@router.post(
-    "/execute/async",
-    response_model=ExecutionJobResponse,
-    summary="Execute Python code asynchronously",
-    description="Submit code for async execution and get a job ID to poll for results.",
-    responses={
-        400: {"description": "Invalid code"},
-        429: {"description": "Rate limit exceeded"},
-    },
-)
-async def execute_code_async(
-    request: Request,
-    exec_request: CodeExecutionRequest,
-) -> ExecutionJobResponse:
-    """Submit code for asynchronous execution.
-    
-    Returns a job ID that can be used to poll for results via /execute/jobs/{job_id}.
-    """
-    # Get client info
-    ip_address, user_agent = await get_client_info(request)
-    
-    # Check rate limit
-    user_id = None
-    allowed, current_count, limit = await get_execution_service_instance().check_rate_limit(
-        user_id, ip_address
+    return CodeExecutionResponse(
+        success=result.exit_code == 0 and not result.timeout,
+        output=result.stdout,
+        error=result.stderr if result.stderr else None,
+        execution_time_ms=result.execution_time_ms,
+        exit_code=result.exit_code,
+        timeout=result.timeout,
     )
-    
-    if not allowed:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Rate limit exceeded. Maximum {limit} executions per minute.",
-        )
-    
-    # Validate syntax
-    validation = await get_execution_service_instance().validate_syntax(exec_request.code)
-    if not validation.valid:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
-                "error": validation.error,
-                "line": validation.syntax_error_line,
-                "column": validation.syntax_error_col,
-            },
-        )
-    
-    # Submit async job
-    result = await get_execution_service_instance().execute_async(exec_request, user_id=user_id)
-    return result
-
-
-@router.get(
-    "/execute/jobs/{job_id}",
-    response_model=ExecutionJobResult,
-    summary="Get async execution result",
-    description="Get the status and result of an asynchronous execution job.",
-    responses={
-        404: {"description": "Job not found"},
-    },
-)
-async def get_execution_job(job_id: str) -> ExecutionJobResult:
-    """Get result of an asynchronous execution job."""
-    result = await get_execution_service_instance().get_job_result(job_id)
-    return result
-
-
-@router.post(
-    "/execute/validate",
-    response_model=CodeValidationExecutionResponse,
-    summary="Execute and validate code with tests",
-    description="Execute code and run test cases against it.",
-    responses={
-        400: {"description": "Invalid code"},
-        429: {"description": "Rate limit exceeded"},
-    },
-)
-async def validate_code_with_tests(
-    request: Request,
-    validation_request: CodeValidationExecutionRequest,
-) -> CodeValidationExecutionResponse:
-    """Execute code with test validation.
-    
-    Runs the provided code and then executes the test code against it.
-    Returns detailed test results including pass/fail status.
-    """
-    # Get client info
-    ip_address, user_agent = await get_client_info(request)
-    
-    # Check rate limit
-    user_id = None
-    allowed, current_count, limit = await get_execution_service_instance().check_rate_limit(
-        user_id, ip_address
-    )
-    
-    if not allowed:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Rate limit exceeded. Maximum {limit} executions per minute.",
-        )
-    
-    # Validate syntax first
-    validation = await get_execution_service_instance().validate_syntax(validation_request.code)
-    if not validation.valid:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
-                "error": validation.error,
-                "line": validation.syntax_error_line,
-                "column": validation.syntax_error_col,
-            },
-        )
-    
-    # Execute with tests
-    result = await get_execution_service_instance().validate_and_test(
-        validation_request,
-        user_id=user_id,
-        ip_address=ip_address,
-        user_agent=user_agent,
-    )
-    
-    return result
 
 
 @router.post(
@@ -249,30 +70,12 @@ async def validate_code_with_tests(
 )
 async def check_syntax(code: str) -> ValidationResponse:
     """Validate Python syntax without executing."""
-    result = await get_execution_service_instance().validate_syntax(code)
-    return result
-
-
-@router.get(
-    "/execute/metrics",
-    response_model=ExecutionMetrics,
-    summary="Get execution metrics",
-    description="Get execution statistics and metrics for monitoring.",
-)
-async def get_metrics(hours: int = 24) -> ExecutionMetrics:
-    """Get execution metrics for the specified time period.
-    
-    Args:
-        hours: Number of hours to include (default: 24, max: 168)
-    """
-    if hours < 1 or hours > 168:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Hours must be between 1 and 168",
-        )
-    
-    metrics = await get_execution_service_instance().get_metrics(hours)
-    return metrics
+    service = get_simple_execution_service()
+    is_valid, error = service.validate_syntax(code)
+    return ValidationResponse(
+        valid=is_valid,
+        error=error,
+    )
 
 
 @router.get(
@@ -282,66 +85,14 @@ async def get_metrics(hours: int = 24) -> ExecutionMetrics:
 )
 async def execution_health():
     """Check execution service health."""
-    import httpx
-    
-    if USE_PISTON:
-        # Check Piston health
-        from api.services.piston_execution import PISTON_API_URL
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(f"{PISTON_API_URL}/api/v2/runtimes", timeout=5.0)
-                if response.status_code == 200:
-                    runtimes = response.json()
-                    python_available = any(r.get("language") == "python" for r in runtimes)
-                    return {
-                        "status": "healthy" if python_available else "degraded",
-                        "mode": "piston",
-                        "python_runtime_available": python_available,
-                        "piston_url": PISTON_API_URL,
-                    }
-                else:
-                    raise HTTPException(
-                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                        detail={
-                            "status": "unhealthy",
-                            "mode": "piston",
-                            "error": f"Piston returned {response.status_code}",
-                        },
-                    )
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail={
-                    "status": "unhealthy",
-                    "mode": "piston",
-                    "error": str(e),
-                },
-            )
-    else:
-        # Check Docker health
-        from api.services.docker_runner import get_docker_runner
-        
-        runner = get_docker_runner()
-        health = runner.health_check()
-        
-        if not health["docker_available"]:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail={
-                    "status": "unhealthy",
-                    "error": "Docker not available",
-                    "details": health,
-                },
-            )
-        
-        return {
-            "status": "healthy" if health["can_run_containers"] else "degraded",
-            "mode": "docker",
-            "details": health,
-        }
+    return {
+        "status": "healthy",
+        "mode": "subprocess",
+        "note": "Using simple subprocess-based execution (Render free tier)",
+    }
 
 
-# Legacy endpoints for backward compatibility
+# Legacy endpoint for backward compatibility
 @router.post(
     "/execute",
     response_model=CodeExecutionResponse,
