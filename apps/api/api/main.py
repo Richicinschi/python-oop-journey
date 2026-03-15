@@ -127,6 +127,8 @@ def create_app() -> FastAPI:
 app = create_app()
 
 
+import time
+
 @app.get("/health", tags=["health"])
 async def health_check():
     """Health check endpoint for load balancers and monitoring."""
@@ -134,7 +136,7 @@ async def health_check():
         "status": "healthy",
         "version": "0.1.0",
         "environment": settings.environment,
-        "timestamp": logging.time.time() if hasattr(logging, 'time') else None,
+        "timestamp": time.time(),
     }
 
 

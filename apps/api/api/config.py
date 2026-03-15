@@ -27,8 +27,12 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
 
-    # CORS
-    allowed_origins_raw: str = Field(default="http://localhost:3000", alias="ALLOWED_ORIGINS")
+    # CORS - Allow all origins in production for Render deployment
+    # In production, this should be restricted to your frontend domain
+    allowed_origins_raw: str = Field(
+        default="http://localhost:3000,https://oop-journey.netlify.app,https://oopjourney.com,https://www.oopjourney.com",
+        alias="ALLOWED_ORIGINS"
+    )
 
     @property
     def allowed_origins(self) -> List[str]:

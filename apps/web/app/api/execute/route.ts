@@ -32,6 +32,18 @@ export async function POST(
     const body: ExecutionRequest = await request.json();
     const { code, mode } = body;
 
+    if (!code || typeof code !== 'string') {
+      return NextResponse.json(
+        {
+          success: false,
+          stdout: '',
+          stderr: 'No code provided',
+          exitCode: 1,
+        },
+        { status: 400 }
+      );
+    }
+
     if (mode === 'run') {
       // Call backend execution API
       const response = await fetch(`${API_BASE_URL}/api/v1/execute/run`, {
@@ -42,19 +54,28 @@ export async function POST(
         body: JSON.stringify({
           code,
           language: 'python',
+          timeout: 10,
         }),
       });
 
+      // Handle HTTP errors gracefully
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Execution failed' }));
+        let errorMessage = 'Execution failed';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorData.error || `HTTP ${response.status}`;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        
         return NextResponse.json(
           {
             success: false,
             stdout: '',
-            stderr: error.detail || 'Execution failed',
+            stderr: errorMessage,
             exitCode: 1,
           },
-          { status: response.status }
+          { status: 200 } // Return 200 so frontend can display error
         );
       }
 
@@ -87,7 +108,7 @@ export async function POST(
         stderr: error instanceof Error ? error.message : 'Network error',
         exitCode: 1,
       },
-      { status: 500 }
+      { status: 200 } // Return 200 so frontend can display error
     );
   }
 }

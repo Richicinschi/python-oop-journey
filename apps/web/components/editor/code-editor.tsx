@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import Editor, { OnMount, BeforeMount, type Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/theme-provider";
 
 import { cn } from "@/lib/utils";
 import {

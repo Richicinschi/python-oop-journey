@@ -7,11 +7,10 @@ Uses resource limits and timeouts for basic security.
 import ast
 import logging
 import os
-import resource
-import signal
 import subprocess
 import sys
 import tempfile
+import time
 from typing import Optional, Tuple
 
 from api.schemas.execution import CodeExecutionRequest, ExecutionResult
@@ -23,18 +22,34 @@ MAX_MEMORY_MB = 256
 MAX_EXECUTION_TIME_SECONDS = 10
 MAX_OUTPUT_SIZE = 10240  # 10KB
 
+# Check if resource module is available (Unix only)
+try:
+    import resource
+    RESOURCE_AVAILABLE = True
+except ImportError:
+    RESOURCE_AVAILABLE = False
+    logger.warning("Resource module not available (Windows or restricted environment). "
+                   "Memory/CPU limits will not be enforced at OS level.")
+
 
 def set_resource_limits():
     """Set resource limits for the child process."""
-    # Limit memory
-    max_memory_bytes = MAX_MEMORY_MB * 1024 * 1024
-    resource.setrlimit(resource.RLIMIT_AS, (max_memory_bytes, max_memory_bytes))
+    if not RESOURCE_AVAILABLE:
+        return
     
-    # Limit CPU time
-    resource.setrlimit(resource.RLIMIT_CPU, (MAX_EXECUTION_TIME_SECONDS, MAX_EXECUTION_TIME_SECONDS))
-    
-    # Limit file size
-    resource.setrlimit(resource.RLIMIT_FSIZE, (MAX_OUTPUT_SIZE, MAX_OUTPUT_SIZE))
+    try:
+        # Limit memory
+        max_memory_bytes = MAX_MEMORY_MB * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (max_memory_bytes, max_memory_bytes))
+        
+        # Limit CPU time
+        resource.setrlimit(resource.RLIMIT_CPU, (MAX_EXECUTION_TIME_SECONDS, MAX_EXECUTION_TIME_SECONDS))
+        
+        # Limit file size
+        resource.setrlimit(resource.RLIMIT_FSIZE, (MAX_OUTPUT_SIZE, MAX_OUTPUT_SIZE))
+    except Exception as e:
+        # Log but don't fail - better to run without limits than not at all
+        logger.warning(f"Failed to set resource limits: {e}")
 
 
 class SimpleExecutionService:
@@ -45,6 +60,9 @@ class SimpleExecutionService:
 
     def execute(self, request: CodeExecutionRequest) -> ExecutionResult:
         """Execute Python code in a subprocess with resource limits."""
+        start_time = time.time()
+        temp_file = None
+        
         try:
             # Create a temporary file for the code
             with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
@@ -52,50 +70,73 @@ class SimpleExecutionService:
                 temp_file = f.name
 
             try:
-                # Run the code with resource limits
+                # Prepare subprocess arguments
+                subprocess_args = {
+                    'capture_output': True,
+                    'text': True,
+                    'timeout': min(request.timeout, MAX_EXECUTION_TIME_SECONDS),
+                }
+                
+                # Only use preexec_fn on Unix systems
+                if RESOURCE_AVAILABLE and hasattr(os, 'fork'):
+                    subprocess_args['preexec_fn'] = set_resource_limits
+
+                # Run the code
                 result = subprocess.run(
                     [sys.executable, temp_file],
-                    capture_output=True,
-                    text=True,
-                    timeout=MAX_EXECUTION_TIME_SECONDS,
-                    preexec_fn=set_resource_limits,
+                    **subprocess_args
                 )
 
+                execution_time_ms = int((time.time() - start_time) * 1000)
+
                 # Truncate output if too large
-                stdout = result.stdout[:MAX_OUTPUT_SIZE]
-                stderr = result.stderr[:MAX_OUTPUT_SIZE]
+                stdout = result.stdout[:MAX_OUTPUT_SIZE] if result.stdout else ""
+                stderr = result.stderr[:MAX_OUTPUT_SIZE] if result.stderr else ""
+
+                success = result.returncode == 0
 
                 return ExecutionResult(
+                    success=success,
                     stdout=stdout,
                     stderr=stderr,
                     exit_code=result.returncode,
-                    execution_time_ms=0,  # Could add timing if needed
+                    execution_time_ms=execution_time_ms,
                     timeout=False,
                 )
 
-            except subprocess.TimeoutExpired:
+            except subprocess.TimeoutExpired as e:
+                execution_time_ms = int((time.time() - start_time) * 1000)
+                stdout = e.stdout[:MAX_OUTPUT_SIZE] if e.stdout else ""
+                stderr = (e.stderr[:MAX_OUTPUT_SIZE] if e.stderr else "") or "Execution timed out"
+                
                 return ExecutionResult(
-                    stdout="",
-                    stderr="Execution timed out",
+                    success=False,
+                    stdout=stdout,
+                    stderr=stderr,
                     exit_code=1,
-                    execution_time_ms=MAX_EXECUTION_TIME_SECONDS * 1000,
+                    execution_time_ms=execution_time_ms,
                     timeout=True,
                 )
 
             finally:
                 # Clean up temp file
-                try:
-                    os.unlink(temp_file)
-                except:
-                    pass
+                if temp_file:
+                    try:
+                        os.unlink(temp_file)
+                    except Exception:
+                        pass
 
         except Exception as e:
+            execution_time_ms = int((time.time() - start_time) * 1000)
             logger.exception("Execution error")
             return ExecutionResult(
+                success=False,
                 stdout="",
                 stderr=f"Execution error: {str(e)}",
                 exit_code=1,
+                execution_time_ms=execution_time_ms,
                 timeout=False,
+                error=str(e),
             )
 
     def validate_syntax(self, code: str) -> Tuple[bool, Optional[str]]:
@@ -104,7 +145,7 @@ class SimpleExecutionService:
             ast.parse(code)
             return True, None
         except SyntaxError as e:
-            return False, f"Syntax error at line {e.lineno}: {e.msg}"
+            return False, f"Syntax error at line {e.lineno}, column {e.offset}: {e.msg}"
         except Exception as e:
             return False, str(e)
 

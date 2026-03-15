@@ -38,9 +38,15 @@ async def execute_code(
     # Validate syntax first
     is_valid, error = service.validate_syntax(exec_request.code)
     if not is_valid:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"error": error},
+        # Return a proper response instead of raising exception
+        # This allows frontend to handle syntax errors gracefully
+        return CodeExecutionResponse(
+            success=False,
+            output="",
+            error=error,
+            execution_time_ms=0,
+            exit_code=1,
+            timeout=False,
         )
     
     # Execute the code (synchronous call wrapped)
@@ -53,7 +59,7 @@ async def execute_code(
     )
     
     return CodeExecutionResponse(
-        success=result.exit_code == 0 and not result.timeout,
+        success=result.success,
         output=result.stdout,
         error=result.stderr if result.stderr else None,
         execution_time_ms=result.execution_time_ms,
@@ -68,13 +74,32 @@ async def execute_code(
     summary="Check code syntax",
     description="Validate Python code syntax without executing.",
 )
-async def check_syntax(code: str) -> ValidationResponse:
+async def check_syntax(exec_request: CodeExecutionRequest) -> ValidationResponse:
     """Validate Python syntax without executing."""
     service = get_simple_execution_service()
-    is_valid, error = service.validate_syntax(code)
+    is_valid, error = service.validate_syntax(exec_request.code)
+    
+    # Parse line/column from error message if syntax error
+    line = None
+    col = None
+    if error and "line" in error:
+        try:
+            # Try to extract line and column from error message
+            import re
+            line_match = re.search(r'line (\d+)', error)
+            col_match = re.search(r'column (\d+)', error)
+            if line_match:
+                line = int(line_match.group(1))
+            if col_match:
+                col = int(col_match.group(1))
+        except Exception:
+            pass
+    
     return ValidationResponse(
         valid=is_valid,
         error=error,
+        syntax_error_line=line,
+        syntax_error_col=col,
     )
 
 
@@ -85,9 +110,14 @@ async def check_syntax(code: str) -> ValidationResponse:
 )
 async def execution_health():
     """Check execution service health."""
+    # Quick test to verify execution works
+    service = get_simple_execution_service()
+    test_result = service.validate_syntax("print('hello')")
+    
     return {
-        "status": "healthy",
+        "status": "healthy" if test_result[0] else "unhealthy",
         "mode": "subprocess",
+        "platform": "unix" if os.name == 'posix' else "windows/other",
         "note": "Using simple subprocess-based execution (Render free tier)",
     }
 

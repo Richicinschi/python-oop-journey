@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTheme } from '@/components/theme-provider';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -91,23 +93,7 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Theme */}
-              <div className="space-y-3">
-                <Label className="text-base">Theme</Label>
-                <div className="grid grid-cols-3 gap-4">
-                  <button className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-primary bg-primary/5">
-                    <Sun className="h-8 w-8" />
-                    <span className="text-sm font-medium">Light</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:border-primary/50">
-                    <Moon className="h-8 w-8" />
-                    <span className="text-sm font-medium">Dark</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:border-primary/50">
-                    <Laptop className="h-8 w-8" />
-                    <span className="text-sm font-medium">System</span>
-                  </button>
-                </div>
-              </div>
+              <ThemeSelector />
 
               <Separator />
 
@@ -508,6 +494,55 @@ export default function SettingsPage() {
 
       {/* Spacer for fixed bar */}
       <div className="h-20" />
+    </div>
+  );
+}
+
+// Theme selector component
+function ThemeSelector() {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <div className="space-y-3">
+      <Label className="text-base">Theme</Label>
+      <div className="grid grid-cols-3 gap-4">
+        <button
+          onClick={() => setTheme('light')}
+          className={cn(
+            "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors",
+            theme === 'light'
+              ? "border-primary bg-primary/5"
+              : "border hover:border-primary/50"
+          )}
+        >
+          <Sun className="h-8 w-8" />
+          <span className="text-sm font-medium">Light</span>
+        </button>
+        <button
+          onClick={() => setTheme('dark')}
+          className={cn(
+            "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors",
+            theme === 'dark'
+              ? "border-primary bg-primary/5"
+              : "border hover:border-primary/50"
+          )}
+        >
+          <Moon className="h-8 w-8" />
+          <span className="text-sm font-medium">Dark</span>
+        </button>
+        <button
+          onClick={() => setTheme('system')}
+          className={cn(
+            "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors",
+            theme === 'system'
+              ? "border-primary bg-primary/5"
+              : "border hover:border-primary/50"
+          )}
+        >
+          <Laptop className="h-8 w-8" />
+          <span className="text-sm font-medium">System</span>
+        </button>
+      </div>
     </div>
   );
 }

@@ -9,7 +9,15 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "analyze": "ANALYZE=true npm run build",
-    "lighthouse": "lhci autorun"
+    "lighthouse": "lhci autorun",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:critical": "playwright test e2e/critical-paths.spec.ts",
+    "test:e2e:nav": "playwright test e2e/navigation.spec.ts",
+    "test:e2e:code": "playwright test e2e/code-execution.spec.ts",
+    "test:e2e:smoke": "playwright test e2e/smoke-test.spec.ts",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "next": "14.1.0",

@@ -26,7 +26,8 @@ import {
   ChevronDown,
   Play,
   CheckCircle2,
-  Circle
+  Circle,
+  LogIn
 } from 'lucide-react';
 import { getWeeks } from '@/lib/curriculum-loader';
 
@@ -200,7 +201,7 @@ export function Sidebar({ className }: SidebarProps) {
           icon={Search}
           label="Search"
           collapsed={collapsed}
-          active={pathname === '/search'}
+          active={pathname === '/search' || pathname.startsWith('/problems')}
         />
         <SidebarItem
           href="/settings"
@@ -208,6 +209,13 @@ export function Sidebar({ className }: SidebarProps) {
           label="Settings"
           collapsed={collapsed}
           active={pathname === '/settings'}
+        />
+        <SidebarItem
+          href="/auth/login"
+          icon={LogIn}
+          label="Sign In"
+          collapsed={collapsed}
+          active={pathname === '/auth/login'}
         />
       </div>
     </div>

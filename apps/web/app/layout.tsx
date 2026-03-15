@@ -45,6 +45,25 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
         
+        {/* Theme initialization script - runs before React hydrates to prevent flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const stored = localStorage.getItem('python-oop-journey-theme');
+                  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  const theme = stored === 'dark' || (stored === 'system' && systemDark) || (!stored && systemDark) ? 'dark' : 'light';
+                  document.documentElement.classList.add(theme);
+                } catch (e) {
+                  // Fallback to light if localStorage is not available
+                  document.documentElement.classList.add('light');
+                }
+              })();
+            `,
+          }}
+        />
+        
         {/* Preconnect to critical domains for performance */}
         <PreconnectHints />
         

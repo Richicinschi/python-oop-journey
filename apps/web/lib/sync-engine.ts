@@ -325,7 +325,7 @@ async function syncOperation(
     if (error instanceof ApiError) {
       if (error.status === 401) {
         // Auth error - don't retry, redirect to login
-        window.location.href = '/login';
+        window.location.href = '/auth/login';
         return { success: false, error: 'Authentication required' };
       }
 
