@@ -4,6 +4,7 @@ import { Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocalBookmarks } from "@/hooks/use-bookmarks";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 import type { Bookmark as BookmarkType } from "@repo/types";
 
 interface BookmarkButtonProps {
@@ -22,12 +23,30 @@ export function BookmarkButton({
   showLabel = false,
 }: BookmarkButtonProps) {
   const { isBookmarked, toggleBookmark } = useLocalBookmarks();
+  const { toast } = useToast();
   const bookmarked = isBookmarked(item.id);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleBookmark(item);
+    const newBookmarkedState = toggleBookmark(item);
+    
+    // Show toast notification
+    if (newBookmarkedState) {
+      toast({
+        title: "Bookmark added",
+        description: `"${item.title}" has been added to your bookmarks.`,
+        variant: "success",
+        duration: 3000,
+      });
+    } else {
+      toast({
+        title: "Bookmark removed",
+        description: `"${item.title}" has been removed from your bookmarks.`,
+        variant: "default",
+        duration: 3000,
+      });
+    }
   };
 
   return (

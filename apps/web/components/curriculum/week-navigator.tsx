@@ -13,26 +13,47 @@ import {
 } from '@/components/ui/accordion';
 import { Week, Day } from '@/types/curriculum';
 import { BookOpen, FileText, CheckCircle2, Circle, Lock } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useEffect, useCallback } from 'react';
 
 interface WeekNavigatorProps {
   weeks: Week[];
   className?: string;
+  /**
+   * Callback when a link is clicked (used to close mobile sidebar)
+   */
+  onLinkClick?: () => void;
 }
 
-export function WeekNavigator({ weeks, className }: WeekNavigatorProps) {
+export function WeekNavigator({ weeks, className, onLinkClick }: WeekNavigatorProps) {
   const pathname = usePathname();
+  
+  // Persist expanded weeks in localStorage
+  const [expandedWeeks, setExpandedWeeks] = useLocalStorage<string[]>('oop-journey-expanded-weeks', []);
 
-  // Determine which week is currently active
-  const getActiveWeek = () => {
+  // Determine which week is currently active based on pathname
+  const getActiveWeek = useCallback(() => {
     for (const week of weeks) {
       if (pathname.includes(week.slug)) {
         return week.slug;
       }
     }
     return null;
-  };
+  }, [pathname, weeks]);
 
   const activeWeek = getActiveWeek();
+
+  // Auto-expand the active week when pathname changes
+  useEffect(() => {
+    if (activeWeek && !expandedWeeks.includes(activeWeek)) {
+      setExpandedWeeks((prev) => [...prev, activeWeek]);
+    }
+  }, [activeWeek, expandedWeeks, setExpandedWeeks]);
+
+  // Handle accordion value changes
+  const handleValueChange = (value: string[]) => {
+    setExpandedWeeks(value);
+  };
 
   return (
     <ScrollArea className={cn('h-full', className)}>
@@ -48,7 +69,8 @@ export function WeekNavigator({ weeks, className }: WeekNavigatorProps) {
 
         <Accordion 
           type="multiple" 
-          defaultValue={activeWeek ? [activeWeek] : []}
+          value={expandedWeeks}
+          onValueChange={handleValueChange}
           className="space-y-1"
         >
           {weeks.map((week, weekIndex) => (
@@ -58,6 +80,7 @@ export function WeekNavigator({ weeks, className }: WeekNavigatorProps) {
               weekIndex={weekIndex}
               isActive={pathname.includes(week.slug)}
               pathname={pathname}
+              onLinkClick={onLinkClick}
             />
           ))}
         </Accordion>
@@ -71,9 +94,10 @@ interface WeekItemProps {
   weekIndex: number;
   isActive: boolean;
   pathname: string;
+  onLinkClick?: () => void;
 }
 
-function WeekItem({ week, weekIndex, isActive, pathname }: WeekItemProps) {
+function WeekItem({ week, weekIndex, isActive, pathname, onLinkClick }: WeekItemProps) {
   const isLocked = weekIndex > 0; // First week unlocked
   const completedDays = 0; // TODO: Get from progress store
   const progress = week.days.length > 0 
@@ -114,6 +138,7 @@ function WeekItem({ week, weekIndex, isActive, pathname }: WeekItemProps) {
           {/* Week Overview Link */}
           <Link
             href={`/weeks/${week.slug}`}
+            onClick={onLinkClick}
             className={cn(
               'flex items-center gap-2 py-1.5 px-2 text-sm rounded-md transition-colors',
               pathname === `/weeks/${week.slug}`
@@ -133,6 +158,7 @@ function WeekItem({ week, weekIndex, isActive, pathname }: WeekItemProps) {
               day={day} 
               dayIndex={dayIndex}
               isActive={pathname.includes(day.slug)}
+              onLinkClick={onLinkClick}
             />
           ))}
         </div>
@@ -146,19 +172,21 @@ interface DayItemProps {
   day: Day;
   dayIndex: number;
   isActive: boolean;
+  onLinkClick?: () => void;
 }
 
-function DayItem({ week, day, dayIndex, isActive }: DayItemProps) {
+function DayItem({ week, day, dayIndex, isActive, onLinkClick }: DayItemProps) {
   const isLocked = dayIndex > 0;
   const isCompleted = false; // TODO: Get from progress store
   const hasTheory = day.theory_content && day.theory_content.length > 0;
-  const isTheoryPage = typeof window !== 'undefined' && 
-    window.location.pathname.includes('theory');
+  const pathname = usePathname();
+  const isTheoryPage = pathname.includes('theory');
 
   return (
     <div className="space-y-0.5">
       <Link
         href={`/weeks/${week.slug}/days/${day.slug}`}
+        onClick={onLinkClick}
         className={cn(
           'flex items-center gap-2 py-1.5 px-2 text-sm rounded-md transition-colors',
           isActive && !isTheoryPage
@@ -181,6 +209,7 @@ function DayItem({ week, day, dayIndex, isActive }: DayItemProps) {
       {hasTheory && isActive && (
         <Link
           href={`/weeks/${week.slug}/days/${day.slug}/theory`}
+          onClick={onLinkClick}
           className={cn(
             'flex items-center gap-2 py-1 px-2 text-xs rounded-md transition-colors ml-4',
             isTheoryPage

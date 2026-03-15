@@ -6,6 +6,8 @@ import Script from "next/script";
 import { Suspense } from "react";
 import { PerformanceMonitor, PreconnectHints } from "@/components/performance-monitor";
 import { Providers } from "@/components/providers";
+import { Toaster } from "@/components/ui/sonner";
+import { PageLoadingIndicator } from "@/components/ui/page-loading-indicator";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -80,7 +82,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <ThemeProvider defaultTheme="system">
+            <Suspense fallback={null}>
+              <PageLoadingIndicator position="fixed" variant="primary" />
+            </Suspense>
             {children}
+            <Toaster position="bottom-right" richColors closeButton />
           </ThemeProvider>
         </Providers>
         

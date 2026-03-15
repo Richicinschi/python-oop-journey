@@ -13,6 +13,7 @@ import { OutputPanel } from '@/components/editor/output-panel';
 import { HintsPanel } from '@/components/editor/hints-panel';
 import { InstructionsPanel } from '@/components/editor/instructions-panel';
 import { SolutionModal } from '@/components/editor/solution-modal';
+import { ProblemSkeleton } from '@/components/problems/problem-skeleton';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useProgress } from '@/hooks/use-progress';
 import { verificationApi } from '@/lib/verification-api';
@@ -256,11 +257,7 @@ export default function ProblemPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
+    return <ProblemSkeleton />;
   }
 
   if (!problem || !week || !day) {
@@ -393,9 +390,12 @@ export default function ProblemPage() {
             hasUnsavedChanges={hasUnsavedChanges}
             fontSize={fontSize}
             wordWrap={wordWrap}
+            isRunning={isRunning}
+            isVerifying={isVerifying}
             onReset={handleReset}
             onSave={handleSave}
             onRun={handleRun}
+            onVerify={handleVerify}
             onFontSizeChange={setFontSize}
             onWordWrapChange={setWordWrap}
           />

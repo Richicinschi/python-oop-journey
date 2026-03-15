@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Terminal, Loader2 } from "lucide-react";
+import { Terminal, Loader2, CheckCircle, XCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { CodeEditor } from "./code-editor";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEditorStore, useEditorKeyboardShortcuts } from "@/hooks/use-editor-store";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/components/ui/use-toast";
 
 export interface PlaygroundProps {
   /** Problem ID for localStorage persistence */
@@ -54,6 +55,7 @@ export function Playground({
   const [result, setResult] = useState<PlaygroundResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState<string>("");
+  const { toast } = useToast();
 
   // Editor store with problem-specific persistence
   const editor = useEditorStore({
@@ -80,6 +82,23 @@ export function Playground({
         executionTime,
       });
       setOutput(runResult.output);
+
+      // Show toast notification based on result
+      if (runResult.success) {
+        toast({
+          title: "Code executed successfully",
+          description: `Execution completed in ${executionTime}ms`,
+          variant: "success",
+          duration: 3000,
+        });
+      } else {
+        toast({
+          title: "Code execution failed",
+          description: runResult.error || "An error occurred during execution.",
+          variant: "error",
+          duration: 5000,
+        });
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
@@ -89,10 +108,17 @@ export function Playground({
         error: errorMessage,
       });
       setOutput(`Error: ${errorMessage}`);
+      
+      toast({
+        title: "Code execution failed",
+        description: errorMessage,
+        variant: "error",
+        duration: 5000,
+      });
     } finally {
       setIsRunning(false);
     }
-  }, [onRun, editor.code]);
+  }, [onRun, editor.code, toast]);
 
   // Keyboard shortcuts
   useEditorKeyboardShortcuts({

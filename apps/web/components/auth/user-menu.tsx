@@ -12,9 +12,30 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut, Settings, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { useToast } from "@/components/ui/use-toast";
 
 export function UserMenu() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+        variant: "default",
+        duration: 3000,
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "error",
+        duration: 5000,
+      });
+    }
+  };
 
   if (!isAuthenticated || !user) {
     return (
@@ -67,7 +88,7 @@ export function UserMenu() {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={logout}
+          onClick={handleLogout}
           className="cursor-pointer text-red-600 focus:text-red-600"
         >
           <LogOut className="w-4 h-4 mr-2" />

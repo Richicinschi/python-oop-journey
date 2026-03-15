@@ -377,8 +377,10 @@ export function useLocalBookmarks() {
     const exists = bookmarks.some((b) => b.id === item.id);
     if (exists) {
       removeBookmark(item.id);
+      return false;
     } else {
       addBookmark(item as Omit<LegacyBookmark, 'createdAt'>);
+      return true;
     }
   }, [bookmarks, addBookmark, removeBookmark]);
 

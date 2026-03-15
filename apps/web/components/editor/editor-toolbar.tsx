@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
   RotateCcw,
   Save,
@@ -10,6 +10,8 @@ import {
   WrapText,
   Play,
   Settings,
+  Loader2,
+  Check,
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 
@@ -30,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/components/ui/use-toast";
 
 export interface EditorToolbarProps {
   /** Whether code has unsaved changes */
@@ -38,12 +41,18 @@ export interface EditorToolbarProps {
   fontSize?: number;
   /** Current word wrap state */
   wordWrap?: boolean;
+  /** Whether code is currently running */
+  isRunning?: boolean;
+  /** Whether code is currently being verified/submitted */
+  isVerifying?: boolean;
   /** Called when reset is clicked */
   onReset?: () => void;
-  /** Called when save is clicked */
-  onSave?: () => void;
+  /** Called when save is clicked - can return a promise */
+  onSave?: () => void | Promise<void>;
   /** Called when run is clicked */
   onRun?: () => void;
+  /** Called when verify/submit is clicked */
+  onVerify?: () => void;
   /** Called when font size changes */
   onFontSizeChange?: (size: number) => void;
   /** Called when word wrap toggles */
@@ -58,14 +67,19 @@ export function EditorToolbar({
   hasUnsavedChanges = false,
   fontSize = 14,
   wordWrap = true,
+  isRunning = false,
+  isVerifying = false,
   onReset,
   onSave,
   onRun,
+  onVerify,
   onFontSizeChange,
   onWordWrapChange,
   className,
 }: EditorToolbarProps) {
   const { theme, setTheme, systemTheme } = useTheme();
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
 
   const effectiveTheme = theme === "system" ? systemTheme : theme;
   const isDark = effectiveTheme === "dark";
@@ -80,6 +94,30 @@ export function EditorToolbar({
     },
     [onFontSizeChange]
   );
+
+  const handleSave = useCallback(async () => {
+    if (!onSave || !hasUnsavedChanges) return;
+
+    setIsSaving(true);
+    try {
+      await Promise.resolve(onSave());
+      toast({
+        title: "Draft saved",
+        description: "Your code has been saved successfully.",
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to save",
+        description: error instanceof Error ? error.message : "An error occurred while saving.",
+        variant: "error",
+        duration: 5000,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [onSave, hasUnsavedChanges, toast]);
 
   return (
     <TooltipProvider delayDuration={100}>
@@ -114,21 +152,32 @@ export function EditorToolbar({
             <Button
               variant="ghost"
               size="sm"
-              onClick={onSave}
-              disabled={!hasUnsavedChanges}
+              onClick={handleSave}
+              disabled={!hasUnsavedChanges || isSaving}
               className="h-8 px-2"
             >
-              <Save
-                className={cn(
-                  "h-4 w-4",
-                  hasUnsavedChanges && "text-yellow-500"
-                )}
-              />
-              <span className="sr-only">Save draft</span>
+              {isSaving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save
+                  className={cn(
+                    "h-4 w-4",
+                    hasUnsavedChanges && "text-yellow-500"
+                  )}
+                />
+              )}
+              <span className="sr-only">
+                {isSaving ? "Saving..." : "Save draft"}
+              </span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Save draft {hasUnsavedChanges && "(unsaved changes)"}</p>
+            <p>
+              {isSaving 
+                ? "Saving..." 
+                : `Save draft${hasUnsavedChanges ? " (unsaved changes)" : ""}`
+              }
+            </p>
           </TooltipContent>
         </Tooltip>
 
@@ -141,19 +190,53 @@ export function EditorToolbar({
               variant="default"
               size="sm"
               onClick={onRun}
+              disabled={isRunning}
               className="h-8 px-3 gap-1.5"
             >
-              <Play className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Run</span>
+              {isRunning ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+              <span className="hidden sm:inline text-xs">
+                {isRunning ? 'Running...' : 'Run'}
+              </span>
               <kbd className="hidden md:inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground ml-1">
                 <span className="text-xs">⌘</span>Enter
               </kbd>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Run code (Ctrl+Enter)</p>
+            <p>{isRunning ? 'Running code...' : 'Run code (Ctrl+Enter)'}</p>
           </TooltipContent>
         </Tooltip>
+
+        {/* Verify/Submit button - only shown when onVerify is provided */}
+        {onVerify && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={onVerify}
+                disabled={isVerifying}
+                className="h-8 px-3 gap-1.5"
+              >
+                {isVerifying ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline text-xs">
+                  {isVerifying ? 'Submitting...' : 'Submit'}
+                </span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isVerifying ? 'Submitting solution...' : 'Submit solution (Ctrl+Shift+Enter)'}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
 
         <div className="flex-1" />
 
