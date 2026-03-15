@@ -1,8 +1,9 @@
-"""Hook for making API calls with automatic CSRF token handling.
-
-This hook wraps the api client and automatically includes CSRF tokens
-for state-changing requests. It also provides loading and error states.
-"""
+/**
+ * Hook for making API calls with automatic CSRF token handling.
+ *
+ * This hook wraps the api client and automatically includes CSRF tokens
+ * for state-changing requests. It also provides loading and error states.
+ */
 
 import { useState, useCallback, useRef } from 'react';
 import { useCsrf } from '@/contexts/csrf-context';

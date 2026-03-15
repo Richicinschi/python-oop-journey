@@ -1,8 +1,9 @@
-"""CSRF Protection Context.
-
-Provides CSRF token management for the application.
-Fetches tokens from the backend and includes them in state-changing requests.
-"""
+/**
+ * CSRF Protection Context.
+ *
+ * Provides CSRF token management for the application.
+ * Fetches tokens from the backend and includes them in state-changing requests.
+ */
 
 import React, {
   createContext,

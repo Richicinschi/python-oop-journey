@@ -41,9 +41,16 @@ def _build_database_url():
     The prepare_threshold parameter is added as a query parameter instead of
     connect_args to avoid asyncpg compatibility issues. Setting it to 0
     disables prepared statement caching, which is needed for CockroachDB
-    compatibility and some connection pool configurations.
+    compatibility and some PostgreSQL setups.
+    
+    Note: This only applies to PostgreSQL URLs (postgresql+asyncpg).
+    SQLite and other databases are returned unchanged.
     """
     url = settings.database_url
+    
+    # Only modify PostgreSQL URLs with asyncpg driver
+    if not url.startswith("postgresql+asyncpg"):
+        return url
     
     # Parse the URL
     parsed = urlparse(url)
