@@ -118,31 +118,9 @@ export default function ProblemPage() {
     }
   }, [code, problem, problemSlug, originalCode, hasStarted, setHasStarted, updateStreak]);
 
-  // Keyboard shortcuts - use ref pattern to always access latest function versions
-  const handleRunRef = useRef(handleRun);
-  const handleVerifyRef = useRef(handleVerify);
-  
-  // Keep refs updated with latest function versions
-  handleRunRef.current = handleRun;
-  handleVerifyRef.current = handleVerify;
-  
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          if (e.shiftKey) {
-            handleVerifyRef.current();
-          } else {
-            handleRunRef.current();
-          }
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  // Define refs for keyboard shortcuts (will be assigned after functions are defined)
+  const handleRunRef = useRef<(() => void) | null>(null);
+  const handleVerifyRef = useRef<(() => void) | null>(null);
 
   const addLog = useCallback((message: string) => {
     setLogs((prev) => [...prev.slice(-49), message]);
@@ -270,6 +248,29 @@ export default function ProblemPage() {
     setExecutionResult(null);
     setVerificationResult(null);
   };
+
+  // Update refs to point to current function versions
+  handleRunRef.current = handleRun;
+  handleVerifyRef.current = handleVerify;
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            handleVerifyRef.current?.();
+          } else {
+            handleRunRef.current?.();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   if (loading) {
     return <ProblemSkeleton />;
