@@ -57,7 +57,7 @@ class ProgressCreate(ProgressBase):
 class Progress(ProgressBase):
     """Progress response schema."""
 
-    id: int
+    id: str
     user_id: str
     completed_at: datetime | None
     created_at: datetime
@@ -82,7 +82,7 @@ class DraftCreate(DraftBase):
 class Draft(DraftBase):
     """Draft response schema."""
 
-    id: int
+    id: str
     user_id: str
     saved_at: datetime
     created_at: datetime

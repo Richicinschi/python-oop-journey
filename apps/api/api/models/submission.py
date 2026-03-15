@@ -1,6 +1,6 @@
 """Submission model for project submissions and reviews."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import String, DateTime, ForeignKey, Text, JSON, Integer, Boolean

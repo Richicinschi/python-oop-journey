@@ -1,7 +1,7 @@
 """Tests for submission system."""
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from api.services.submission import SubmissionService
@@ -203,7 +203,7 @@ class TestSubmissionService:
                 project_slug="project-1",
                 files={},
                 status="approved",
-                submitted_at=datetime.utcnow(),
+                submitted_at=datetime.now(timezone.utc),
             ),
             Submission(
                 id=str(uuid4()),
@@ -211,7 +211,7 @@ class TestSubmissionService:
                 project_slug="project-2",
                 files={},
                 status="approved",
-                submitted_at=datetime.utcnow(),
+                submitted_at=datetime.now(timezone.utc),
             ),
         ]
         

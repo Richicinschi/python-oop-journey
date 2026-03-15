@@ -249,7 +249,7 @@ async def get_review_queue(
     from datetime import datetime
     items = []
     for s in pending:
-        waiting_hours = (datetime.utcnow() - s.submitted_at).total_seconds() / 3600
+        waiting_hours = (datetime.now(timezone.utc) - s.submitted_at).total_seconds() / 3600
         test_summary = s.test_results.get("test_summary", {
             "total": s.test_results.get("total", 0),
             "passed": s.test_results.get("passed", 0),

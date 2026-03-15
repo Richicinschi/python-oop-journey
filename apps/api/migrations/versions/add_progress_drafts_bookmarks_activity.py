@@ -111,7 +111,7 @@ def upgrade() -> None:
             sa.Column('user_id', sa.String(36), nullable=False),
             sa.Column('activity_type', sa.String(50), nullable=False),
             sa.Column('item_slug', sa.String(100), nullable=True),
-            sa.Column('meta_data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+            sa.Column('metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
             sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
             sa.PrimaryKeyConstraint('id'),
             sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),

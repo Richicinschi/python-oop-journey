@@ -4,6 +4,7 @@ import logging
 import os
 
 from fastapi import APIRouter, HTTPException, Request, status
+from pydantic import BaseModel
 
 from api.core.rate_limit import rate_limit_per_minute
 from api.schemas.execution import (
@@ -15,6 +16,14 @@ from api.services.simple_execution import get_simple_execution_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+class ExecutionHealthResponse(BaseModel):
+    """Execution service health check response."""
+    status: str
+    mode: str
+    platform: str
+    note: str
 
 
 @router.post(
@@ -119,6 +128,7 @@ async def check_syntax(
 
 @router.get(
     "/execute/health",
+    response_model=ExecutionHealthResponse,
     summary="Execution service health check",
     description="Check the health of the code execution service.",
 )
@@ -128,12 +138,12 @@ async def execution_health():
     service = get_simple_execution_service()
     test_result = service.validate_syntax("print('hello')")
     
-    return {
-        "status": "healthy" if test_result[0] else "unhealthy",
-        "mode": "subprocess",
-        "platform": "unix" if os.name == 'posix' else "windows/other",
-        "note": "Using simple subprocess-based execution (Render free tier)",
-    }
+    return ExecutionHealthResponse(
+        status="healthy" if test_result[0] else "unhealthy",
+        mode="subprocess",
+        platform="unix" if os.name == 'posix' else "windows/other",
+        note="Using simple subprocess-based execution (Render free tier)",
+    )
 
 
 # Legacy endpoint for backward compatibility

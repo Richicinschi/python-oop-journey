@@ -3,7 +3,7 @@
 import logging
 import math
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from uuid import uuid4
 
@@ -37,7 +37,7 @@ class ReviewItem:
                    4 = Correct with hesitation
                    5 = Perfect response
         """
-        self.last_reviewed = datetime.utcnow()
+        self.last_reviewed = datetime.now(timezone.utc)
         
         if quality < 3:
             # Failed review - reset repetitions
@@ -72,7 +72,7 @@ class ReviewItem:
             self.priority = float('inf')
             return
         
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         days_overdue = (now - self.next_review).total_seconds() / 86400
         
         # Priority formula: overdue days + ease factor weight + repetition bonus
@@ -96,7 +96,7 @@ class ReviewQueue:
     
     def get_due_items(self, now: Optional[datetime] = None) -> List[ReviewItem]:
         """Get all items due for review."""
-        now = now or datetime.utcnow()
+        now = now or datetime.now(timezone.utc)
         return [
             item for item in self.items
             if item.next_review and item.next_review <= now
@@ -151,7 +151,7 @@ class SpacedRepetitionService:
         # Calculate interval based on time since solved
         interval = 1
         if progress.solved_at:
-            days_since_solved = (datetime.utcnow() - progress.solved_at).days
+            days_since_solved = (datetime.now(timezone.utc) - progress.solved_at).days
             if days_since_solved > 0:
                 interval = min(days_since_solved, 30)
         
@@ -172,7 +172,7 @@ class SpacedRepetitionService:
     def _calculate_initial_next_review(self, progress: Progress) -> datetime:
         """Calculate initial next review date."""
         if not progress.solved_at:
-            return datetime.utcnow()
+            return datetime.now(timezone.utc)
         
         # First review after 1 day
         # Second review after 6 days  
@@ -195,7 +195,7 @@ class SpacedRepetitionService:
         total_items = len(queue.items)
         
         # Calculate items due today, this week
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         today_end = now + timedelta(days=1)
         week_end = now + timedelta(days=7)
         
@@ -295,7 +295,7 @@ class SpacedRepetitionService:
         
         # Calculate current streak
         current_streak = 0
-        today = datetime.utcnow().date()
+        today = datetime.now(timezone.utc).date()
         yesterday = today - timedelta(days=1)
         
         if sorted_dates and (sorted_dates[0] == today or sorted_dates[0] == yesterday):

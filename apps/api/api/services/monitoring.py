@@ -3,7 +3,7 @@
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any
 
@@ -93,7 +93,7 @@ class ExecutionMonitor:
             exit_code=exit_code,
             error_type=error_type,
             memory_usage_mb=memory_usage_mb,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             ip_address=ip_address,
             user_agent=user_agent
         )
@@ -146,7 +146,7 @@ class ExecutionMonitor:
     
     def _track_user_execution(self, user_id: str) -> None:
         """Track execution for rate limiting."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         window_start = now - timedelta(seconds=self.RATE_LIMIT_WINDOW_SECONDS)
         
         if user_id not in self._user_execution_counts:
@@ -193,7 +193,7 @@ class ExecutionMonitor:
             recent_from_ip = sum(
                 1 for e in self._execution_history
                 if e.ip_address == record.ip_address 
-                and e.timestamp > datetime.utcnow() - timedelta(minutes=1)
+                and e.timestamp > datetime.now(timezone.utc) - timedelta(minutes=1)
             )
             if recent_from_ip > 20:
                 logger.warning(
@@ -224,7 +224,7 @@ class ExecutionMonitor:
     
     def _get_recent_executions(self, minutes: int = 60) -> list[ExecutionRecord]:
         """Get executions from the last N minutes."""
-        cutoff = datetime.utcnow() - timedelta(minutes=minutes)
+        cutoff = datetime.now(timezone.utc) - timedelta(minutes=minutes)
         return [e for e in self._execution_history if e.timestamp > cutoff]
     
     def get_metrics(self, hours: int = 24) -> ExecutionMetrics:
@@ -238,7 +238,7 @@ class ExecutionMonitor:
         """
         executions = [
             e for e in self._execution_history
-            if e.timestamp > datetime.utcnow() - timedelta(hours=hours)
+            if e.timestamp > datetime.now(timezone.utc) - timedelta(hours=hours)
         ]
         
         if not executions:
@@ -289,7 +289,7 @@ class ExecutionMonitor:
         Returns:
             Dictionary mapping error types to counts
         """
-        cutoff = datetime.utcnow() - timedelta(hours=hours)
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
         errors: dict[str, int] = {}
         
         for e in self._execution_history:

@@ -1,7 +1,7 @@
 """Activity service for logging and retrieving user activities."""
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select, and_, desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -57,7 +57,7 @@ class ActivityService:
 
     async def get_activity_summary(self, user_id: str, days: int = 7) -> dict:
         """Get activity summary for a time period using SQL GROUP BY for performance."""
-        cutoff = datetime.utcnow() - timedelta(days=days)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
 
         # Use SQL GROUP BY for efficient counting - avoids N+1 query issue
         # and reduces memory usage by not loading all activities into Python
@@ -115,7 +115,7 @@ class ActivityService:
         self, user_id: str, days: int = 30
     ) -> dict:
         """Get detailed activity statistics."""
-        cutoff = datetime.utcnow() - timedelta(days=days)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
 
         # Get counts by activity type
         stmt = (
@@ -163,7 +163,7 @@ class ActivityService:
         self, days: int = 365
     ) -> int:
         """Delete activities older than specified days. Returns count deleted."""
-        cutoff = datetime.utcnow() - timedelta(days=days)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
         
         stmt = select(Activity).where(Activity.created_at < cutoff)
         result = await self.session.execute(stmt)

@@ -1,7 +1,7 @@
 """Progress service for tracking user problem completion."""
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select, func, and_, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -72,18 +72,18 @@ class ProgressService:
             
             # Track first attempt
             if status == ProblemStatus.IN_PROGRESS and not progress.first_attempted_at:
-                progress.first_attempted_at = datetime.utcnow()
+                progress.first_attempted_at = datetime.now(timezone.utc)
             
             # Track completion
             if status == ProblemStatus.SOLVED and not progress.solved_at:
-                progress.solved_at = datetime.utcnow()
+                progress.solved_at = datetime.now(timezone.utc)
 
         # Update time spent
         if time_spent_seconds:
             progress.time_spent_seconds += time_spent_seconds
 
-        progress.last_attempted_at = datetime.utcnow()
-        progress.updated_at = datetime.utcnow()
+        progress.last_attempted_at = datetime.now(timezone.utc)
+        progress.updated_at = datetime.now(timezone.utc)
 
         await self.session.commit()
         await self.session.refresh(progress)
@@ -94,17 +94,17 @@ class ProgressService:
         progress = await self.get_or_create_progress(user_id, problem_slug)
         
         progress.attempts_count += 1
-        progress.last_attempted_at = datetime.utcnow()
+        progress.last_attempted_at = datetime.now(timezone.utc)
         
         # Set first attempted if not set
         if not progress.first_attempted_at:
-            progress.first_attempted_at = datetime.utcnow()
+            progress.first_attempted_at = datetime.now(timezone.utc)
         
         # Auto-update status to in_progress if not started
         if progress.status == ProblemStatus.NOT_STARTED:
             progress.status = ProblemStatus.IN_PROGRESS
 
-        progress.updated_at = datetime.utcnow()
+        progress.updated_at = datetime.now(timezone.utc)
         
         await self.session.commit()
         await self.session.refresh(progress)
@@ -188,7 +188,7 @@ class ProgressService:
         - Materializing streak counts in a user_stats table
         """
         # Get activity dates for the last 365 days
-        cutoff = datetime.utcnow() - timedelta(days=365)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=365)
         stmt = (
             select(distinct(func.date(Activity.created_at)))
             .where(
@@ -206,7 +206,7 @@ class ProgressService:
             return 0
 
         # Calculate streak
-        today = datetime.utcnow().date()
+        today = datetime.now(timezone.utc).date()
         yesterday = today - timedelta(days=1)
 
         streak = 0

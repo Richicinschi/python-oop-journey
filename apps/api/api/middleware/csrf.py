@@ -12,7 +12,7 @@ Security features:
 
 import logging
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Set
 
 from fastapi import HTTPException, Request, Response, status
@@ -73,7 +73,7 @@ class CSRFTokenStore:
             The generated CSRF token
         """
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(hours=CSRF_TOKEN_EXPIRY_HOURS)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=CSRF_TOKEN_EXPIRY_HOURS)
         self._tokens[session_id] = (token, expires_at)
         return token
     
@@ -93,7 +93,7 @@ class CSRFTokenStore:
         stored_token, expires_at = self._tokens[session_id]
         
         # Check expiration
-        if datetime.utcnow() > expires_at:
+        if datetime.now(timezone.utc) > expires_at:
             # Clean up expired token
             del self._tokens[session_id]
             return False
@@ -115,7 +115,7 @@ class CSRFTokenStore:
         Returns:
             Number of tokens cleaned up
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         expired = [
             sid for sid, (_, exp) in self._tokens.items()
             if now > exp

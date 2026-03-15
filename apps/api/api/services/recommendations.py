@@ -2,7 +2,7 @@
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import List, Optional, Dict, Any, Union
 from uuid import uuid4
@@ -250,7 +250,7 @@ class RecommendationEngine:
             if not problem:
                 continue
             
-            days_overdue = (datetime.utcnow() - item.next_review).days if item.next_review else 0
+            days_overdue = (datetime.now(timezone.utc) - item.next_review).days if item.next_review else 0
             
             reason = f"Due for review"
             if days_overdue > 0:

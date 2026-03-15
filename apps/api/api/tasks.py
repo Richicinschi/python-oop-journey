@@ -2,7 +2,7 @@
 
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
@@ -170,6 +170,6 @@ def health_check_task():
     logger.info(f"Health check result: {health}")
     
     return {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "health": health,
     }

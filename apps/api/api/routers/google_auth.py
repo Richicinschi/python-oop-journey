@@ -2,7 +2,7 @@
 
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Depends, Query, Response
@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.database import get_db
 from api.services.auth import AuthService
 
-router = APIRouter(prefix="/api/v1/auth/google", tags=["auth"])
+router = APIRouter(prefix="/google", tags=["auth"])
 
 logger = logging.getLogger(__name__)
 
@@ -143,8 +143,8 @@ async def google_callback(
         
         if user:
             # Update last login
-            user.last_seen = datetime.utcnow()
-            user.last_login_at = datetime.utcnow()
+            user.last_seen = datetime.now(timezone.utc)
+            user.last_login_at = datetime.now(timezone.utc)
             await db.commit()
             logger.info(f"Existing user logged in: {email}")
         else:

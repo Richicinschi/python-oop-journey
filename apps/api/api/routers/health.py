@@ -2,7 +2,7 @@
 
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -39,6 +39,45 @@ class HealthCheckDetailed(BaseModel):
     checks: dict
 
 
+class DBHealthResponse(BaseModel):
+    """Database health check response."""
+    status: str
+    database: str
+    latency_ms: float
+    timestamp: str
+
+
+class CacheHealthResponse(BaseModel):
+    """Cache health check response."""
+    status: str
+    cache: str
+    type: str | None = None
+    stats: dict | None = None
+    message: str | None = None
+    timestamp: str
+
+
+class ReadyResponse(BaseModel):
+    """Readiness probe response."""
+    ready: bool
+    timestamp: str
+
+
+class LiveResponse(BaseModel):
+    """Liveness probe response."""
+    alive: bool
+    timestamp: str
+
+
+class CurriculumHealthResponse(BaseModel):
+    """Curriculum health check response."""
+    status: str
+    weeks: int
+    days: int
+    problems: int
+    timestamp: str
+
+
 # Track server start time
 START_TIME = time.time()
 
@@ -55,7 +94,7 @@ async def health_check():
     return HealthStatus(
         status="healthy",
         version="0.1.0",
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         uptime_seconds=uptime,
         environment=settings.environment,
     )
@@ -190,7 +229,7 @@ async def health_check_detailed(db: AsyncSession = Depends(get_db)):
     response_model = HealthCheckDetailed(
         status=overall_status,
         version="0.1.0",
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         uptime_seconds=uptime,
         environment=settings.environment,
         checks=checks,
@@ -206,7 +245,7 @@ async def health_check_detailed(db: AsyncSession = Depends(get_db)):
     return response_model
 
 
-@router.get("/db")
+@router.get("/db", response_model=DBHealthResponse)
 async def health_check_db(db: AsyncSession = Depends(get_db)):
     """Database-specific health check."""
     try:
@@ -216,19 +255,19 @@ async def health_check_db(db: AsyncSession = Depends(get_db)):
         latency = (time.time() - start_time) * 1000
 
         if row == 1:
-            return {
-                "status": "healthy",
-                "database": "connected",
-                "latency_ms": round(latency, 2),
-                "timestamp": datetime.utcnow().isoformat(),
-            }
+            return DBHealthResponse(
+                status="healthy",
+                database="connected",
+                latency_ms=round(latency, 2),
+                timestamp=datetime.now(timezone.utc).isoformat(),
+            )
         else:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail={
                     "status": "unhealthy",
                     "database": "unexpected_response",
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 },
             )
     except Exception as e:
@@ -239,43 +278,43 @@ async def health_check_db(db: AsyncSession = Depends(get_db)):
                 "status": "unhealthy",
                 "database": "disconnected",
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 
 
-@router.get("/cache")
+@router.get("/cache", response_model=CacheHealthResponse)
 async def health_check_cache():
     """Cache-specific health check."""
     try:
         stats = await cache_manager.get_stats()
 
         if stats.get("enabled"):
-            return {
-                "status": "healthy",
-                "cache": "connected",
-                "type": "redis",
-                "stats": stats,
-                "timestamp": datetime.utcnow().isoformat(),
-            }
+            return CacheHealthResponse(
+                status="healthy",
+                cache="connected",
+                type="redis",
+                stats=stats,
+                timestamp=datetime.now(timezone.utc).isoformat(),
+            )
         else:
-            return {
-                "status": "degraded",
-                "cache": "disabled",
-                "message": "Redis cache not available, using fallback",
-                "timestamp": datetime.utcnow().isoformat(),
-            }
+            return CacheHealthResponse(
+                status="degraded",
+                cache="disabled",
+                message="Redis cache not available, using fallback",
+                timestamp=datetime.now(timezone.utc).isoformat(),
+            )
     except Exception as e:
         logger.error(f"Cache health check failed: {e}")
-        return {
-            "status": "unhealthy",
-            "cache": "error",
-            "error": str(e),
-            "timestamp": datetime.utcnow().isoformat(),
-        }
+        return CacheHealthResponse(
+            status="unhealthy",
+            cache="error",
+            message=str(e),
+            timestamp=datetime.now(timezone.utc).isoformat(),
+        )
 
 
-@router.get("/ready")
+@router.get("/ready", response_model=ReadyResponse)
 async def readiness_check(db: AsyncSession = Depends(get_db)):
     """Kubernetes-style readiness probe.
 
@@ -285,10 +324,10 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
         # Check database
         await db.execute(text("SELECT 1"))
 
-        return {
-            "ready": True,
-            "timestamp": datetime.utcnow().isoformat(),
-        }
+        return ReadyResponse(
+            ready=True,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+        )
     except Exception as e:
         logger.error(f"Readiness check failed: {e}")
         raise HTTPException(
@@ -296,24 +335,24 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
             detail={
                 "ready": False,
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 
 
-@router.get("/live")
+@router.get("/live", response_model=LiveResponse)
 async def liveness_check():
     """Kubernetes-style liveness probe.
 
     Returns 200 if the service is running (doesn't check dependencies).
     """
-    return {
-        "alive": True,
-        "timestamp": datetime.utcnow().isoformat(),
-    }
+    return LiveResponse(
+        alive=True,
+        timestamp=datetime.now(timezone.utc).isoformat(),
+    )
 
 
-@router.get("/curriculum")
+@router.get("/curriculum", response_model=CurriculumHealthResponse)
 async def curriculum_health_check():
     """Curriculum data health check.
     
@@ -334,13 +373,13 @@ async def curriculum_health_check():
             for day in week.days
         )
         
-        return {
-            "status": "healthy",
-            "weeks": week_count,
-            "days": day_count,
-            "problems": problem_count,
-            "timestamp": datetime.utcnow().isoformat(),
-        }
+        return CurriculumHealthResponse(
+            status="healthy",
+            weeks=week_count,
+            days=day_count,
+            problems=problem_count,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+        )
     except Exception as e:
         logger.error(f"Curriculum health check failed: {e}")
         raise HTTPException(
@@ -348,6 +387,6 @@ async def curriculum_health_check():
             detail={
                 "status": "unhealthy",
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )

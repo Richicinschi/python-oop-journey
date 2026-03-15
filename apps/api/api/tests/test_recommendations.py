@@ -1,7 +1,7 @@
 """Tests for smart recommendations system."""
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from api.services.spaced_repetition import ReviewItem, ReviewQueue
@@ -86,7 +86,7 @@ class TestSpacedRepetition:
         """Test getting due items from queue."""
         queue = ReviewQueue()
         
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         
         # Item due now
         item1 = ReviewItem(problem_slug="due-now")

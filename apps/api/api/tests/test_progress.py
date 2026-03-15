@@ -1,7 +1,7 @@
 """Tests for progress persistence system."""
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.models.progress import Progress, ProblemStatus
@@ -122,7 +122,7 @@ class TestProgressService:
     async def test_calculate_streak(self, test_user, progress_service, activity_service):
         """Test streak calculation."""
         # Log activities for consecutive days
-        today = datetime.utcnow()
+        today = datetime.now(timezone.utc)
         
         for i in range(3):
             activity_date = today - timedelta(days=i)

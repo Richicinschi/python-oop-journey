@@ -10,6 +10,7 @@ import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from pydantic import BaseModel
 
 from api.config import get_settings
 from api.core.rate_limit import rate_limit, rate_limit_per_minute
@@ -29,6 +30,20 @@ from api.services.ai_hints import get_ai_hint_service
 from api.services.curriculum import CurriculumService
 
 logger = logging.getLogger(__name__)
+
+
+# Response models for endpoints without response_model
+class MessageResponse(BaseModel):
+    """Simple message response."""
+    message: str
+
+
+class HealthResponse(BaseModel):
+    """Health check response."""
+    status: str
+    providers: dict
+    models: dict
+
 
 # Create router with global rate limit dependency
 # All AI endpoints have a global 100 requests/minute limit per IP across all AI endpoints
@@ -243,9 +258,9 @@ async def code_review(
 
 @router.post(
     "/ai/hint-feedback",
+    response_model=MessageResponse,
     summary="Submit hint feedback",
     description="Submit feedback about whether an AI hint was helpful.",
-    status_code=status.HTTP_204_NO_CONTENT,
 )
 async def submit_hint_feedback(
     feedback: AIHintFeedback,
@@ -279,14 +294,14 @@ async def submit_hint_feedback(
     # In production, store this in a database for analysis
     # await store_hint_feedback(feedback)
     
-    return None
+    return MessageResponse(message="Feedback received")
 
 
 @router.post(
     "/ai/report-hint",
+    response_model=MessageResponse,
     summary="Report problematic hint",
     description="Report an AI hint that was inappropriate or incorrect.",
-    status_code=status.HTTP_204_NO_CONTENT,
 )
 async def report_hint(
     report: AIReportRequest,
@@ -324,15 +339,16 @@ async def report_hint(
     # In production, store this in a database for manual review
     # await store_hint_report(report)
     
-    return None
+    return MessageResponse(message="Report received")
 
 
 @router.get(
     "/ai/health",
+    response_model=HealthResponse,
     summary="Check AI service health",
     description="Check if the AI hint service is available.",
 )
-async def ai_health_check() -> dict:
+async def ai_health_check() -> HealthResponse:
     """Check if the AI hint service is healthy.
     
     Returns the status of the AI service and which providers are configured.
@@ -347,14 +363,14 @@ async def ai_health_check() -> dict:
         getattr(settings, "anthropic_api_key", None) or ai_service.anthropic_api_key
     )
     
-    return {
-        "status": "healthy" if openai_configured else "degraded",
-        "providers": {
+    return HealthResponse(
+        status="healthy" if openai_configured else "degraded",
+        providers={
             "openai": openai_configured,
             "anthropic": anthropic_configured,
         },
-        "models": {
+        models={
             "hint": ai_service.hint_model,
             "review": ai_service.review_model,
         },
-    }
+    )

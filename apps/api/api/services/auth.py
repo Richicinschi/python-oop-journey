@@ -3,7 +3,7 @@
 import hashlib
 import logging
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from jose import JWTError, jwt
@@ -51,8 +51,8 @@ class AuthService:
         user = result.scalar_one_or_none()
 
         if user:
-            user.last_seen = datetime.utcnow()
-            user.last_login_at = datetime.utcnow()
+            user.last_seen = datetime.now(timezone.utc)
+            user.last_login_at = datetime.now(timezone.utc)
             await self.session.commit()
             return user
 
@@ -105,7 +105,7 @@ class AuthService:
         token_hash = self._hash_token(token)
         
         # Calculate expiration
-        expires_at = datetime.utcnow() + timedelta(
+        expires_at = datetime.now(timezone.utc) + timedelta(
             minutes=settings.magic_link_expire_minutes
         )
         
@@ -141,7 +141,7 @@ class AuthService:
             select(AuthToken)
             .where(AuthToken.token_hash == token_hash)
             .where(AuthToken.used_at.is_(None))
-            .where(AuthToken.expires_at > datetime.utcnow())
+            .where(AuthToken.expires_at > datetime.now(timezone.utc))
         )
         result = await self.session.execute(stmt)
         auth_token = result.scalar_one_or_none()
@@ -151,12 +151,12 @@ class AuthService:
             return None
         
         # Mark token as used
-        auth_token.used_at = datetime.utcnow()
+        auth_token.used_at = datetime.now(timezone.utc)
         
         # Update user's last login
         user = await self.get_user_by_id(auth_token.user_id)
         if user:
-            user.last_login_at = datetime.utcnow()
+            user.last_login_at = datetime.now(timezone.utc)
             await self.session.commit()
             logger.info(f"Magic link verified for user: {user.email}")
         
@@ -171,7 +171,7 @@ class AuthService:
         Returns:
             JWT access token string
         """
-        expires = datetime.utcnow() + timedelta(
+        expires = datetime.now(timezone.utc) + timedelta(
             days=settings.jwt_access_token_expire_days
         )
         payload = {
@@ -179,7 +179,7 @@ class AuthService:
             "email": user.email,
             "type": "access",
             "exp": expires,
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
             "jti": str(uuid4()),
         }
         return jwt.encode(
@@ -241,14 +241,14 @@ class AuthService:
             select(AuthToken)
             .where(AuthToken.user_id == user_id)
             .where(AuthToken.used_at.is_(None))
-            .where(AuthToken.expires_at > datetime.utcnow())
+            .where(AuthToken.expires_at > datetime.now(timezone.utc))
         )
         result = await self.session.execute(stmt)
         tokens = result.scalars().all()
         
         count = 0
         for token in tokens:
-            token.used_at = datetime.utcnow()
+            token.used_at = datetime.now(timezone.utc)
             count += 1
         
         await self.session.commit()
@@ -258,14 +258,14 @@ class AuthService:
     # Legacy methods for backward compatibility
     def create_access_token(self, user_id: str) -> tuple[str, datetime]:
         """Create JWT access token."""
-        expires = datetime.utcnow() + timedelta(
+        expires = datetime.now(timezone.utc) + timedelta(
             minutes=settings.jwt_access_token_expire_minutes
         )
         payload = {
             "sub": user_id,
             "type": "access",
             "exp": expires,
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
             "jti": str(uuid4()),
         }
         token = jwt.encode(
@@ -275,14 +275,14 @@ class AuthService:
 
     def create_refresh_token(self, user_id: str) -> tuple[str, datetime]:
         """Create JWT refresh token."""
-        expires = datetime.utcnow() + timedelta(
+        expires = datetime.now(timezone.utc) + timedelta(
             days=settings.jwt_refresh_token_expire_days
         )
         payload = {
             "sub": user_id,
             "type": "refresh",
             "exp": expires,
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
             "jti": str(uuid4()),
         }
         token = jwt.encode(

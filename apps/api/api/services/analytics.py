@@ -2,7 +2,7 @@
 
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any
 from enum import Enum
 
@@ -301,7 +301,7 @@ class LearningAnalytics:
             }
         
         # Calculate weekly velocity
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         first_solve = solved[0].solved_at
         
         if not first_solve:
@@ -393,7 +393,7 @@ class LearningAnalytics:
             "topic_mastery": await self.get_topic_mastery(user_id),
             "learning_velocity": await self.get_learning_velocity(user_id),
             "success_rate_by_difficulty": await self.get_success_rate_by_difficulty(user_id),
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
         }
 
 

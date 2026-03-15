@@ -1,3 +1,11 @@
+declare global {
+  interface Window {
+    __syncEngine?: {
+      syncPendingOperations: () => Promise<void>;
+    };
+  }
+}
+
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";

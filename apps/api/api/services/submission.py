@@ -1,7 +1,7 @@
 """Submission service for managing project submissions and reviews."""
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from sqlalchemy import select, desc, func, and_
@@ -209,7 +209,7 @@ class SubmissionService:
         submission.status = data.status.value
         submission.reviewer_notes = data.reviewer_notes
         submission.reviewed_by = reviewer_id
-        submission.reviewed_at = datetime.utcnow()
+        submission.reviewed_at = datetime.now(timezone.utc)
         
         if data.is_exemplary is not None:
             submission.is_exemplary = data.is_exemplary
@@ -456,7 +456,7 @@ class SubmissionService:
             return 0, 0
         
         # Calculate current streak
-        today = datetime.utcnow().date()
+        today = datetime.now(timezone.utc).date()
         yesterday = today - timedelta(days=1)
         
         current_streak = 0

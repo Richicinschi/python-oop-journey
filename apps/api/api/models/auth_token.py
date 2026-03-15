@@ -1,6 +1,6 @@
 """Auth token model for magic links."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import String, DateTime, ForeignKey, Index
@@ -61,7 +61,7 @@ class AuthToken(Base):
     @property
     def is_expired(self) -> bool:
         """Check if token has expired."""
-        return datetime.utcnow() > self.expires_at
+        return datetime.now(timezone.utc) > self.expires_at
 
     @property
     def is_used(self) -> bool:

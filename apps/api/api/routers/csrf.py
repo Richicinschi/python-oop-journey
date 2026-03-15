@@ -6,6 +6,7 @@ Provides endpoints for CSRF token generation and management.
 import logging
 
 from fastapi import APIRouter, Request, Response
+from pydantic import BaseModel
 
 from api.middleware.csrf import (
     CSRF_COOKIE_NAME,
@@ -18,8 +19,17 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+class CSRFTokenResponse(BaseModel):
+    """CSRF token response."""
+    csrf_token: str
+    token_name: str
+    header_name: str
+    refreshed: bool
+
+
 @router.get(
     "/csrf-token",
+    response_model=CSRFTokenResponse,
     summary="Get CSRF token",
     description="Generate and return a CSRF token for the current session.",
     response_description="CSRF token for use in state-changing requests",
@@ -69,6 +79,7 @@ async def get_csrf_token_endpoint(
 
 @router.post(
     "/csrf-refresh",
+    response_model=CSRFTokenResponse,
     summary="Refresh CSRF token",
     description="Force generation of a new CSRF token.",
 )

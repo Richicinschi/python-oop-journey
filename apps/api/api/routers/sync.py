@@ -1,6 +1,6 @@
 """Sync router for batch operations and multi-device sync."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
@@ -50,7 +50,7 @@ class BatchSyncResponse(BaseModel):
 
     applied: list[str] = Field(default_factory=list, description="Operation IDs that were applied")
     conflicts: list[ConflictInfo] = Field(default_factory=list)
-    server_timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    server_timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 class ForceSyncRequest(BaseModel):
@@ -58,6 +58,27 @@ class ForceSyncRequest(BaseModel):
 
     operation: SyncOperation
     force: bool = True
+
+
+class ForceSyncResponse(BaseModel):
+    """Force sync response."""
+    status: str
+    operation_id: str
+
+
+class SyncStatusResponse(BaseModel):
+    """Sync status response."""
+    user_id: str
+    counts: dict[str, int]
+    last_updated: dict[str, str | None]
+    server_timestamp: str
+
+
+class ConflictResolutionResponse(BaseModel):
+    """Conflict resolution response."""
+    status: str
+    operation_id: str
+    strategy: str
 
 
 # ==================== Helper Functions ====================
@@ -118,14 +139,14 @@ async def handle_progress_sync(
             existing.status = ProblemStatus(status_value)
             existing.attempts = operation.data.get("attempts", existing.attempts)
             if status_value == "completed":
-                existing.completed_at = datetime.utcnow()
+                existing.completed_at = datetime.now(timezone.utc)
         else:
             new_progress = Progress(
                 user_id=user.id,
                 problem_slug=problem_slug,
                 status=ProblemStatus(status_value),
                 attempts=operation.data.get("attempts", 1),
-                completed_at=datetime.utcnow() if status_value == "completed" else None,
+                completed_at=datetime.now(timezone.utc) if status_value == "completed" else None,
             )
             db.add(new_progress)
 
@@ -184,13 +205,13 @@ async def handle_draft_sync(
         
         if existing:
             existing.code = code
-            existing.saved_at = datetime.utcnow()
+            existing.saved_at = datetime.now(timezone.utc)
         else:
             new_draft = Draft(
                 user_id=user.id,
                 problem_slug=problem_slug,
                 code=code,
-                saved_at=datetime.utcnow(),
+                saved_at=datetime.now(timezone.utc),
             )
             db.add(new_draft)
 
@@ -312,6 +333,7 @@ async def batch_sync(
 
 @router.post(
     "/sync/force",
+    response_model=ForceSyncResponse,
     summary="Force sync operation",
     description="Force apply an operation, overwriting server data even if there's a conflict.",
 )
@@ -319,7 +341,7 @@ async def force_sync(
     request: ForceSyncRequest,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> dict[str, str]:
+) -> ForceSyncResponse:
     """
     Force sync an operation, bypassing conflict detection.
     
@@ -330,12 +352,12 @@ async def force_sync(
     
     # Temporarily modify the timestamp to ensure it wins
     operation.data["_force"] = True
-    operation.data["_forced_at"] = datetime.utcnow().isoformat()
+    operation.data["_forced_at"] = datetime.now(timezone.utc).isoformat()
     
     success, _ = await handle_operation(operation, current_user, db)
     
     if success:
-        return {"status": "success", "operation_id": operation.id}
+        return ForceSyncResponse(status="success", operation_id=operation.id)
     else:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -345,13 +367,14 @@ async def force_sync(
 
 @router.get(
     "/sync/status",
+    response_model=SyncStatusResponse,
     summary="Get sync status",
     description="Get the current sync status for the user, including last sync timestamp.",
 )
 async def get_sync_status(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> dict[str, Any]:
+) -> SyncStatusResponse:
     """Get sync status for the current user."""
     # Get counts of each type
     progress_count = await db.scalar(
@@ -392,12 +415,13 @@ async def get_sync_status(
             "progress": progress_record.updated_at.isoformat() if progress_record else None,
             "draft": draft_record.saved_at.isoformat() if draft_record else None,
         },
-        "server_timestamp": datetime.utcnow().isoformat(),
+        "server_timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 
 @router.post(
     "/sync/resolve",
+    response_model=ConflictResolutionResponse,
     summary="Resolve sync conflict",
     description="Resolve a sync conflict by choosing which version to keep.",
 )
@@ -407,7 +431,7 @@ async def resolve_conflict(
     merged_data: dict[str, Any] | None = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> dict[str, str]:
+) -> ConflictResolutionResponse:
     """
     Resolve a sync conflict.
     
@@ -419,8 +443,8 @@ async def resolve_conflict(
     # and apply the resolution strategy
     # For now, we just acknowledge the resolution
     
-    return {
-        "status": "resolved",
-        "operation_id": operation_id,
-        "strategy": strategy,
-    }
+    return ConflictResolutionResponse(
+        status="resolved",
+        operation_id=operation_id,
+        strategy=strategy,
+    )

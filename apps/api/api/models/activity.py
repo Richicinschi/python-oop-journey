@@ -1,6 +1,6 @@
 """Activity log model for tracking user actions."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum as PyEnum
 from uuid import uuid4
 
@@ -59,7 +59,7 @@ class Activity(Base):
         nullable=True,
         index=True,
     )
-    meta_data: Mapped[dict | None] = mapped_column(
+    metadata: Mapped[dict | None] = mapped_column(
         JSONB,
         nullable=True,
     )
