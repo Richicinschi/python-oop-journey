@@ -141,35 +141,37 @@ export default function ProblemPage() {
     addLog('Running code...');
 
     try {
-      // Try to validate syntax first using the verification API
-      const validation = await verificationApi.validateSyntax(code);
-      
-      if (!validation.valid) {
-        setExecutionResult({
-          stdout: '',
-          stderr: validation.message || 'Syntax error',
-          exitCode: 1,
-        });
-        addLog('Syntax validation failed');
-        setIsRunning(false);
-        return;
-      }
-
-      // For now, simulate execution since we don't have a direct run endpoint
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setExecutionResult({
-        stdout: 'Code syntax is valid.\nNote: Full execution requires the Python runner service.',
-        stderr: '',
-        exitCode: 0,
-        executionTime: 500,
+      // Call the backend execution API
+      const response = await fetch('/api/execute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          mode: 'run',
+        }),
       });
-      addLog('Code validation completed');
+
+      const result = await response.json();
+
+      setExecutionResult({
+        stdout: result.stdout || '',
+        stderr: result.stderr || '',
+        exitCode: result.exitCode || 0,
+        executionTime: result.executionTime,
+      });
+
+      if (result.exitCode === 0) {
+        addLog('Code executed successfully');
+      } else {
+        addLog(`Execution failed with exit code ${result.exitCode}`);
+      }
     } catch (error) {
       addLog('Execution failed: Network error');
       setExecutionResult({
         stdout: '',
-        stderr: 'Failed to execute code. Please try again.',
+        stderr: error instanceof Error ? error.message : 'Failed to execute code. Please try again.',
         exitCode: 1,
       });
     } finally {

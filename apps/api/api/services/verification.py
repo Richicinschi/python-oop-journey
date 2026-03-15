@@ -150,33 +150,17 @@ class VerificationService:
     async def _run_pytest(
         self, combined_code: str, problem_slug: str
     ) -> dict[str, Any]:
-        """Run pytest on the combined code using Docker sandbox and parse results."""
-        from api.services.docker_runner import get_docker_runner
+        """Run pytest on the combined code using subprocess sandbox and parse results."""
+        from api.services.simple_execution import get_simple_execution_service
         
-        runner = get_docker_runner()
+        service = get_simple_execution_service()
         
-        # Check if Docker is available
-        if not runner._client:
-            return {
-                "success": False,
-                "summary": VerificationSummary(
-                    total=0, passed=0, failed=0, errors=1, skipped=0
-                ),
-                "tests": [
-                    TestResult(
-                        name="execution",
-                        status=TestStatus.ERROR,
-                        message="Docker execution service is not available",
-                        error_category=ErrorCategory.UNKNOWN_ERROR,
-                        hint="The code execution service is temporarily unavailable. Please try again later.",
-                    )
-                ],
-                "stdout": "",
-                "stderr": "Docker execution service unavailable",
-            }
+        # Create execution request
+        from api.schemas.execution import CodeExecutionRequest
+        request = CodeExecutionRequest(code=combined_code, timeout=self.timeout)
         
-        # Run the code in Docker sandbox
-        result = runner.execute(combined_code, timeout=self.timeout)
+        # Run the code in subprocess
+        result = service.execute(request)
         
         # Parse the output
         if result.timeout:
