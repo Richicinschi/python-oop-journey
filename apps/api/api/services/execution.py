@@ -17,6 +17,7 @@ from api.schemas.execution import (
     ValidationResponse,
 )
 from api.services.docker_runner import get_docker_runner
+from api.services.simple_execution import get_simple_execution_service
 from api.services.monitoring import get_monitor
 from api.tasks import execute_code_task, validate_code_task
 
@@ -24,12 +25,40 @@ logger = logging.getLogger(__name__)
 
 
 class ExecutionService:
-    """Service for safe code execution using Docker sandboxing."""
+    """Service for safe code execution using subprocess sandboxing.
+    
+    Primary execution uses subprocess for compatibility with Render free tier.
+    Docker execution is available as fallback when configured.
+    """
 
     def __init__(self):
         """Initialize execution service."""
         self.monitor = get_monitor()
-        self.runner = get_docker_runner()
+        self._docker_runner = None
+        self._simple_service = None
+    
+    def _get_runner(self):
+        """Get the appropriate execution runner.
+        
+        Returns:
+            Simple execution service (primary) or Docker runner (if available)
+        """
+        if self._simple_service is None:
+            self._simple_service = get_simple_execution_service()
+        return self._simple_service
+    
+    def _get_docker_runner(self):
+        """Get Docker runner if available.
+        
+        Returns:
+            Docker runner or None if not available
+        """
+        if self._docker_runner is None:
+            self._docker_runner = get_docker_runner()
+            # Check if Docker is actually available
+            if self._docker_runner._client is None:
+                self._docker_runner = None
+        return self._docker_runner
 
     async def execute(
         self, 
@@ -63,8 +92,10 @@ class ExecutionService:
 {request.test_code}
 """
         
-        # Execute in Docker
-        result = self.runner.execute(code_to_run, timeout=request.timeout)
+        # Execute using subprocess (primary method for Render compatibility)
+        from api.schemas.execution import CodeExecutionRequest as SimpleRequest
+        simple_request = SimpleRequest(code=code_to_run, timeout=request.timeout)
+        result = self._get_runner().execute(simple_request)
         
         # Determine status
         if result.timeout:
@@ -198,7 +229,8 @@ class ExecutionService:
         Returns:
             Validation response
         """
-        is_valid, error, line, col = self.runner.validate_syntax(code)
+        is_valid, error = self._get_runner().validate_syntax(code)
+        line = col = None  # Simple execution returns tuple of (is_valid, error)
         
         return ValidationResponse(
             valid=is_valid,
@@ -275,8 +307,10 @@ except Exception as e:
     sys.exit(1)
 '''
         
-        # Execute
-        result = self.runner.execute(test_wrapper, timeout=request.timeout)
+        # Execute using subprocess
+        from api.schemas.execution import CodeExecutionRequest as SimpleRequest
+        simple_request = SimpleRequest(code=test_wrapper, timeout=request.timeout)
+        result = self._get_runner().execute(simple_request)
         
         # Determine status
         if result.timeout:

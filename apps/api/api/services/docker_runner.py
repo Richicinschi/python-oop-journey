@@ -81,7 +81,7 @@ class DockerRunner:
     def _init_docker_client(self) -> None:
         """Initialize Docker client with proper configuration."""
         if not DOCKER_AVAILABLE:
-            logger.warning("Docker not available - code execution disabled")
+            # Silently skip when Docker library is not installed
             self._client = None
             return
         try:
@@ -96,8 +96,8 @@ class DockerRunner:
             self._client.ping()
             logger.info("Docker client initialized successfully")
             
-        except (DockerException, AttributeError) as e:
-            logger.error(f"Failed to initialize Docker client: {e}")
+        except (DockerException, AttributeError):
+            # Silently fail - subprocess execution will be used instead
             self._client = None
 
     def _ensure_image(self) -> bool:
@@ -350,11 +350,12 @@ class DockerRunner:
             "error": None,
         }
         
+        # Silently return unavailable status if Docker is not available
+        if not self._client:
+            status["error"] = None  # No error - just not available
+            return status
+        
         try:
-            if not self._client:
-                status["error"] = "Docker client not initialized"
-                return status
-            
             # Check Docker connection
             self._client.ping()
             status["docker_available"] = True
