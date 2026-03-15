@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -112,16 +112,23 @@ export default function ProblemPage() {
     }
   }, [code, problem, problemSlug, originalCode, hasStarted, setHasStarted, updateStreak]);
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts - use ref pattern to always access latest function versions
+  const handleRunRef = useRef(handleRun);
+  const handleVerifyRef = useRef(handleVerify);
+  
+  // Keep refs updated with latest function versions
+  handleRunRef.current = handleRun;
+  handleVerifyRef.current = handleVerify;
+  
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'Enter') {
           e.preventDefault();
           if (e.shiftKey) {
-            handleVerify();
+            handleVerifyRef.current();
           } else {
-            handleRun();
+            handleRunRef.current();
           }
         }
       }
@@ -129,13 +136,13 @@ export default function ProblemPage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [code]);
+  }, []);
 
   const addLog = useCallback((message: string) => {
     setLogs((prev) => [...prev.slice(-49), message]);
   }, []);
 
-  const handleRun = async () => {
+  const handleRun = useCallback(async () => {
     setIsRunning(true);
     setExecutionResult(null);
     addLog('Running code...');
@@ -177,9 +184,9 @@ export default function ProblemPage() {
     } finally {
       setIsRunning(false);
     }
-  };
+  }, [code, addLog, problemSlug]);
 
-  const handleVerify = async () => {
+  const handleVerify = useCallback(async () => {
     setIsVerifying(true);
     setVerificationResult(null);
     addLog('Running tests...');
@@ -223,7 +230,7 @@ export default function ProblemPage() {
     } finally {
       setIsVerifying(false);
     }
-  };
+  }, [code, addLog, problemSlug, completeProblem]);
 
   const handleReset = () => {
     if (confirm('Reset code to starter template? All changes will be lost.')) {

@@ -5,6 +5,7 @@ import os
 
 from fastapi import APIRouter, HTTPException, Request, status
 
+from api import limiter
 from api.schemas.execution import (
     CodeExecutionRequest,
     CodeExecutionResponse,
@@ -27,6 +28,7 @@ router = APIRouter()
         503: {"description": "Execution service unavailable"},
     },
 )
+@limiter.limit("30/minute")
 async def execute_code(
     request: Request,
     exec_request: CodeExecutionRequest,
@@ -74,6 +76,7 @@ async def execute_code(
     summary="Check code syntax",
     description="Validate Python code syntax without executing.",
 )
+@limiter.limit("60/minute")
 async def check_syntax(
     request: Request,
     exec_request: CodeExecutionRequest
@@ -136,6 +139,7 @@ async def execution_health():
         429: {"description": "Rate limit exceeded"},
     },
 )
+@limiter.limit("30/minute")
 async def execute_code_legacy(
     request: Request,
     exec_request: CodeExecutionRequest,

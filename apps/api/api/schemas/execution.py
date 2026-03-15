@@ -20,13 +20,13 @@ class ExecutionStatus(str, Enum):
 class CodeExecutionRequest(BaseModel):
     """Code execution request."""
 
-    code: str = Field(..., description="Python code to execute", max_length=10000)
-    timeout: int = Field(default=10, ge=1, le=60, description="Execution timeout in seconds")
-    problem_slug: str | None = Field(
-        default=None, description="Optional problem slug for validation"
-    )
+    code: str = Field(..., description="Python code to execute", max_length=100000)
+    timeout: int = Field(default=10, ge=1, le=30, description="Execution timeout in seconds")
     test_code: str | None = Field(
-        default=None, description="Optional test code to run against"
+        default=None, description="Optional test code to run against", max_length=50000
+    )
+    problem_slug: str | None = Field(
+        default=None, description="Optional problem slug for validation", max_length=255
     )
 
     @field_validator("code")
@@ -40,20 +40,20 @@ class CodeExecutionRequest(BaseModel):
     @field_validator("timeout")
     @classmethod
     def validate_timeout(cls, v: int) -> int:
-        """Validate timeout is within acceptable range."""
+        """Validate timeout is within acceptable range (1-30 seconds)."""
         if v < 1:
             raise ValueError("Timeout must be at least 1 second")
-        if v > 60:
-            raise ValueError("Timeout cannot exceed 60 seconds")
+        if v > 30:
+            raise ValueError("Timeout cannot exceed 30 seconds")
         return v
 
 
 class CodeValidationRequest(BaseModel):
     """Code validation request."""
 
-    code: str = Field(..., description="Python code to validate syntax")
+    code: str = Field(..., description="Python code to validate syntax", max_length=100000)
     test_code: str | None = Field(
-        default=None, description="Optional test code to validate"
+        default=None, description="Optional test code to validate", max_length=50000
     )
 
 
@@ -108,9 +108,9 @@ class TestResult(BaseModel):
 class CodeValidationExecutionRequest(BaseModel):
     """Request for code validation with test execution."""
 
-    code: str = Field(..., description="Python code to execute and validate", max_length=10000)
-    test_code: str = Field(..., description="Test code to run against the solution")
-    timeout: int = Field(default=10, ge=1, le=60, description="Execution timeout in seconds")
+    code: str = Field(..., description="Python code to execute and validate", max_length=100000)
+    test_code: str = Field(..., description="Test code to run against the solution", max_length=50000)
+    timeout: int = Field(default=10, ge=1, le=30, description="Execution timeout in seconds")
 
 
 class CodeValidationExecutionResponse(BaseModel):
@@ -219,7 +219,7 @@ class ProjectExecutionRequest(BaseModel):
         ..., description="Path to entry point file (e.g., 'src/main.py')"
     )
     timeout: int = Field(
-        default=30, ge=1, le=120, description="Execution timeout in seconds"
+        default=30, ge=1, le=30, description="Execution timeout in seconds"
     )
 
     @field_validator("files")

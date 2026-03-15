@@ -50,10 +50,6 @@ export interface CodeEditorProps {
   onRun?: () => void;
 }
 
-// Global refs for useCodeEditor hook access
-const globalEditorRef = { current: null as editor.IStandaloneCodeEditor | null };
-const globalMonacoRef = { current: null as Monaco | null };
-
 export function CodeEditor({
   value,
   onChange,
@@ -75,7 +71,7 @@ export function CodeEditor({
   const [isMounted, setIsMounted] = useState(false);
   const [hasError, setHasError] = useState(false);
   
-  // Use local refs that sync to global refs
+  // Component refs for editor instance access
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
 
@@ -95,10 +91,6 @@ export function CodeEditor({
         editorRef.current = editorInstance;
         monacoRef.current = monacoInstance;
         
-        // Sync to global refs for useCodeEditor hook
-        globalEditorRef.current = editorInstance;
-        globalMonacoRef.current = monacoInstance;
-
         // Initialize Python language support
         initializeMonaco(monacoInstance);
 
@@ -229,10 +221,4 @@ export function CodeEditor({
   );
 }
 
-// Export hook to access editor instance
-export function useCodeEditor() {
-  return {
-    getEditor: () => globalEditorRef.current,
-    getMonaco: () => globalMonacoRef.current,
-  };
-}
+

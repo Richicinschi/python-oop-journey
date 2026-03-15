@@ -61,9 +61,9 @@ class VerificationResult(BaseModel):
 
 class VerificationRequest(BaseModel):
     """Verification request."""
-    code: str = Field(..., description="Learner's code")
-    problem_slug: str = Field(..., description="Problem identifier")
-    test_code: str | None = Field(None, description="Optional test code (if not from curriculum)")
+    code: str = Field(..., description="Learner's code", max_length=100000)
+    problem_slug: str = Field(..., description="Problem identifier", max_length=255)
+    test_code: str | None = Field(None, description="Optional test code (if not from curriculum)", max_length=50000)
 
 
 class HintSuggestion(BaseModel):

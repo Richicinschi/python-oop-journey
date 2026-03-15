@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
+from api import limiter
 from api.schemas.verification import VerificationRequest, VerificationResponse
 from api.services.verification import get_verification_service
 
@@ -22,6 +23,7 @@ verification_service = get_verification_service()
         429: {"description": "Rate limit exceeded"},
     },
 )
+@limiter.limit("60/minute")
 async def verify_solution(
     request: Request,
     request_data: VerificationRequest
@@ -64,6 +66,7 @@ async def verify_solution(
         429: {"description": "Rate limit exceeded"},
     },
 )
+@limiter.limit("60/minute")
 async def verify_solution_for_problem(
     request: Request,
     problem_slug: str,
