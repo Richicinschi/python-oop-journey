@@ -27,6 +27,10 @@ class Progress(Base):
         UniqueConstraint("user_id", "problem_slug", name="uq_user_problem_progress"),
         # Composite index for user progress queries filtered by status
         Index("idx_progress_user_status", "user_id", "status", postgresql_using="btree"),
+        # Unique index for user+problem lookup (replaces unique constraint)
+        Index("idx_progress_user_problem", "user_id", "problem_slug", unique=True),
+        # Composite index for week/day filtering
+        Index("idx_progress_week_day", "week_slug", "day_slug"),
     )
 
     id: Mapped[str] = mapped_column(

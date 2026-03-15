@@ -125,6 +125,10 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
+    # Monitoring
+    sentry_dsn: str = Field(default="", description="Sentry DSN for error tracking")
+    app_version: str = Field(default="0.1.0", description="Application version")
+
     @property
     def is_development(self) -> bool:
         """Check if running in development mode."""

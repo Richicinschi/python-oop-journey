@@ -100,9 +100,9 @@ class ProgressWebSocket:
     """WebSocket endpoint handler for progress updates."""
 
     @staticmethod
-    async def handle(websocket: WebSocket, user_id: str):
+    async def handle(websocket: WebSocket, user_id: str, authenticated_user_id: str | None = None):
         """Handle WebSocket connection for a user."""
-        await manager.connect(websocket, user_id)
+        await manager.connect(websocket, user_id, authenticated_user_id)
         
         try:
             while True:

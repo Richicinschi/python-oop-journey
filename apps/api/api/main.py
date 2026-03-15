@@ -8,8 +8,7 @@ from fastapi import FastAPI, HTTPException, WebSocket, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
-from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import Response
 
 from api.config import get_settings
 from api.database import close_db, init_db
@@ -126,7 +125,11 @@ def create_app() -> FastAPI:
             headers=exc.headers if hasattr(exc, 'headers') else None,
         )
 
-    # Security headers middleware (first for defense in depth)
+    # Request ID middleware (first to capture all requests)
+    from api.middleware.request_id import RequestIDMiddleware
+    app.add_middleware(RequestIDMiddleware)
+    
+    # Security headers middleware
     from api.core.security_headers import SecurityHeadersMiddleware
     app.add_middleware(SecurityHeadersMiddleware)
     
@@ -244,7 +247,7 @@ def create_app() -> FastAPI:
             return
         
         user_id = payload.get("sub")
-        await ProgressWebSocket.handle(websocket, user_id)
+        await ProgressWebSocket.handle(websocket, user_id, authenticated_user_id=user_id)
 
     return app
 

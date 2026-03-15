@@ -355,24 +355,20 @@ class SimpleExecutionService:
             # Create temporary file for the code
             with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
                 f.write(restricted_code)
-                temp_file = f.name
-
+                temp_path = f.name
             try:
                 # Layer 3 & 4: Run in isolated subprocess
-                result = self._run_subprocess(temp_file, request.timeout)
+                result = self._run_subprocess(temp_path, request.timeout)
                 
                 if result.timeout:
                     self.security_stats['timeout'] += 1
                 
                 return result
-
             finally:
-                # Clean up temp file
-                if temp_file:
-                    try:
-                        os.unlink(temp_file)
-                    except Exception:
-                        pass
+                try:
+                    os.unlink(temp_path)
+                except OSError:
+                    pass
 
         except Exception as e:
             self.security_stats['errors'] += 1
