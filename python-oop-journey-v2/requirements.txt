@@ -1,0 +1,6 @@
+# Python OOP Journey v2 - Core Dependencies
+# This file lists the minimal runtime dependencies.
+# Most learning materials use only the Python standard library.
+
+# Development and testing tools (install with: pip install -r requirements-dev.txt)
+# See pyproject.toml for full dev dependency list.

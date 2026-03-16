@@ -1,0 +1,399 @@
+{
+  "timestamp": "2026-03-15T12:35:55.357342",
+  "base_url": "https://oop-journey-api.onrender.com",
+  "summary": {
+    "total": 47,
+    "passed": 17,
+    "failed": 30,
+    "pass_rate": 36.17021276595745
+  },
+  "performance": {
+    "average": 0.36186902663286996,
+    "max": 0.49085569381713867,
+    "min": 0.3238508701324463
+  },
+  "results": {
+    "passed": [
+      {
+        "name": "GET /health",
+        "status": true,
+        "details": "Main health check: OK",
+        "response_time": 0.3699619770050049,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:34.496332"
+      },
+      {
+        "name": "GET /health/cache",
+        "status": true,
+        "details": "Cache health: OK",
+        "response_time": 0.4332880973815918,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:35.830405"
+      },
+      {
+        "name": "GET /health/live",
+        "status": true,
+        "details": "Liveness check: OK",
+        "response_time": 0.3560495376586914,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:36.566764"
+      },
+      {
+        "name": "GET /ready",
+        "status": true,
+        "details": "Alternative readiness: OK",
+        "response_time": 0.34490203857421875,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:36.912682"
+      },
+      {
+        "name": "GET /",
+        "status": true,
+        "details": "Root endpoint: OK",
+        "response_time": 0.3620612621307373,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:37.275748"
+      },
+      {
+        "name": "POST /api/v1/execute/run - Missing parenthesis",
+        "status": true,
+        "details": "Has error handling: True",
+        "response_time": 0.49085569381713867,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:39.691772"
+      },
+      {
+        "name": "POST /api/v1/execute/run - Invalid indentation",
+        "status": true,
+        "details": "Has error handling: True",
+        "response_time": 0.33109402656555176,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:40.023890"
+      },
+      {
+        "name": "GET /api/v1/execute/health",
+        "status": true,
+        "details": "Status: 200",
+        "response_time": 0.3245859146118164,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:41.526714"
+      },
+      {
+        "name": "POST /api/v1/execute/syntax-check (valid)",
+        "status": true,
+        "details": "Status: 200",
+        "response_time": 0.3347182273864746,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:41.862448"
+      },
+      {
+        "name": "POST /api/v1/execute/syntax-check (invalid)",
+        "status": true,
+        "details": "Status: 200",
+        "response_time": 0.36660003662109375,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:42.230087"
+      },
+      {
+        "name": "POST /api/v1/verify",
+        "status": true,
+        "details": "Status: 200, Keys: ['success', 'summary', 'tests', 'stdout', 'stderr', 'execution_time_ms', 'suggested_hints', 'progress_updated', 'attempts']",
+        "response_time": 0.3379781246185303,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:42.569187"
+      },
+      {
+        "name": "GET /api/v1/curriculum",
+        "status": true,
+        "details": "Full curriculum: OK (keys: ['version', 'weeks'])",
+        "response_time": 0.3424527645111084,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:45.710596"
+      },
+      {
+        "name": "GET /api/v1/curriculum/problems",
+        "status": true,
+        "details": "All problems: OK (4 items)",
+        "response_time": 0.3238508701324463,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:46.035522"
+      },
+      {
+        "name": "GET /api/v1/ai/health",
+        "status": true,
+        "details": "Status: 200",
+        "response_time": 0.3454556465148926,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:50.835786"
+      },
+      {
+        "name": "OPTIONS /api/v1/execute/run (CORS)",
+        "status": true,
+        "details": "Status: 200, CORS headers: {'access-control-allow-credentials': 'true', 'access-control-allow-headers': 'Content-Type', 'access-control-allow-methods': 'DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT', 'access-control-allow-origin': 'http://localhost:3000', 'access-control-max-age': '600'}",
+        "response_time": 0.3477816581726074,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:53.259273"
+      },
+      {
+        "name": "Response Headers Check",
+        "status": true,
+        "details": "Content-Type: application/json, Server: cloudflare, CORS: False",
+        "response_time": 0.3860964775085449,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:53.646403"
+      },
+      {
+        "name": "GET /openapi.json",
+        "status": true,
+        "details": "OpenAPI spec loaded: 86 paths",
+        "response_time": 0.35404109954833984,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:55.356982"
+      }
+    ],
+    "failed": [
+      {
+        "name": "GET /health/detailed",
+        "status": false,
+        "details": "Detailed health check",
+        "response_time": 0.48023056983947754,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:34.978321"
+      },
+      {
+        "name": "GET /health/db",
+        "status": false,
+        "details": "Database health",
+        "response_time": 0.4165778160095215,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:35.396091"
+      },
+      {
+        "name": "GET /health/ready",
+        "status": false,
+        "details": "Readiness check",
+        "response_time": 0.37738919258117676,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:36.209275"
+      },
+      {
+        "name": "POST /api/v1/execute/run - Simple print",
+        "status": false,
+        "details": "No response",
+        "response_time": 0.5167920589447021,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:37.793636"
+      },
+      {
+        "name": "POST /api/v1/execute/run - Variable assignment",
+        "status": false,
+        "details": "No response",
+        "response_time": 0.4121696949005127,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:38.206858"
+      },
+      {
+        "name": "POST /api/v1/execute/run - Function definition",
+        "status": false,
+        "details": "No response",
+        "response_time": 0.494920015335083,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:38.702801"
+      },
+      {
+        "name": "POST /api/v1/execute/run - List comprehension",
+        "status": false,
+        "details": "No response",
+        "response_time": 0.49545955657958984,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:39.199890"
+      },
+      {
+        "name": "POST /api/v1/execute/run - Undefined variable",
+        "status": false,
+        "details": "No response",
+        "response_time": 0.7727489471435547,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:40.797956"
+      },
+      {
+        "name": "POST /api/v1/execute (legacy)",
+        "status": false,
+        "details": "No response",
+        "response_time": 0.40206265449523926,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:41.201088"
+      },
+      {
+        "name": "POST /api/v1/validate-syntax (valid)",
+        "status": false,
+        "details": "Status: N/A",
+        "response_time": 0.34419822692871094,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:43.956780"
+      },
+      {
+        "name": "POST /api/v1/validate-syntax (invalid)",
+        "status": false,
+        "details": "No response",
+        "response_time": 0.3630805015563965,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:44.320907"
+      },
+      {
+        "name": "GET /api/v1/test-info/{problem_slug}",
+        "status": false,
+        "details": "All tested slugs returned 404",
+        "response_time": 0.33939266204833984,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:45.367060"
+      },
+      {
+        "name": "GET /api/v1/curriculum/weeks/{slug}",
+        "status": false,
+        "details": "No valid week slug found",
+        "response_time": 0.34656691551208496,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:47.092400"
+      },
+      {
+        "name": "GET /api/v1/curriculum/problems/{slug}",
+        "status": false,
+        "details": "No valid problem slug found",
+        "response_time": 0.39296722412109375,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:47.830083"
+      },
+      {
+        "name": "POST /api/v1/auth/magic-link",
+        "status": false,
+        "details": "No response",
+        "response_time": 0.9625494480133057,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:48.793725"
+      },
+      {
+        "name": "GET /api/v1/auth/me",
+        "status": false,
+        "details": "Get current user",
+        "response_time": 0.3297078609466553,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:49.124553"
+      },
+      {
+        "name": "PATCH /api/v1/auth/me",
+        "status": false,
+        "details": "Update user",
+        "response_time": 0.3409898281097412,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:49.466723"
+      },
+      {
+        "name": "GET /api/v1/users/me",
+        "status": false,
+        "details": "Get user profile",
+        "response_time": 0.3446016311645508,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:49.812326"
+      },
+      {
+        "name": "GET /api/v1/users/me/stats",
+        "status": false,
+        "details": "Get user stats",
+        "response_time": 0.32161903381347656,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:50.135054"
+      },
+      {
+        "name": "GET /api/v1/users/me/progress",
+        "status": false,
+        "details": "Get user progress",
+        "response_time": 0.35257482528686523,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:50.489291"
+      },
+      {
+        "name": "POST /api/v1/ai/hint",
+        "status": false,
+        "details": "Generate hint",
+        "response_time": 0.3303067684173584,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:51.167204"
+      },
+      {
+        "name": "POST /api/v1/ai/explain-error",
+        "status": false,
+        "details": "Explain error",
+        "response_time": 0.3443031311035156,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:51.512569"
+      },
+      {
+        "name": "POST /api/v1/ai/code-review",
+        "status": false,
+        "details": "Code review",
+        "response_time": 0.3532142639160156,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:51.866871"
+      },
+      {
+        "name": "GET /api/v1/progress",
+        "status": false,
+        "details": "Get all progress",
+        "response_time": 0.3482811450958252,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:52.216658"
+      },
+      {
+        "name": "GET /api/v1/progress/stats/overall",
+        "status": false,
+        "details": "Overall stats",
+        "response_time": 0.3417670726776123,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:52.559611"
+      },
+      {
+        "name": "GET /api/v1/drafts",
+        "status": false,
+        "details": "List drafts",
+        "response_time": 0.3494722843170166,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:52.910394"
+      },
+      {
+        "name": "404 Error Handling",
+        "status": false,
+        "details": "Status: N/A",
+        "response_time": 0.31746792793273926,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:53.965142"
+      },
+      {
+        "name": "Invalid HTTP Method Handling",
+        "status": false,
+        "details": "No response",
+        "response_time": 0.35727548599243164,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:54.323629"
+      },
+      {
+        "name": "Malformed JSON Handling",
+        "status": false,
+        "details": "Status: N/A",
+        "response_time": 0.35314464569091797,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:54.677899"
+      },
+      {
+        "name": "Empty Body Handling",
+        "status": false,
+        "details": "No response",
+        "response_time": 0.32181429862976074,
+        "error": null,
+        "timestamp": "2026-03-15T12:35:55.000831"
+      }
+    ],
+    "warnings": [],
+    "performance": {}
+  }
+}

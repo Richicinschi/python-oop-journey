@@ -1,0 +1,80 @@
+# CLAW Git Configuration
+# This file gives CLAW explicit permissions for this dedicated workspace
+
+git:
+  user:
+    name: "CLAW"
+    email: "claw@oop-journey.ai"
+  
+  permissions:
+    # Core git operations
+    commit: true
+    push: true
+    pull: true
+    fetch: true
+    
+    # Branch operations
+    create_branch: true
+    delete_branch: true
+    switch_branch: true
+    merge: true
+    rebase: false  # Prefer merge over rebase
+    
+    # Advanced operations
+    force_push: true  # Only on feature branches, never main
+    reset: true  # Can reset to last known good state
+    revert: true  # Can revert bad commits
+    cherry_pick: true
+    
+    # Repository management
+    tag: true
+    stash: true
+    clean: true  # Can remove untracked files
+  
+  workflow:
+    branch_prefix: "claw/"
+    commit_prefix: "[CLAW]"
+    main_branch: "main"
+    
+    # Auto-commit settings
+    auto_commit: true
+    auto_commit_frequency: "on_success"  # on_success, on_change, manual
+    auto_push: true
+    
+    # Commit message template
+    commit_template: |
+      [CLAW] <type>: <title>
+      
+      <description>
+      
+      Changes:
+      - <change 1>
+      - <change 2>
+      
+      Testing:
+      - <test performed>
+      
+      Status: <working|broken|needs_review>
+  
+  remotes:
+    origin: "https://github.com/Richicinschi/python-oop-journey-claw.git"
+  
+  # Safety settings
+  safety:
+    protected_branches:
+      - main
+    require_verification_before_merge: true
+    max_commits_before_push: 5
+    backup_before_destructive_ops: true
+  
+  # Commit types for consistent messaging
+  commit_types:
+    fix: "Bug fix"
+    feat: "New feature"
+    refactor: "Code restructuring"
+    test: "Adding or updating tests"
+    docs: "Documentation changes"
+    config: "Configuration changes"
+    perf: "Performance improvement"
+    style: "Code style/formatting"
+    chore: "Maintenance tasks"

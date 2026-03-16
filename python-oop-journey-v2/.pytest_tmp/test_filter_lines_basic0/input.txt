@@ -1,0 +1,3 @@
+ERROR: something
+INFO: normal
+ERROR: again

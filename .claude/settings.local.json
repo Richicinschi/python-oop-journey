@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(du -sh /c/Users/digitalnomad/Documents/oopkimi/*)",
+      "Read(//c/Users/DIGITA~1/AppData/Local/Temp/claude/c--Users-digitalnomad-Documents-oopkimi/52ad998a-6bc0-4406-95a4-1dbdd4ab114b/tasks/**)",
+      "Bash(git pull:*)",
+      "WebFetch(domain:python-oop-journey.onrender.com)",
+      "WebFetch(domain:oop-journey-api.onrender.com)",
+      "Bash(npx tsc:*)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''api/routers/curriculum.py''\\).read\\(\\)\\); print\\(''curriculum.py: OK''\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''api/routers/google_auth.py''\\).read\\(\\)\\); print\\(''google_auth.py: OK''\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''api/models/progress.py''\\).read\\(\\)\\); print\\(''progress.py: OK''\\)\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh api:*)",
+      "Bash(npx turbo:*)",
+      "Bash(export PATH=\"c:/Users/digitalnomad/Documents/oopkimi/website-playground/nodejs:$PATH\")",
+      "Bash(rm -rf apps/web/.next/types)",
+      "Bash(PATH=\"c:/Users/digitalnomad/Documents/oopkimi/website-playground/nodejs:$PATH\")",
+      "Bash(node -e \"const fs = require\\(''''fs''''\\); try { fs.rmSync\\(''''apps/web/.next/types'''', {recursive:true,force:true}\\); } catch\\(e\\) {}\")",
+      "Bash(export PATH=\"/c/Users/digitalnomad/Documents/oopkimi/website-playground/nodejs:$PATH\")",
+      "Bash(node -e \"const fs=require\\(''''fs''''\\); try{fs.rmSync\\(''''apps/web/.next/types'''',{recursive:true,force:true}\\)}catch\\(e\\){}\")",
+      "Bash(export PATH=\"/c/Users/digitalnomad/Documents/oopkimi/website-playground/nodejs:/usr/bin:$PATH\")",
+      "Bash(wc -l \"c:/Users/digitalnomad/Documents/oopkimi/website-playground/apps/web/app/\\(dashboard\\)/weeks/[weekSlug]/project/page.tsx\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\digitalnomad\\Documents\\oopkimi\\website-playground\\apps\\web\\app\\projects\\[projectSlug]"
+    ]
+  }
+}

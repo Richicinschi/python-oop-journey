@@ -1,0 +1,1344 @@
+WEBSITE PLAYGROUND BUILD PROMPT FOR A NEW CHAT
+
+You are helping me build the web platform for this curriculum.
+
+Read this entire prompt before creating files, choosing frameworks, proposing
+architecture, or making UI decisions.
+
+This is not a marketing site.
+This is not a generic LMS.
+This is not a static docs wrapper.
+This is not a toy code runner.
+
+This should become the main interactive surface for learning through the
+`python-oop-journey-v2` curriculum:
+
+- read theory
+- understand concepts
+- move through the curriculum in order
+- solve exercises in the browser
+- run code safely
+- verify work clearly
+- get hints without getting spoiled immediately
+- reveal solutions intentionally
+- track real progress
+- return later without losing context
+- eventually handle weekly projects and capstone work well
+
+Assume I already own the domain for this product.
+
+Assume the curriculum repository is the source of truth for content.
+Do not turn the website into a manual content-entry system.
+
+If some later weeks are not yet fully present in the current workspace, do not
+invent fake curriculum content. Design the platform so new weeks can appear
+naturally when the repo gains real material.
+
+========================================================================
+01. PRIMARY MISSION
+========================================================================
+
+Create the best possible interactive learning platform and coding playground for
+the `python-oop-journey-v2` curriculum.
+
+The website must feel like a serious product for learning Python and OOP:
+
+- intentional
+- trustworthy
+- calm
+- fast
+- code-first
+- learner-friendly
+- maintainable
+
+It must support these real jobs well:
+
+1. A learner reading and understanding theory
+2. A learner solving exercises in an interactive Python editor
+3. A learner verifying work without getting lost
+4. A learner resuming exactly where they left off
+5. A maintainer syncing the site with the curriculum repository cleanly
+
+========================================================================
+02. PRODUCT STANDARD
+========================================================================
+
+This should feel closer to:
+
+- an interactive textbook
+- a coding practice product
+- a personal learning cockpit
+- a serious curriculum platform
+
+than to:
+
+- a blog
+- a random docs site
+- a SaaS dashboard template
+- a decorative AI-flavored landing page with an editor bolted on
+
+The final product should be something I would actually want to use as my main
+way to work through the curriculum on my domain.
+
+========================================================================
+03. USER-FIRST EXPECTATION
+========================================================================
+
+When making tradeoffs, optimize for the learner's lived experience.
+
+The learner should consistently feel:
+
+- I know where to start
+- I know what this page is for
+- I know what to do next
+- I know how to run my code
+- I know how to verify my work
+- I know where to get help
+- I do not feel punished for making mistakes
+- I can come back tomorrow without reorienting from scratch
+
+If a design looks technically correct but increases confusion, slow navigation,
+or emotional friction, it is the wrong design.
+
+========================================================================
+04. WHAT SUCCESS LOOKS LIKE
+========================================================================
+
+A successful first serious version should let me do this smoothly:
+
+1. Open the site on my domain
+2. Immediately understand the curriculum layout
+3. See where I left off
+4. Open a week
+5. Open a day
+6. Read theory in a pleasant format
+7. Jump straight into the first exercise
+8. Edit starter code in a strong browser editor
+9. Run my code
+10. Verify my solution
+11. Read meaningful failure feedback
+12. Use hints if stuck
+13. Reveal the solution intentionally if needed
+14. Mark progress and move on
+15. Return later and resume cleanly
+
+If any of these steps feels clumsy, hidden, brittle, or annoying, the product
+is not good enough yet.
+
+========================================================================
+05. HARD REQUIREMENTS
+========================================================================
+
+These are non-negotiable.
+
+1. The website must ingest curriculum content from the repo structure.
+2. Do not manually duplicate the curriculum into random CMS records.
+3. Theory docs, exercise stubs, solutions, tests, and project docs must remain
+   traceable to the repo.
+4. The playground must not execute arbitrary learner Python inside the web app
+   process.
+5. Code execution must run in an isolated sandbox with strict limits.
+6. The UX must clearly separate:
+   - read theory
+   - run code
+   - verify work
+   - reveal help
+   - reveal solution
+7. The site must support a real desktop coding experience.
+8. The site must support a strong mobile reading experience.
+9. The architecture must be maintainable and testable.
+10. The custom domain must be treated as a first-class deployment concern.
+
+========================================================================
+06. CORE PRODUCT PRINCIPLES
+========================================================================
+
+Use these principles everywhere.
+
+1. Clarity over cleverness
+2. Guidance over clutter
+3. Fast navigation over decorative density
+4. Trust over hype
+5. Learning support over raw correctness theater
+6. Calm focus over noisy gamification
+7. Safe execution over fast unsafe shortcuts
+8. Repo ingestion over manual content drift
+
+========================================================================
+07. PRIMARY PERSONAS
+========================================================================
+
+Design mainly for these personas.
+
+Persona 1: The Daily Learner
+
+- Works through the curriculum in order
+- Wants a clean next-step experience
+- Needs help without immediate spoilers
+- Wants to feel steady progress
+
+Persona 2: The Returning Learner
+
+- Has been away for a few days
+- Needs fast reorientation
+- Wants to see:
+  - where they stopped
+  - what is incomplete
+  - what to review next
+
+Persona 3: The Maintainer
+
+- Adds or updates curriculum content in the repo
+- Needs ingestion to be reliable
+- Needs failures to be precise, not mysterious
+
+Persona 4: The Reviewer
+
+- Wants to inspect the platform and see that it is thoughtfully engineered
+- Values coherence, safety, and professionalism
+
+========================================================================
+08. MOST IMPORTANT UX OUTCOME
+========================================================================
+
+The website should reduce friction between:
+
+- learning a concept
+- trying code
+- getting feedback
+- moving forward
+
+The site should not force the learner to translate raw repository structure into
+their own mental model. That translation is the product's job.
+
+========================================================================
+09. LEARNING LOOP
+========================================================================
+
+The product should be built around this loop:
+
+1. Preview today's scope
+2. Read the theory
+3. Open the first problem
+4. Try code
+5. Run code
+6. Verify
+7. Inspect feedback
+8. Use hints if needed
+9. Save progress
+10. Continue to the next problem
+11. End with a project or review checkpoint
+
+This loop should feel obvious and smooth from the UI alone.
+
+========================================================================
+10. ONBOARDING REQUIREMENTS
+========================================================================
+
+The onboarding experience matters.
+
+The first visit should answer:
+
+- What is this site?
+- What is the curriculum?
+- Where should I start?
+- Do I need an account?
+- How do exercises work here?
+- What is the difference between run and verify?
+
+The first-time user experience should ideally include:
+
+1. a clean landing view with curriculum overview
+2. a clear "Start Here" action
+3. a short explanation of:
+   - theory pages
+   - problem pages
+   - run vs verify
+   - hints vs solutions
+4. a resume or continue-learning affordance when the user returns
+
+Avoid a wall of generic onboarding slides.
+Teach the product through use, not through filler.
+
+========================================================================
+11. HOMEPAGE REQUIREMENTS
+========================================================================
+
+The homepage should not be a generic hero plus empty feature boxes.
+
+It should function as a real learner dashboard.
+
+It should include:
+
+1. current progress summary
+2. continue where I left off
+3. curriculum map
+4. current recommended next step
+5. recently visited items
+6. bookmarks or saved items
+7. optional review queue
+
+If the user is new, the homepage should shift gracefully into:
+
+- start the curriculum
+- understand the structure
+- see what is available
+
+If the user is returning, the homepage should shift into:
+
+- continue this day
+- resume this problem
+- review failed checks
+
+========================================================================
+12. INFORMATION ARCHITECTURE
+========================================================================
+
+The information architecture should be extremely clear.
+
+Top-level areas should likely include:
+
+1. Home
+2. Curriculum
+3. Search
+4. Projects
+5. Bookmarks
+6. Notes
+7. Profile or Progress
+
+Within the curriculum area, users should move through:
+
+- week
+- day
+- theory
+- exercises
+- project
+
+The structure should be predictable and never surprising.
+
+========================================================================
+13. WEEK PAGE REQUIREMENTS
+========================================================================
+
+Each week page should feel like a real planning surface, not a folder listing.
+
+It should show:
+
+1. week title
+2. week objective
+3. prerequisite context
+4. day list
+5. weekly project overview
+6. learner progress for that week
+7. estimated scope
+8. recommended sequence
+9. current day if already in progress
+
+It should answer:
+
+- What is this week about?
+- What will I learn?
+- How big is it?
+- Where should I begin?
+- What project ties this together?
+
+========================================================================
+14. DAY PAGE REQUIREMENTS
+========================================================================
+
+Each day page should work as a mini learning plan.
+
+It should include:
+
+1. day title
+2. learning objectives
+3. theory summary
+4. link or embedded entry to the full theory page
+5. list of problems in order
+6. problem difficulty labels
+7. progress markers
+8. a clear "start with problem 1" action
+9. a clear link to the weekly project connection
+
+Optional but strongly useful:
+
+10. estimated effort
+11. common mistakes for today
+12. recommended review problems later
+
+========================================================================
+15. THEORY EXPERIENCE
+========================================================================
+
+Theory pages are not just markdown dumps.
+
+They should provide:
+
+1. high-quality typography
+2. strong content hierarchy
+3. table of contents
+4. code block copy controls
+5. previous/next navigation
+6. links into today's problems
+7. visible learning objectives
+8. callouts for common mistakes
+9. progress state such as read or partially read
+
+Very desirable:
+
+10. glossary popovers
+11. collapsible examples
+12. scroll-position memory
+13. jump into first exercise CTA
+
+The reading experience should be calm and premium.
+
+========================================================================
+16. PROBLEM PAGE REQUIREMENTS
+========================================================================
+
+The problem page is one of the most important product surfaces.
+
+Every problem page should show:
+
+1. title
+2. topic
+3. difficulty
+4. short learning context
+5. requirements
+6. examples
+7. behavior notes
+8. related theory link
+9. editable starter code
+10. run panel
+11. verify panel
+12. hint controls
+13. solution reveal controls
+14. previous/next problem navigation
+15. saved state information
+
+The page should answer, immediately:
+
+- What am I building?
+- What shape should my code have?
+- How do I run it?
+- How do I verify it?
+- What do I do if I am stuck?
+
+========================================================================
+17. PROBLEM PAGE UX DETAILS
+========================================================================
+
+Make the problem page feel excellent.
+
+It should support:
+
+1. easy reading of instructions without losing the editor
+2. resizable panes on desktop
+3. clear single-column fallback on smaller screens
+4. sticky actions where useful:
+   - Run
+   - Verify
+   - Save
+   - Reset
+5. autosave feedback
+6. clear last run and last verified timestamps
+7. visible unsaved-changes state
+
+Avoid:
+
+- hiding important actions behind menus
+- requiring too much scrolling between instructions and code
+- making output easy to lose
+
+========================================================================
+18. PLAYGROUND REQUIREMENTS
+========================================================================
+
+The playground is a core product feature.
+
+It should support:
+
+1. a serious code editor
+2. syntax highlighting
+3. strong keyboard behavior
+4. reset to starter code
+5. save draft
+6. autosave
+7. run code
+8. verify code
+9. stdout view
+10. stderr view
+11. execution status
+12. timeout messaging
+13. clean traceback formatting
+14. clear failure vs platform-error distinction
+
+Strong future support:
+
+15. multiple files for projects
+16. tabs or tree-based project editing
+17. version history
+18. compare with previous attempts
+19. copy output
+20. shareable run snapshot if desired later
+
+Do not ship a glorified textarea.
+
+========================================================================
+19. RUN VS VERIFY UX
+========================================================================
+
+The platform must make the difference between Run and Verify extremely clear.
+
+Run:
+
+- executes the learner code
+- good for experimentation
+- should show direct output and runtime errors
+
+Verify:
+
+- checks correctness
+- should use a learner-friendly harness
+- should explain pass/fail clearly
+
+Show Solution:
+
+- should be intentional
+- should not be the easiest thing on the page to click
+
+This distinction is fundamental to the product.
+
+========================================================================
+20. VERIFICATION FEEDBACK REQUIREMENTS
+========================================================================
+
+Verification feedback should feel helpful, not punishing.
+
+Good output should include:
+
+1. pass/fail summary
+2. which check failed
+3. what kind of issue occurred:
+   - wrong return value
+   - raised unexpected exception
+   - missing edge case
+   - output mismatch
+4. enough detail to debug
+5. a path to next help:
+   - hint
+   - related note
+   - theory link
+
+Do not dump raw pytest output at the learner unless intentionally placed in an
+advanced debug view.
+
+The default learner surface should be cleaner and more interpretable.
+
+========================================================================
+21. HINTS, HELP, AND SPOILER CONTROL
+========================================================================
+
+The site should help learners without collapsing straight into answers.
+
+Preferred help ladder:
+
+1. Hint 1: conceptual nudge
+2. Hint 2: structural guidance
+3. Hint 3: edge-case reminder
+4. Solution reveal
+
+The UI should make this ladder visible.
+
+The site should support:
+
+- common mistakes
+- debugging tips
+- why-this-works notes
+- related theory references
+
+The product should be good for learning, not just scoring.
+
+========================================================================
+22. SOLUTION REVEAL UX
+========================================================================
+
+Showing the reference solution should be thoughtful.
+
+Requirements:
+
+1. do not auto-show solutions
+2. require explicit user intent
+3. allow re-hide
+4. keep the learner code visible nearby
+5. optionally support side-by-side compare
+
+The UI should communicate:
+
+- This is the reference solution
+- Use it after a real attempt
+- Compare behavior and structure, not only final output
+
+========================================================================
+23. PROJECT EXPERIENCE
+========================================================================
+
+Weekly projects must be first-class product surfaces.
+
+Each project page should include:
+
+1. project goal
+2. key concepts reinforced
+3. starter structure
+4. required public surface
+5. suggested workflow
+6. run instructions
+7. verification path
+8. reference solution access
+9. progress milestones
+
+Project work should not feel like the site suddenly falls back to raw files.
+
+========================================================================
+24. DAILY RHYTHM AND RESUME UX
+========================================================================
+
+The product should feel good for repeated daily use.
+
+Support:
+
+1. continue where I left off
+2. return to today's last problem
+3. show today's completed items
+4. show what is unfinished
+5. suggest the next best action
+
+When a learner returns after a break, the product should reduce re-entry
+friction immediately.
+
+========================================================================
+25. PROGRESS TRACKING
+========================================================================
+
+Track progress at multiple levels:
+
+1. week started
+2. week completed
+3. day started
+4. day completed
+5. theory read
+6. problem attempted
+7. problem solved
+8. verification last passed
+9. project started
+10. project completed
+
+Useful associated state:
+
+- last visited page
+- saved draft
+- last run result
+- last verify result
+- notes
+- bookmarks
+- timestamps
+
+Do not reduce the whole learning journey to one vague percentage.
+
+========================================================================
+26. MOTIVATION AND REVIEW
+========================================================================
+
+Use motivation carefully.
+
+Good motivational UX:
+
+- visible streak if wanted
+- progress clarity
+- completed items
+- review suggestions
+- gentle reminders
+
+Bad motivational UX:
+
+- aggressive gamification
+- fake achievement clutter
+- noisy dopamine widgets
+
+The platform should help me build momentum without feeling childish.
+
+========================================================================
+27. NOTES, BOOKMARKS, AND REVIEW TOOLS
+========================================================================
+
+Support learner memory and reflection.
+
+Strong additions:
+
+1. bookmarks
+2. personal notes per theory page or problem
+3. quick review-later mark
+4. failed verification history
+5. recently visited list
+6. review queue
+
+These features should feel integrated, not bolted on.
+
+========================================================================
+28. SEARCH AND NAVIGATION
+========================================================================
+
+Search should work across:
+
+- weeks
+- days
+- theory docs
+- problem titles
+- project pages
+- topic names and keywords when possible
+
+Navigation should support:
+
+- curriculum sidebar
+- breadcrumbs
+- previous/next
+- quick jump to week/day/problem
+- recently visited
+
+The user should never feel trapped deep in the hierarchy.
+
+========================================================================
+29. EMPTY STATES, LOADING STATES, AND RECOVERY
+========================================================================
+
+This product must handle states well.
+
+Design great:
+
+1. empty bookmarks state
+2. empty notes state
+3. no progress yet state
+4. failed content sync state
+5. execution timeout state
+6. verification unavailable state
+7. no-results search state
+
+Every empty or failure state should answer:
+
+- what happened
+- whether it is my fault or the platform's
+- what I can do next
+
+Do not ship vague "Something went wrong" experiences.
+
+========================================================================
+30. TONE AND MICROCOPY
+========================================================================
+
+The product voice should be:
+
+- clear
+- calm
+- direct
+- respectful
+- non-patronizing
+
+Microcopy should:
+
+- explain actions plainly
+- avoid hype
+- avoid fake cheerleading
+- avoid vague labels
+
+Examples of good action labels:
+
+- Run Code
+- Verify Solution
+- Show Hint 1
+- Reveal Reference Solution
+- Reset to Starter Code
+- Continue From Last Problem
+
+========================================================================
+31. TRUST AND SAFETY FEELING
+========================================================================
+
+The user should trust the platform.
+
+Trust is created by:
+
+1. clear status messaging
+2. no silent failures
+3. visible autosave behavior
+4. stable resume behavior
+5. obvious separation between learner code and reference content
+6. clear execution safety and limits where relevant
+
+If the platform feels unpredictable, users will stop trusting it.
+
+========================================================================
+32. CONTENT INGESTION STRATEGY
+========================================================================
+
+This is one of the most important parts.
+
+Do not hardcode the curriculum into web components.
+
+The ingestion layer should derive structure from repo conventions:
+
+- `weekXX_topic/README.md`
+- `dayNN_topic.md`
+- `exercises/dayNN/problem_XX_*.py`
+- `solutions/dayNN/problem_XX_*.py`
+- `tests/dayNN/test_problem_XX_*.py`
+- `project/README.md`
+- `project/starter/`
+- `project/reference_solution/`
+
+It should:
+
+1. scan the repo
+2. build a normalized manifest
+3. extract docstring metadata when possible
+4. extract theory metadata from markdown structure
+5. preserve source-path traceability
+6. fail loudly in development on malformed content
+
+Minimum manifest fields:
+
+- week slug
+- week title
+- day slug
+- day title
+- theory doc path
+- problem slug
+- problem title
+- difficulty
+- exercise path
+- solution path
+- test path
+- project metadata
+
+It must be easy to add later weeks without redesigning the website.
+
+========================================================================
+33. RECOMMENDED TECHNICAL DIRECTION
+========================================================================
+
+Be opinionated. Default to this stack unless local constraints justify another
+choice clearly.
+
+Frontend:
+
+- Next.js with App Router
+- TypeScript
+- React
+- Tailwind CSS
+- Monaco editor
+- MDX or strong markdown rendering
+
+Backend:
+
+- FastAPI
+- Pydantic
+- SQLAlchemy plus Alembic if Python owns the DB layer
+
+Persistence:
+
+- PostgreSQL
+- Redis when needed for jobs, queues, or rate limiting
+
+Execution:
+
+- isolated Python sandbox workers
+- strict limits
+- no unrestricted network access
+
+Deployment:
+
+- independently deployable frontend and backend
+- domain-ready production setup
+- HTTPS
+- secure cookies
+- structured environment config
+
+If another stack is chosen, explain why it is better for:
+
+1. content ingestion
+2. Python execution
+3. long-term maintenance
+4. deployment on a custom domain
+
+========================================================================
+34. ARCHITECTURE GOALS
+========================================================================
+
+The architecture should separate:
+
+1. content ingestion
+2. content normalization
+3. learner-facing rendering
+4. playground/editor UI
+5. code execution
+6. verification
+7. learner progress
+8. search/navigation
+9. admin or sync tools
+
+Strong recommendation:
+
+Use a monorepo or clearly organized multi-app workspace.
+
+Suggested shape:
+
+website-playground/
+  README.md
+  apps/
+    web/
+    api/
+  packages/
+    curriculum/
+    ui/
+    shared/
+  infrastructure/
+    docker/
+    deployment/
+  docs/
+
+The exact shape can vary, but the separation of concerns must remain.
+
+========================================================================
+35. CONTENT MODEL
+========================================================================
+
+Use a normalized content model with clear types.
+
+At minimum:
+
+- Curriculum
+- Week
+- Day
+- TheoryDocument
+- Problem
+- ProblemAssets
+- Project
+- UserProgress
+- Submission
+- Draft
+- Note
+- Bookmark
+- VerificationResult
+
+Each `Problem` should ideally include:
+
+- stable slug
+- display title
+- week/day position
+- difficulty
+- rendered instructions
+- starter code
+- solution code
+- related theory info
+- test references
+- project linkage when relevant
+
+========================================================================
+36. DATA MODEL FOR APP FEATURES
+========================================================================
+
+If persistence exists, define durable storage for:
+
+- users
+- sessions
+- learner_profiles
+- progress_records
+- code_submissions
+- saved_drafts
+- bookmarks
+- notes
+- execution_runs
+- verification_runs
+
+Keep names boring and clear.
+Avoid cute schema naming.
+
+========================================================================
+37. AUTHENTICATION AND ACCESS
+========================================================================
+
+For a personal platform, keep auth simple but production-safe.
+
+Good defaults:
+
+- magic link auth
+- email/password with secure session handling
+- optional single-user bootstrap in development
+
+The app should support:
+
+- private mode
+- future multi-user expansion
+
+Do not let auth complexity block the entire product, but do not ignore it if
+progress and drafts need persistence.
+
+========================================================================
+38. SANDBOX EXECUTION REQUIREMENTS
+========================================================================
+
+Never run learner Python directly inside the web app process.
+
+Execution must be:
+
+1. isolated
+2. resource-limited
+3. time-limited
+4. network-restricted
+5. filesystem-restricted
+6. auditable
+
+Suggested flow:
+
+1. web app sends code to backend
+2. backend creates execution job
+3. worker runs code in sandbox
+4. output and verification results return
+5. sandbox is destroyed
+
+Resource constraints should include:
+
+- CPU time limit
+- wall-clock timeout
+- memory cap
+- process cap
+- no unrestricted networking
+- no host filesystem access
+
+Do not compromise here.
+
+========================================================================
+39. MOBILE VS DESKTOP EXPERIENCE
+========================================================================
+
+The product should be honest about screen constraints.
+
+Desktop:
+
+- primary environment for serious coding
+- strong editor and side-by-side workflow
+
+Mobile:
+
+- strong reading experience
+- review, bookmarking, and light note-taking
+- maybe light editing, but do not optimize mobile around full coding parity if
+  it hurts desktop quality
+
+The site should never feel broken on mobile, but it does not need to pretend a
+phone is the ideal place for full project coding.
+
+========================================================================
+40. DESIGN DIRECTION
+========================================================================
+
+Avoid generic template energy and avoid AI-looking sameness.
+
+Design goals:
+
+- serious
+- readable
+- modern
+- calm
+- code-first
+- intentional
+
+Guidance:
+
+1. strong typography
+2. careful spacing
+3. clear contrast
+4. structured panels
+5. restrained motion
+6. no purple bias
+7. no fake glassmorphism everywhere
+8. no dashboard bloat
+
+The product should look like a tool built for thoughtful learning.
+
+========================================================================
+41. ACCESSIBILITY REQUIREMENTS
+========================================================================
+
+The app should be usable with:
+
+- keyboard navigation
+- visible focus states
+- semantic structure
+- good color contrast
+- accessible controls
+- readable form labels
+- screen-reader-friendly page structure where practical
+
+This especially matters for:
+
+- sidebars
+- tabs
+- editor controls
+- modals
+- accordions
+- hint and solution panels
+
+========================================================================
+42. PERFORMANCE REQUIREMENTS
+========================================================================
+
+The product should feel fast.
+
+Goals:
+
+1. fast curriculum navigation
+2. fast theory rendering
+3. fast search
+4. reasonable editor startup
+5. visible execution state without UI lockups
+
+Use caching where helpful for:
+
+- parsed manifests
+- rendered theory content
+- nav trees
+- stable metadata
+
+Do not build obviously slow content-loading paths.
+
+========================================================================
+43. CUSTOM DOMAIN AND DEPLOYMENT
+========================================================================
+
+I already own the domain.
+
+The deployment design must support:
+
+- custom domain setup
+- HTTPS
+- environment-specific base URLs
+- secure cookies
+- API origin configuration
+- preview environments if useful
+
+Deployment docs should cover:
+
+1. required environment variables
+2. frontend deployment
+3. backend deployment
+4. database setup
+5. domain configuration
+6. local vs preview vs production behavior
+
+========================================================================
+44. OBSERVABILITY AND OPERATIONS
+========================================================================
+
+Add practical observability from the beginning.
+
+Useful defaults:
+
+- structured logs
+- error tracking
+- request tracing where practical
+- execution-run logging
+- sync-job logging
+- health endpoints
+
+It should be easy to answer:
+
+- Did content ingestion fail?
+- Did code execution fail?
+- Was it a learner-code issue or platform issue?
+- Did verification fail due to platform drift?
+
+========================================================================
+45. TESTING REQUIREMENTS
+========================================================================
+
+Test this like a real product.
+
+Required coverage areas:
+
+1. curriculum ingestion
+2. manifest normalization
+3. routing and navigation logic
+4. problem page rendering
+5. theory rendering
+6. playground request flow
+7. verification result handling
+8. progress persistence
+9. project page rendering
+10. auth flow if present
+11. API contracts
+12. sandbox safety boundaries where practical
+
+Use:
+
+- unit tests
+- integration tests
+- end-to-end tests
+
+The next chat must not stop after building pretty pages.
+
+========================================================================
+46. DOCUMENTATION REQUIREMENTS
+========================================================================
+
+Create docs that matter.
+
+At minimum:
+
+1. root README
+2. architecture overview
+3. local development guide
+4. deployment guide
+5. content ingestion guide
+6. sandbox execution guide
+
+Avoid noisy status files.
+Prefer a few durable technical docs.
+
+========================================================================
+47. DELIVERY PHASES
+========================================================================
+
+Build this in phases.
+
+Phase 1: Foundation
+
+1. choose the app structure
+2. scaffold frontend and backend
+3. implement curriculum ingestion
+4. render week/day/theory/problem views without full playground behavior
+
+Phase 2: Playground MVP
+
+1. add code editor
+2. add safe code execution
+3. add starter code loading
+4. add run output
+5. add learner-friendly verification
+
+Phase 3: Learner State
+
+1. add auth or durable local persistence
+2. add progress tracking
+3. add saved drafts
+4. add resume flow
+5. add bookmarks and notes if feasible
+
+Phase 4: Project Experience
+
+1. add project pages
+2. add multi-file editing where needed
+3. add project verification
+
+Phase 5: Product Polish
+
+1. improve search
+2. improve navigation
+3. improve hints and explanation systems
+4. improve accessibility
+5. improve responsiveness
+6. finalize deployment and domain setup
+
+========================================================================
+48. ACCEPTANCE CRITERIA
+========================================================================
+
+The first serious version of the website is acceptable only if:
+
+1. It ingests the curriculum repo cleanly.
+2. A learner can browse by week, day, theory, problem, and project without raw
+   repo confusion.
+3. Theory pages feel good to read.
+4. Problem pages feel good to work in.
+5. The editor is real, not fake.
+6. Learner code runs in an isolated sandbox.
+7. Verification is understandable.
+8. Progress can be saved and resumed.
+9. Weekly projects are first-class pages.
+10. The architecture is documented.
+11. The domain can be configured cleanly.
+12. The product feels like something a real learner would want to use every day.
+
+========================================================================
+49. DECISION RULES IF YOU HIT AMBIGUITY
+========================================================================
+
+If a decision is unclear, use these priorities in order:
+
+1. learner experience
+2. safety of execution
+3. maintainability
+4. honest repo integration
+5. clarity of architecture
+6. aesthetics
+
+If there is tension between:
+
+"fast demo" vs "safe execution"
+- choose safe execution
+
+"pretty UI" vs "usable daily workflow"
+- choose usable daily workflow
+
+"more features" vs "clean architecture"
+- choose clean architecture
+
+"manual content entry" vs "repo ingestion"
+- choose repo ingestion
+
+"maximal cleverness" vs "trustworthy product"
+- choose trustworthy product
+
+========================================================================
+50. IMMEDIATE ACTIONS FOR THE NEXT CHAT
+========================================================================
+
+Do not only produce a high-level plan.
+
+Start by:
+
+1. inspecting the current workspace
+2. identifying live curriculum content
+3. identifying whether a website app already exists
+4. deciding whether to extend or replace any partial attempt
+5. choosing the concrete app structure
+6. scaffolding the website project
+7. implementing the curriculum ingestion layer
+8. rendering the first real navigable week/day/problem views
+9. then building the playground foundation
+
+If local constraints force a different approach, explain them concretely and
+continue with the best practical path.
+
+========================================================================
+51. FINAL EXPECTATION
+========================================================================
+
+This website should become the product layer on top of the curriculum.
+
+It should not feel like a wrapper.
+It should not feel like a template.
+It should not feel like a prototype pretending to be a product.
+
+It should feel:
+
+- learner-friendly
+- genuinely useful
+- safe
+- elegant
+- stable
+- extensible
+
+Build the thing I would actually want to use on my domain as the main way to
+study this curriculum.
+

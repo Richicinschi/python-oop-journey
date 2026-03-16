@@ -1,0 +1,1834 @@
+REBUILD PROMPT FOR A NEW CHAT
+
+You are helping me rebuild my Python learning project from scratch.
+
+Read this entire prompt carefully before you start creating files.
+
+I do NOT want you to preserve the current repository layout as-is. The current project contains useful curriculum ideas, but the implementation quality and structure drifted over time. I want a brand-new repository with a fixed architecture, honest documentation, clean imports, and a learner-friendly layout.
+
+This is not a migration.
+This is not a compatibility refactor.
+This is a ground-up rebuild.
+
+Use the old repository only as reference material for:
+
+- curriculum topics
+- problem ideas
+- naming inspiration
+- rough weekly progression
+
+Do NOT inherit its broken structure.
+
+======================================================================
+01. PRIMARY MISSION
+======================================================================
+
+Create a new repository named:
+
+`python-oop-journey-v2`
+
+inside the current workspace.
+
+The new repository must be:
+
+- structurally consistent
+- pleasant to navigate
+- safe to test from the repo root
+- pedagogically coherent
+- easy to extend later
+- honest about what is complete and what is not
+
+This project is a serious educational codebase, not a quick content dump.
+
+It should feel intentionally designed for:
+
+1. a learner working through the material day by day
+2. a maintainer adding future weeks or exercises
+3. an automated test runner executing the whole repo from the root
+4. a recruiter or reviewer browsing the capstone and curriculum structure
+
+======================================================================
+02. WHAT WAS WRONG WITH V1 AND MUST NOT BE REPEATED
+======================================================================
+
+The old project had the following problems. Treat this list as a "never again" checklist.
+
+1. Monolithic daily files like `day01_exercises.py` and `day01_solutions.py` containing many unrelated problems.
+2. Duplicate week directories with conflicting naming schemes.
+3. Ambiguous imports like `from day01_solutions import *`.
+4. Tests relying on `sys.path` manipulation.
+5. Root `pytest` failures caused by import collisions and duplicate test module names.
+6. Committed generated artifacts such as `__pycache__`, `.pytest_cache`, `.coverage`, and `htmlcov`.
+7. Status and summary documents that became stale and contradicted the real code.
+8. Placeholder files committed as if the week was "done".
+9. Fake or placeholder badges and URLs in README files.
+10. Inconsistent package boundaries and multiple ways to import the same symbol.
+11. Same symbol names reused in confusing ways across the same day.
+12. Root configuration pointing at folders that were empty, renamed, or obsolete.
+13. Too much repository noise compared with the amount of genuinely useful learning material.
+14. Unnecessary dependencies or stray imports in beginner materials.
+15. Incomplete weeks that still looked finished from the documentation.
+
+If you are ever unsure between reproducing old behavior and choosing a cleaner structure, choose the cleaner structure.
+
+======================================================================
+03. NON-NEGOTIABLE RULES
+======================================================================
+
+These rules are mandatory.
+
+1. One problem per file.
+2. Problems are grouped by day.
+3. Do not create giant `dayNN_exercises.py` files.
+4. Do not create giant `dayNN_solutions.py` files.
+5. Do not use wildcard imports anywhere.
+6. Do not use `sys.path.insert(...)` or similar import hacks anywhere.
+7. Do not create duplicate week directories.
+8. Do not commit generated artifacts or caches.
+9. Do not create placeholder files just to fill out the tree.
+10. Do not claim a week is complete unless it actually is.
+11. Keep one canonical import path for each public symbol.
+12. Make the repository testable from the root with `pytest`.
+13. Use valid Python module names.
+14. Keep the documentation synchronized with the actual file structure.
+15. Prefer fewer complete files over many incomplete ones.
+
+Important correction:
+
+Do NOT name Python modules like `01_calculate_sum.py`.
+That is not a valid Python import module name.
+
+Use valid names such as:
+
+- `problem_01_calculate_sum.py`
+- `problem_02_celsius_to_fahrenheit.py`
+- `problem_03_divide_with_remainder.py`
+
+This is mandatory.
+
+======================================================================
+04. HIGH-LEVEL PRODUCT VISION
+======================================================================
+
+I want the rebuilt repo to be a polished curriculum platform with these qualities:
+
+1. Clean learning progression from fundamentals to real-world OOP.
+2. Strong folder hygiene and predictable naming.
+3. Consistent day-to-day shape.
+4. Problem files that are small enough to open, understand, and solve independently.
+5. Theory docs that support the exercises rather than existing as fluff.
+6. Weekly projects that reinforce the week's concepts.
+7. A capstone that feels portfolio-worthy.
+8. Honest, minimal documentation rather than status-noise.
+
+This should feel like a mini educational product, not a generated dumping ground.
+
+======================================================================
+05. CANONICAL REPOSITORY NAME AND DIRECTORY NAMES
+======================================================================
+
+Create a new repository named:
+
+`python-oop-journey-v2`
+
+Use exactly these week directories:
+
+- `week01_fundamentals`
+- `week02_fundamentals_advanced`
+- `week03_oop_basics`
+- `week04_oop_intermediate`
+- `week05_oop_advanced`
+- `week06_patterns`
+- `week07_real_world`
+- `week08_capstone`
+
+Optional post-capstone extensions may use:
+
+- `week09_portfolio_polish`
+- `week10_interview_and_architecture_review`
+
+Do NOT create alternate names such as:
+
+- `week02_advanced_fundamentals`
+- `week04_inheritance`
+- `week05_advanced_oop`
+- `week06_design_patterns`
+
+There must be exactly one canonical directory per week.
+
+======================================================================
+06. ROOT-LEVEL REPOSITORY STRUCTURE
+======================================================================
+
+Use this root structure:
+
+python-oop-journey-v2/
+  README.md
+  QUICKSTART.md
+  INDEX.md
+  ROADMAP.md
+  pyproject.toml
+  requirements.txt
+  pytest.ini
+  .gitignore
+  daily_log.md
+  progress_tracker.md
+  resources/
+    cheatsheets/
+      complexity_cheatsheet.md
+  week01_fundamentals/
+  week02_fundamentals_advanced/
+  week03_oop_basics/
+  week04_oop_intermediate/
+  week05_oop_advanced/
+  week06_patterns/
+  week07_real_world/
+  week08_capstone/
+
+Notes:
+
+1. `ROADMAP.md` is allowed as the one honest forward-looking planning document.
+2. Do NOT create noisy reports like `FINAL_STATUS.md`, `SESSION_SUMMARY.md`, or `FILES_CREATED_REPORT.md`.
+3. The root should stay focused and readable.
+
+======================================================================
+07. ROOT TOOLING AND CONFIGURATION STRATEGY
+======================================================================
+
+Use one root configuration strategy for the whole repo.
+Do not create per-week tool config files unless there is an exceptional reason.
+
+Required root files:
+
+1. `pyproject.toml`
+2. `requirements.txt`
+3. `pytest.ini`
+4. `.gitignore`
+
+Recommended toolchain:
+
+- `pytest`
+- `pytest-cov`
+- `black`
+- `ruff`
+- `mypy`
+
+Root configuration goals:
+
+1. `pytest` works from the repo root.
+2. imports work without path hacks.
+3. linters do not require custom per-week setup.
+4. formatting rules are consistent across the repo.
+5. generated files are excluded from version control.
+
+Strong recommendation for pytest:
+
+- use `--import-mode=importlib` to reduce accidental module-name collisions
+
+Recommended `pytest.ini` behavior:
+
+- verbose output
+- strict markers if markers are used
+- short tracebacks
+- importlib import mode
+- explicit `testpaths` only if they match the real repo
+
+Do not configure test discovery to point at folders that do not exist.
+
+`requirements.txt` should stay lean.
+Do not add unnecessary runtime dependencies for a teaching repo.
+
+Avoid dependencies like:
+
+- `sympy`
+- large web frameworks
+- database drivers
+- anything not required for the current material
+
+unless a later week truly needs them and the need is documented.
+
+======================================================================
+08. .GITIGNORE REQUIREMENTS
+======================================================================
+
+The root `.gitignore` must exclude at least:
+
+- `__pycache__/`
+- `*.py[cod]`
+- `.pytest_cache/`
+- `.mypy_cache/`
+- `.ruff_cache/`
+- `.coverage`
+- `htmlcov/`
+- `.venv/`
+- `venv/`
+- `.DS_Store`
+- `.idea/`
+
+If `.vscode/` is included, include only intentional shared settings, not workspace noise.
+
+======================================================================
+09. PACKAGE STRUCTURE AND IMPORT RULES
+======================================================================
+
+Every week directory must be a real Python package.
+Every relevant subdirectory must use `__init__.py`.
+
+Use this general week structure:
+
+weekXX_topic/
+  __init__.py
+  README.md
+  day01_topic_name.md
+  day02_topic_name.md
+  day03_topic_name.md
+  day04_topic_name.md
+  day05_topic_name.md
+  day06_topic_name.md
+  exercises/
+    __init__.py
+    day01/
+      __init__.py
+      problem_01_*.py
+      problem_02_*.py
+    day02/
+      __init__.py
+      ...
+  solutions/
+    __init__.py
+    day01/
+      __init__.py
+      problem_01_*.py
+      problem_02_*.py
+    day02/
+      __init__.py
+      ...
+  tests/
+    __init__.py
+    day01/
+      test_problem_01_*.py
+      test_problem_02_*.py
+    day02/
+      test_problem_01_*.py
+      ...
+  project/
+    README.md
+    starter/
+    reference_solution/
+    tests/
+
+Import policy:
+
+1. Tests must use explicit imports.
+2. Do not use wildcard imports.
+3. Do not rely on the current working directory.
+4. Do not rely on `sys.path` mutation.
+5. Prefer full module imports in tests, for example:
+
+   `from week01_fundamentals.solutions.day01.problem_01_calculate_sum import calculate_sum`
+
+6. Day package `__init__.py` files may re-export symbols for convenience, for example:
+
+   `from .problem_01_calculate_sum import calculate_sum`
+
+but tests should still prefer direct problem-module imports for maximum clarity.
+
+Public symbol collision rule:
+
+Within a single `dayNN` package, exported public symbol names must be unique.
+
+If two exercises would naturally define the same class name, rename them to stay package-safe.
+
+Example:
+
+- bad: two different files each exporting `Duck`
+- good: `BehaviorDuck` and `WaterfowlDuck`
+- good: `BaseDuck` and `ComposedDuck`
+
+Self-contained problem rule:
+
+If one exercise requires multiple classes or helper functions that belong to that one exercise, keep them in the same problem file.
+
+Example:
+
+- `problem_01_car_composition.py` may contain `Engine`, `Transmission`, and `Car`
+
+That is correct because it is still one exercise file.
+
+Shared helper rule:
+
+Prefer self-contained problem files.
+Create shared helper modules only if all of the following are true:
+
+1. the helper is used by at least three files
+2. the helper is conceptually stable
+3. sharing it improves clarity
+4. the helper does not hide the pedagogical point
+
+If shared helpers are needed, place them in one of:
+
+- `dayNN/_shared.py`
+- `project/shared/`
+
+Do not create random utility sprawl.
+
+======================================================================
+10. EXERCISE / SOLUTION / TEST RELATIONSHIP
+======================================================================
+
+The committed repository should remain green when tested from the root.
+
+That means:
+
+1. exercise files may be incomplete and contain TODOs
+2. solution files must be complete
+3. the default test suite must target solution files and reference project solutions
+4. incomplete learner starter code must not break the root test run
+
+Important:
+
+Do not try to make the default committed root test suite run directly against unfinished exercises.
+That creates a permanent red repo unless the exercises are already solved.
+
+Instead:
+
+- exercises are the learner-facing incomplete material
+- solutions are the canonical passing reference implementation
+- tests validate the reference implementation by default
+
+Optional future enhancement:
+
+If you want to support "run tests against exercises", design it cleanly later via a well-documented switch or alternate test target.
+Do NOT add brittle dynamic import hacks in the initial rebuild.
+
+Exercise files should still:
+
+- import cleanly
+- have valid syntax
+- define the right public API
+- raise `NotImplementedError` or contain explicit TODO placeholders where appropriate
+
+======================================================================
+11. PROBLEM FILE TEMPLATE REQUIREMENTS
+======================================================================
+
+Each exercise problem file should be intentionally educational and small enough to focus on one concept.
+
+Each exercise file must include:
+
+1. a module docstring with the problem title
+2. a short explanation of what the learner is building
+3. requirements
+4. example usage
+5. constraints or behavior notes
+6. type hints
+7. TODO markers or `NotImplementedError` where appropriate
+
+Preferred exercise file skeleton:
+
+```python
+"""Problem 01: Calculate Sum
+
+Topic: Basic arithmetic
+Difficulty: Easy
+"""
+
+from __future__ import annotations
+
+
+def calculate_sum(a: int, b: int) -> int:
+    """Return the sum of two integers."""
+    raise NotImplementedError("Implement calculate_sum")
+```
+
+For class-based exercises:
+
+```python
+"""Problem 03: Bank Account
+
+Topic: Classes and state
+Difficulty: Easy
+"""
+
+from __future__ import annotations
+
+
+class BankAccount:
+    """Simple bank account model."""
+
+    def __init__(self, owner: str, balance: float = 0.0) -> None:
+        raise NotImplementedError("Implement __init__")
+
+    def deposit(self, amount: float) -> bool:
+        raise NotImplementedError("Implement deposit")
+```
+
+Notes:
+
+1. Keep learner-facing files readable.
+2. Avoid overly long comment blocks that drown out the code.
+3. The exercise file is not the place for full implementation explanations.
+4. Do not insert advanced concepts before the curriculum reaches them.
+
+======================================================================
+12. SOLUTION FILE TEMPLATE REQUIREMENTS
+======================================================================
+
+Each solution file must include:
+
+1. complete implementation
+2. correct type hints
+3. only useful comments
+4. no unnecessary cleverness
+5. no giant explanatory essays inside the code
+
+Preferred solution file skeleton:
+
+```python
+"""Reference solution for Problem 01: Calculate Sum."""
+
+from __future__ import annotations
+
+
+def calculate_sum(a: int, b: int) -> int:
+    """Return the sum of two integers."""
+    return a + b
+```
+
+Class-based example:
+
+```python
+"""Reference solution for Problem 03: Bank Account."""
+
+from __future__ import annotations
+
+
+class BankAccount:
+    """Simple bank account model."""
+
+    def __init__(self, owner: str, balance: float = 0.0) -> None:
+        self.owner = owner
+        self.balance = balance
+
+    def deposit(self, amount: float) -> bool:
+        if amount <= 0:
+            return False
+        self.balance += amount
+        return True
+```
+
+======================================================================
+13. TEST FILE TEMPLATE REQUIREMENTS
+======================================================================
+
+Each problem gets its own test file.
+
+Each test file must:
+
+1. import one solution module explicitly
+2. focus on one problem
+3. cover normal behavior
+4. cover edge cases
+5. include a few representative invalid cases when relevant
+6. stay readable
+
+Preferred test skeleton:
+
+```python
+"""Tests for Problem 01: Calculate Sum."""
+
+from __future__ import annotations
+
+from week01_fundamentals.solutions.day01.problem_01_calculate_sum import calculate_sum
+
+
+def test_calculate_sum_with_positive_numbers() -> None:
+    assert calculate_sum(2, 3) == 5
+
+
+def test_calculate_sum_with_zero() -> None:
+    assert calculate_sum(0, 0) == 0
+
+
+def test_calculate_sum_with_negative_numbers() -> None:
+    assert calculate_sum(-2, 5) == 3
+```
+
+Avoid:
+
+- giant test files with unrelated problems
+- star imports
+- hidden path manipulation
+- test files that do nothing except `pass`
+
+======================================================================
+14. DOCUMENTATION STRATEGY
+======================================================================
+
+I want fewer docs, but each one should matter.
+
+Required root docs:
+
+1. `README.md`
+2. `QUICKSTART.md`
+3. `INDEX.md`
+4. `ROADMAP.md`
+5. `progress_tracker.md`
+6. `daily_log.md`
+
+Do NOT create:
+
+- `FINAL_STATUS.md`
+- `SESSION_SUMMARY.md`
+- `FILES_CREATED_REPORT.md`
+- `WEEKX_STATUS.md`
+- `WEEKX_COMPLETE.md`
+
+unless there is a compelling, durable reason.
+
+If the repo is incomplete, use:
+
+- `ROADMAP.md`
+
+as the single source of truth for what remains.
+
+README requirements:
+
+The root `README.md` must contain:
+
+1. project purpose
+2. target audience
+3. curriculum overview
+4. canonical repo structure
+5. setup instructions
+6. test instructions
+7. how to use exercises vs solutions vs projects
+8. honest current status
+
+QUICKSTART requirements:
+
+The root `QUICKSTART.md` must help a learner begin immediately:
+
+1. install dependencies
+2. open the repo
+3. read the first theory doc
+4. open the first exercise
+5. run the first passing reference test
+6. understand the recommended daily workflow
+
+INDEX requirements:
+
+The root `INDEX.md` should act as a navigation hub:
+
+1. week-by-week links
+2. project links
+3. major resource links
+4. no fake links
+5. no claims about content that does not exist
+
+ROADMAP requirements:
+
+`ROADMAP.md` should be simple and honest:
+
+1. completed weeks
+2. in-progress weeks
+3. next milestones
+4. optional post-capstone extensions
+
+Week README requirements:
+
+Each `weekXX/.../README.md` should contain:
+
+1. week objective
+2. prerequisites
+3. daily topic list
+4. file structure summary
+5. how to work through theory, exercises, solutions, and project
+6. the weekly project overview
+
+Theory doc requirements:
+
+Each day theory document should contain:
+
+1. learning objectives
+2. key concepts and terminology
+3. small examples
+4. common mistakes
+5. how the topic connects to that day's exercises
+6. a short preview of the weekly project connection
+
+Progress tracker requirements:
+
+`progress_tracker.md` should include:
+
+1. overall progress by week
+2. daily checkboxes
+3. weekly project checkbox
+4. notes area
+5. no decorative noise
+
+Daily log requirements:
+
+`daily_log.md` should be a reusable template with:
+
+1. date
+2. topic studied
+3. exercises completed
+4. what was hard
+5. what became clearer
+6. tomorrow's plan
+
+======================================================================
+15. PEDAGOGICAL GUARDRAILS
+======================================================================
+
+The rebuild must respect learning progression.
+
+Do not leak advanced ideas too early.
+
+Pedagogical rules:
+
+1. Week 1 should not rely on OOP for exercise solutions.
+2. Week 2 should not require class-heavy designs except where the topic naturally needs it.
+3. Week 3 should introduce classes cleanly before any inheritance-heavy material.
+4. Week 4 is where inheritance and polymorphism become central.
+5. Week 5 is the first place for descriptors, metaclasses, advanced decorators, and reflection.
+6. Week 6 is where design patterns become explicit.
+7. Week 7 should focus on pragmatic design and testing, not just theory.
+8. Week 8 should integrate everything in a coherent capstone.
+
+Additional educational rules:
+
+1. Do not use `dataclass` in learner-facing Week 1-3 exercises unless explicitly justified.
+2. Do not use descriptors or metaclasses before Week 5.
+3. Do not introduce design-pattern jargon before Week 6 unless it is unavoidable.
+4. Keep early-week solutions simple and idiomatic.
+5. Prefer standard library solutions over external libraries.
+6. Avoid "smart" code that hides the learning point.
+
+Difficulty progression inside a day:
+
+Use problem numbering to signal progression:
+
+- Problems 01-03: warm-up / foundational
+- Problems 04-06: core practice
+- Problems 07-08: harder application
+- Problems 09-10: stretch or bonus
+
+Not every day must have exactly 10 problems, but the progression should feel intentional.
+
+Quality over quantity.
+
+Recommended counts:
+
+- Week 1-2: 8 to 10 problems per day
+- Week 3-4: 6 to 10 problems per day
+- Week 5-7: 4 to 8 deeper problems per day
+- Week 8: milestone-driven instead of many isolated drills
+
+======================================================================
+16. WEEKLY PROJECT STRUCTURE
+======================================================================
+
+Each week should include a weekly project.
+
+Use this structure:
+
+project/
+  README.md
+  starter/
+  reference_solution/
+  tests/
+
+Project README requirements:
+
+1. project overview
+2. learning goals
+3. required features
+4. optional stretch features
+5. how starter code is organized
+6. how reference solution is organized
+7. how to run tests
+
+Starter project rules:
+
+1. incomplete but coherent
+2. runnable if reasonable
+3. clearly marked TODOs
+4. no fake implementation disguised as starter code
+
+Reference project rules:
+
+1. complete
+2. tested
+3. cleanly structured
+4. aligned with the week's concepts
+
+Project tests:
+
+1. should target the reference solution by default
+2. may be separate from exercise tests
+3. should validate key behavior, not every micro-detail
+
+======================================================================
+17. CANONICAL WEEK ARCHITECTURE TEMPLATE
+======================================================================
+
+For Weeks 1-7, use this shape:
+
+- 6 theory documents
+- exercises split by day and problem
+- solutions split by day and problem
+- tests split by day and problem
+- one weekly project
+- one week README
+
+For Week 8, use:
+
+- planning and requirements docs
+- architecture docs
+- core code package
+- tests
+- README
+- demo or CLI if appropriate
+
+Optional Week 9-10 extensions are allowed only after the core 8-week curriculum is solid.
+
+======================================================================
+18. DETAILED CURRICULUM BLUEPRINT
+======================================================================
+
+Use the following as the curriculum baseline.
+You may improve titles or swap individual problems if you preserve the learning progression and structure.
+
+----------------------------------------------------------------------
+WEEK 1 - PYTHON FUNDAMENTALS
+----------------------------------------------------------------------
+
+Week directory:
+`week01_fundamentals`
+
+Week goal:
+Build confidence with Python syntax, data types, collections, control flow, and functions before entering OOP.
+
+Day 1: Variables, data types, arithmetic, basic operations
+Theory file:
+`day01_variables_types.md`
+Recommended problems:
+- calculate_sum
+- celsius_to_fahrenheit
+- divide_with_remainder
+- is_perfect_square
+- reverse_integer
+- count_even_digits
+- power
+- swap_values
+- validate_and_convert
+- gcd
+- is_palindrome_number
+
+Day 2: Strings
+Theory file:
+`day02_strings.md`
+Recommended problems:
+- reverse_string
+- is_valid_palindrome
+- is_anagram
+- first_unique_character
+- longest_common_prefix
+- count_and_say
+- longest_substring_without_repeating
+- compress_string
+- group_anagrams
+- zigzag_conversion
+- longest_palindromic_substring
+
+Day 3: Lists and tuples
+Theory file:
+`day03_lists_tuples.md`
+Recommended problems:
+- two_sum_list
+- remove_duplicates_sorted
+- rotate_array
+- contains_duplicate
+- maximum_subarray
+- merge_sorted_arrays
+- product_except_self
+- find_min_rotated
+- three_sum
+- container_with_most_water
+- best_time_to_buy_sell_stock
+
+Day 4: Dictionaries and sets
+Theory file:
+`day04_dicts_sets.md`
+Recommended problems:
+- find_all_pairs
+- group_anagrams_optimal
+- top_k_frequent
+- longest_consecutive_sequence
+- intersection_of_two_arrays
+- subarray_sum_equals_k
+- first_missing_positive
+- isomorphic_strings
+- word_pattern
+- valid_sudoku
+
+Day 5: Control flow
+Theory file:
+`day05_control_flow.md`
+Recommended problems:
+- fizz_buzz
+- is_prime
+- count_primes
+- generate_parentheses
+- is_power_of_two
+- is_happy_number
+- spiral_matrix
+- rotate_image
+- pascals_triangle
+- letter_combinations
+
+Day 6: Functions and recursion
+Theory file:
+`day06_functions.md`
+Recommended problems:
+- fibonacci_recursive
+- fibonacci_memoized
+- factorial
+- power_recursive
+- binary_search_recursive
+- permutations
+- subsets
+- combination_sum
+- n_queens
+- word_search
+
+Weekly project:
+Command-line quiz game
+
+Project goals:
+- basic input/output
+- functions
+- control flow
+- data storage in lists/dicts
+
+----------------------------------------------------------------------
+WEEK 2 - ADVANCED FUNDAMENTALS
+----------------------------------------------------------------------
+
+Week directory:
+`week02_fundamentals_advanced`
+
+Week goal:
+Move from basic syntax into file handling, modules, functional patterns, and testing.
+
+Day 1: File I/O and file processing
+Theory file:
+`day01_file_io.md`
+Recommended problems:
+- count_lines
+- find_longest_line
+- word_frequency
+- merge_files
+- filter_lines
+- csv_column_sum
+- merge_json_files
+- analyze_log
+- timer_context
+- safe_file_writer
+- directory_tree
+
+Day 2: Exceptions and defensive programming
+Theory file:
+`day02_exceptions.md`
+Recommended problems:
+- safe_divide
+- parse_positive_int
+- validate_age
+- bounded_withdrawal
+- retry_operation
+- safe_json_loader
+- config_validator
+- custom_exception_hierarchy
+- transaction_guard
+- fallback_value_resolver
+
+Day 3: Modules and packages
+Theory file:
+`day03_modules_packages.md`
+Recommended problems:
+- module_counter
+- import_tracker
+- plugin_registry
+- package_math_tools
+- string_utils_module
+- calculator_package
+- config_package_loader
+- namespace_cleanup
+
+Day 4: Comprehensions and generators
+Theory file:
+`day04_comprehensions_generators.md`
+Recommended problems:
+- flatten_nested_list
+- invert_dictionary
+- matrix_transpose
+- even_square_map
+- word_length_histogram
+- unique_pairs
+- running_total_generator
+- fibonacci_generator
+- chunked_iterator
+- lazy_filter_map
+
+Day 5: Functional programming basics
+Theory file:
+`day05_functional_programming.md`
+Recommended problems:
+- chain_operations
+- compose_functions
+- partial_discount
+- map_filter_reduce_pipeline
+- custom_sort_key
+- closure_counter
+- memoized_callable
+- predicate_combiner
+
+Day 6: Testing with pytest
+Theory file:
+`day06_testing_with_pytest.md`
+Recommended problems:
+- calculator_test_suite
+- fixture_driven_user_factory
+- parametrized_palindrome_tests
+- file_processor_with_tmp_path
+- mock_api_client
+- exception_assertion_suite
+- mini_tdd_refactor
+
+Weekly project:
+Procedural library system
+
+Project goals:
+- files
+- modules
+- exceptions
+- testing
+
+----------------------------------------------------------------------
+WEEK 3 - OOP BASICS
+----------------------------------------------------------------------
+
+Week directory:
+`week03_oop_basics`
+
+Week goal:
+Introduce classes, state, methods, encapsulation, and the design of small object systems.
+
+Day 1: Classes and objects
+Theory file:
+`day01_classes_objects.md`
+Recommended problems:
+- person
+- bank_account
+- rectangle
+- student
+- counter
+- temperature
+- book
+- shopping_cart
+- point_2d
+- timer
+
+Day 2: Instance methods, class methods, static methods
+Theory file:
+`day02_method_types.md`
+Recommended problems:
+- inventory_item
+- date_helper
+- temperature_converter
+- user_factory
+- student_registry
+- bank_branch
+- math_toolkit
+- logger_config
+- url_builder
+- account_factory
+
+Day 3: Encapsulation and properties
+Theory file:
+`day03_encapsulation_properties.md`
+Recommended problems:
+- bank_account_private_balance
+- person_with_age_validation
+- temperature_property
+- product_price_validation
+- user_password_rules
+- rectangle_dimensions
+- email_address
+- savings_account_limits
+- circle_radius_validation
+- gradebook
+
+Day 4: Magic methods
+Theory file:
+`day04_magic_methods.md`
+Recommended problems:
+- vector_2d
+- money
+- product_catalog_item
+- playlist
+- fraction_number
+- range_box
+- basket
+- point_comparison
+
+Day 5: Composition and aggregation
+Theory file:
+`day05_composition_aggregation.md`
+Recommended problems:
+- car_composition
+- computer_components
+- library_collection
+- team_roster
+- restaurant_menu
+- school_classroom
+- zoo_enclosure
+- company_department
+
+Day 6: Class design principles
+Theory file:
+`day06_class_design.md`
+Recommended problems:
+- parking_lot_system
+- atm_machine
+- order_management
+- task_board
+- hotel_booking_model
+- mini_library_design
+
+Weekly project:
+Basic e-commerce system
+
+Project goals:
+- product, cart, order, user, inventory classes
+- separation of concerns
+- testable object interactions
+
+----------------------------------------------------------------------
+WEEK 4 - OOP INTERMEDIATE
+----------------------------------------------------------------------
+
+Week directory:
+`week04_oop_intermediate`
+
+Week goal:
+Introduce inheritance carefully and teach when to use it versus composition.
+
+Day 1: Inheritance basics
+Theory file:
+`day01_inheritance_basics.md`
+Recommended problems:
+- vehicle_hierarchy
+- employee_hierarchy
+- animal_kingdom
+- bank_account_types
+- shape_hierarchy
+- book_and_ebook
+- student_and_graduate_student
+- smart_device_hierarchy
+
+Day 2: Method overriding and `super()`
+Theory file:
+`day02_method_overriding_super.md`
+Recommended problems:
+- notification_services
+- payment_methods
+- shipping_options
+- media_player_hierarchy
+- report_generators
+- game_character_actions
+
+Day 3: Abstract base classes
+Theory file:
+`day03_abstract_base_classes.md`
+Recommended problems:
+- payment_processor_abc
+- shape_abc
+- employee_role_abc
+- transport_interface
+- storage_backend_abc
+- parser_framework
+
+Day 4: Multiple inheritance and MRO
+Theory file:
+`day04_multiple_inheritance_mro.md`
+Recommended problems:
+- logging_and_timestamp_mixins
+- flying_and_swimming_animals
+- audit_enabled_models
+- cached_validated_objects
+- admin_power_user
+- renderable_clickable_widgets
+
+Day 5: Polymorphism
+Theory file:
+`day05_polymorphism.md`
+Recommended problems:
+- payment_runtime_dispatch
+- report_renderer_dispatch
+- media_handler_dispatch
+- transport_simulator
+- shape_area_dispatch
+- employee_bonus_dispatch
+
+Day 6: Composition vs inheritance
+Theory file:
+`day06_composition_vs_inheritance.md`
+Recommended problems:
+- car_with_engine_component
+- employee_with_salary_benefits_department
+- strategy_sorter
+- duck_behaviors
+- plugin_system
+- repository_pattern_basics
+
+Weekly project:
+Animal shelter management system
+
+Project goals:
+- base animal types
+- staff roles
+- adoption workflow
+- composition where appropriate
+
+----------------------------------------------------------------------
+WEEK 5 - ADVANCED OOP
+----------------------------------------------------------------------
+
+Week directory:
+`week05_oop_advanced`
+
+Week goal:
+Teach powerful Python object model features without losing clarity.
+
+Day 1: Descriptors
+Theory file:
+`day01_descriptors.md`
+Recommended problems:
+- validated_attribute
+- typed_attribute
+- cached_property_descriptor
+- range_validator
+- lazy_property
+- observable_attribute
+- logged_attribute
+- readonly_attribute
+- attribute_history
+- weak_reference_descriptor
+
+Day 2: Metaclasses
+Theory file:
+`day02_metaclasses.md`
+Recommended problems:
+- singleton_meta
+- class_registry_meta
+- auto_property_meta
+- validation_meta
+- immutable_meta
+- tracked_class_meta
+- abstract_meta
+- plugin_registry_meta
+- attribute_checker_meta
+- serializable_meta
+
+Day 3: Function and class decorators
+Theory file:
+`day03_decorators.md`
+Recommended problems:
+- timer_decorator
+- cache_decorator
+- retry_decorator
+- validate_types_decorator
+- logged_class_decorator
+- singleton_decorator
+- immutable_decorator
+- deprecated_decorator
+- counted_decorator
+- rate_limit_decorator
+- debug_decorator
+- once_decorator
+- requires_decorator
+
+Day 4: Dataclasses, slots, structured models
+Theory file:
+`day04_dataclasses_and_slots.md`
+Recommended problems:
+- inventory_dataclass
+- immutable_config_model
+- student_record_model
+- event_payload_model
+- slot_optimized_point
+- comparison_ready_money
+
+Day 5: Iterators, generators, and custom collections
+Theory file:
+`day05_iterators_generators_collections.md`
+Recommended problems:
+- custom_range_iterator
+- countdown_iterator
+- paginated_collection
+- tree_traversal_generator
+- history_buffer
+- playlist_iterator
+
+Day 6: Reflection, introspection, context managers
+Theory file:
+`day06_reflection_and_context_managers.md`
+Recommended problems:
+- object_inspector
+- dynamic_method_router
+- attribute_diff_tool
+- timing_context_manager
+- transaction_context_manager
+- temporary_config_override
+
+Weekly project:
+Task management system
+
+Project goals:
+- custom models
+- decorators
+- context managers
+- clean domain structure
+
+----------------------------------------------------------------------
+WEEK 6 - DESIGN PATTERNS
+----------------------------------------------------------------------
+
+Week directory:
+`week06_patterns`
+
+Week goal:
+Teach design patterns as tradeoffs and tools, not as cargo-cult templates.
+
+Day 1: Creational patterns
+Theory file:
+`day01_creational_patterns.md`
+Recommended problems:
+- factory_method_notifications
+- abstract_factory_ui
+- builder_query_object
+- singleton_config_store
+- prototype_document_clone
+
+Day 2: Structural patterns
+Theory file:
+`day02_structural_patterns.md`
+Recommended problems:
+- adapter_payment_gateway
+- decorator_text_formatting
+- composite_file_tree
+- facade_media_system
+- proxy_image_loader
+
+Day 3: Behavioral patterns I
+Theory file:
+`day03_behavioral_patterns_part_1.md`
+Recommended problems:
+- observer_stock_ticker
+- strategy_sort_engine
+- command_text_editor
+- state_order_lifecycle
+- mediator_chat_room
+
+Day 4: Behavioral patterns II
+Theory file:
+`day04_behavioral_patterns_part_2.md`
+Recommended problems:
+- template_report_pipeline
+- iterator_menu_system
+- visitor_shape_export
+- chain_of_responsibility_support_tickets
+- memento_text_history
+
+Day 5: Pattern tradeoffs and anti-patterns
+Theory file:
+`day05_pattern_tradeoffs.md`
+Recommended problems:
+- refactor_god_object
+- remove_unnecessary_singleton
+- strategy_vs_conditionals
+- inheritance_to_composition_refactor
+- overabstracted_service_cleanup
+
+Day 6: Applying patterns in a mini framework
+Theory file:
+`day06_patterns_in_a_small_framework.md`
+Recommended problems:
+- plugin_driven_game_loop
+- event_bus
+- command_dispatcher
+- component_registry
+- save_load_state
+
+Weekly project:
+Game framework
+
+Project goals:
+- pattern application
+- event handling
+- modular design
+
+----------------------------------------------------------------------
+WEEK 7 - REAL-WORLD OOP
+----------------------------------------------------------------------
+
+Week directory:
+`week07_real_world`
+
+Week goal:
+Apply OOP to realistic systems with testing, refactoring, interfaces, and performance awareness.
+
+Day 1: API design with classes
+Theory file:
+`day01_api_design_with_classes.md`
+Recommended problems:
+- pagination_api_client
+- repository_service_layer
+- fluent_query_builder
+- response_wrapper
+- configuration_object
+
+Day 2: Testing OOP code
+Theory file:
+`day02_testing_oop_code.md`
+Recommended problems:
+- service_with_mock_repository
+- payment_processor_with_fakes
+- notification_dispatcher_fixture_suite
+- stateful_object_regression_tests
+- contract_style_interface_tests
+
+Day 3: Refactoring procedural code into OOP
+Theory file:
+`day03_refactoring_procedural_to_oop.md`
+Recommended problems:
+- invoice_refactor
+- csv_report_refactor
+- auth_flow_refactor
+- shopping_cart_refactor
+- log_parser_refactor
+
+Day 4: Data processing with objects
+Theory file:
+`day04_data_processing_with_objects.md`
+Recommended problems:
+- pipeline_stage_objects
+- dataset_summary_model
+- event_stream_processor
+- validation_pipeline
+- batch_job_runner
+
+Day 5: Service-style or web-oriented OOP design
+Theory file:
+`day05_service_oriented_oop.md`
+Recommended problems:
+- user_service
+- order_service
+- session_manager
+- request_context
+- permission_policy
+
+Day 6: Performance and optimization
+Theory file:
+`day06_performance_and_optimization.md`
+Recommended problems:
+- slots_memory_comparison
+- caching_service
+- lazy_loading_collection
+- batched_repository
+- profiling_refactor
+
+Weekly project:
+Personal finance tracker
+
+Project goals:
+- categories, accounts, transactions, reports
+- object boundaries
+- tests
+- simple persistence
+
+----------------------------------------------------------------------
+WEEK 8 - CAPSTONE
+----------------------------------------------------------------------
+
+Week directory:
+`week08_capstone`
+
+Week goal:
+Build a real, coherent, testable library management system that combines the whole curriculum.
+
+This week should be milestone-driven, not problem-list driven.
+
+Core deliverables:
+
+1. `README.md`
+2. `requirements.md`
+3. `domain_model.md`
+4. `architecture.md`
+5. `testing_strategy.md`
+6. code package
+7. tests
+8. demo instructions
+
+Suggested internal structure:
+
+week08_capstone/
+  __init__.py
+  README.md
+  requirements.md
+  domain_model.md
+  architecture.md
+  testing_strategy.md
+  library_management_system/
+    __init__.py
+    domain/
+    services/
+    repositories/
+    interfaces/
+    cli/
+  tests/
+
+Capstone milestones:
+
+Day 1:
+- requirements
+- scope definition
+- user stories
+- domain language
+
+Day 2:
+- domain model
+- class design
+- service boundaries
+- persistence strategy
+
+Day 3:
+- implement core domain entities
+- implement repositories
+- implement circulation logic
+
+Day 4:
+- implement user workflows
+- reservations
+- fines or policy logic
+- reporting basics
+
+Day 5:
+- tests
+- edge cases
+- cleanup
+- CLI/demo
+
+Day 6:
+- documentation
+- polish
+- walkthrough
+- final integration review
+
+Capstone minimum requirements:
+
+1. at least 10 meaningful classes
+2. at least 3 design patterns used intentionally
+3. type hints throughout core modules
+4. real tests
+5. clear README
+6. runnable demo path
+7. no fake features
+
+Preferred capstone patterns:
+
+- repository
+- strategy
+- factory
+- observer or event bus if useful
+
+Possible domain entities:
+
+- Book
+- BookCopy
+- Member
+- Librarian
+- Loan
+- Reservation
+- Catalog
+- FinePolicy
+- NotificationService
+- LibraryBranch
+
+======================================================================
+19. OPTIONAL POST-CAPSTONE EXTENSIONS
+======================================================================
+
+If the core 8 weeks are solid and time permits, you may add optional extension weeks.
+
+These are optional. Do not start them until the core curriculum is honestly usable.
+
+----------------------------------------------------------------------
+WEEK 9 - PORTFOLIO POLISH
+----------------------------------------------------------------------
+
+Week directory:
+`week09_portfolio_polish`
+
+Possible content:
+
+- packaging and distribution basics
+- project demos
+- README polish
+- architecture diagrams
+- SQLite persistence for the capstone
+- CLI ergonomics
+- release checklist
+- portfolio presentation notes
+
+----------------------------------------------------------------------
+WEEK 10 - INTERVIEW AND ARCHITECTURE REVIEW
+----------------------------------------------------------------------
+
+Week directory:
+`week10_interview_and_architecture_review`
+
+Possible content:
+
+- review exercises
+- code-reading drills
+- refactoring drills
+- OOP tradeoff discussions
+- pattern selection exercises
+- interview-style design prompts
+
+Again:
+
+Do NOT build these until Weeks 1-8 are clean and credible.
+
+======================================================================
+20. FILE NAMING CONVENTIONS
+======================================================================
+
+Use these conventions consistently.
+
+Theory docs:
+
+- `day01_variables_types.md`
+- `day02_strings.md`
+
+Problem module files:
+
+- `problem_01_calculate_sum.py`
+- `problem_02_celsius_to_fahrenheit.py`
+
+Test files:
+
+- `test_problem_01_calculate_sum.py`
+- `test_problem_02_celsius_to_fahrenheit.py`
+
+Never use:
+
+- `01_calculate_sum.py`
+- `1_calculate_sum.py`
+- `CalculateSum.py`
+
+Use lowercase snake_case everywhere except class names.
+
+======================================================================
+21. ROOT README HONESTY RULES
+======================================================================
+
+The root README must not contain:
+
+- fake GitHub badges
+- fake Codecov badges
+- fake CI badges
+- placeholder repo URLs
+- claims about coverage if not measured
+- claims about completeness if the files are not there
+
+It is better to have a simple honest README than a flashy fake one.
+
+======================================================================
+22. QUALITY GATES BEFORE MOVING TO THE NEXT WEEK
+======================================================================
+
+Before starting the next week, the current week must satisfy all relevant checks:
+
+1. week README exists and matches the real structure
+2. theory files exist for all six days
+3. exercise files exist only where there is real content
+4. solution files pass tests
+5. tests are split by day and problem
+6. root `pytest` still passes
+7. no broken imports
+8. no placeholder files pretending to be complete
+9. project README exists
+10. INDEX and ROADMAP are updated honestly
+
+If a week cannot be completed in the current run:
+
+1. finish a coherent subset
+2. keep the repo green
+3. document the remaining work in `ROADMAP.md`
+4. do not generate fake placeholder material just to make folders look full
+
+======================================================================
+23. IMPLEMENTATION PHASES
+======================================================================
+
+Build the new repo in this order.
+
+Phase 1 - Foundation
+
+1. Create `python-oop-journey-v2`
+2. Add root files:
+   - `README.md`
+   - `QUICKSTART.md`
+   - `INDEX.md`
+   - `ROADMAP.md`
+   - `pyproject.toml`
+   - `requirements.txt`
+   - `pytest.ini`
+   - `.gitignore`
+   - `daily_log.md`
+   - `progress_tracker.md`
+3. Add `resources/cheatsheets/complexity_cheatsheet.md`
+4. Establish package structure and import conventions
+
+Phase 2 - Week 1 template-quality implementation
+
+1. Fully implement Week 1
+2. Split exercises into one file per problem
+3. Split solutions into one file per problem
+4. Split tests into one file per problem
+5. Add weekly project
+6. Make sure root `pytest` passes
+7. Make sure docs accurately describe the structure
+
+Phase 3 - Week-by-week expansion
+
+1. Implement Week 2
+2. Implement Week 3
+3. Implement Week 4
+4. Implement Week 5
+5. Implement Week 6
+6. Implement Week 7
+
+Important:
+
+Do not race ahead by creating fake shells for later weeks.
+Finish each week to a credible standard before moving on.
+
+Phase 4 - Capstone
+
+1. Implement Week 8 capstone docs and code
+2. Add tests
+3. Add demo path
+4. Ensure repo remains structurally clean
+
+Phase 5 - Optional extension
+
+Only if core Weeks 1-8 are already strong:
+
+1. add Week 9 portfolio polish
+2. add Week 10 interview and architecture review
+
+======================================================================
+24. ACCEPTANCE CRITERIA
+======================================================================
+
+The rebuild is acceptable only if all of the following are true:
+
+1. The new repo is created separately as `python-oop-journey-v2`.
+2. There is exactly one canonical directory per week.
+3. Every problem is in its own module file.
+4. Problem module names are valid Python identifiers.
+5. Exercises, solutions, and tests are all split by day and by problem.
+6. Root `pytest` works without path hacks.
+7. Imports are explicit and unambiguous.
+8. No generated artifacts are committed.
+9. Root docs match reality.
+10. Week 1 is fully usable as a clean template.
+11. The default committed test suite validates reference solutions, not unfinished exercise stubs.
+12. The repo contains no misleading placeholder weeks pretending to be done.
+13. The capstone is real and navigable.
+14. The overall repository feels coherent and intentionally designed.
+
+======================================================================
+25. DECISION RULES IF YOU HIT AMBIGUITY
+======================================================================
+
+If a structural decision is unclear, use these priorities in order:
+
+1. correctness
+2. clarity
+3. consistency
+4. pedagogical value
+5. ease of testing
+6. ease of future extension
+
+If the old repo conflicts with this prompt:
+
+- follow this prompt
+
+If there is tension between "more files" and "cleaner repo":
+
+- choose the cleaner repo
+
+If there is tension between "more content" and "honest completeness":
+
+- choose honest completeness
+
+If there is tension between "clever code" and "teachable code":
+
+- choose teachable code
+
+======================================================================
+26. WHAT TO DO IMMEDIATELY IN THE NEW CHAT
+======================================================================
+
+Start executing, not just planning.
+
+Immediate steps:
+
+1. Create `python-oop-journey-v2` in the workspace.
+2. Scaffold the root structure and configuration files.
+3. Implement Week 1 completely using the canonical per-problem layout.
+4. Add the Week 1 project.
+5. Ensure `pytest` passes from the new repo root.
+6. Update `README.md`, `QUICKSTART.md`, `INDEX.md`, `ROADMAP.md`, and the Week 1 README so they accurately describe what exists.
+7. Summarize what was created and what remains for Week 2 onward.
+
+Do not stop at a plan.
+Do not produce placeholder content.
+Do the real build work.
+
+======================================================================
+27. FINAL BEHAVIORAL EXPECTATIONS FOR YOU AS THE CODING AGENT
+======================================================================
+
+I expect you to:
+
+1. be opinionated about consistency
+2. avoid structural drift
+3. choose valid Python module naming
+4. keep tests root-safe
+5. keep docs honest
+6. avoid noisy repository clutter
+7. prefer stable architecture over rushed quantity
+8. finish Week 1 to a high standard before expanding
+9. treat the capstone as a real portfolio project
+10. leave the rebuilt repo in a state I would actually want to keep using
+
+This is a rebuild from first principles.
+Use the old repo only as inspiration, not as a template.

@@ -1,0 +1,57 @@
+# Kimi Claw Soul Configuration
+# Python OOP Journey Project
+
+project:
+  name: "Python OOP Journey"
+  description: "Interactive Python OOP learning platform with curriculum, code editor, and progress tracking"
+  repository: "https://github.com/Richicinschi/python-oop-journey"
+  version: "0.0.0"
+  
+structure:
+  root: "website-playground"
+  type: "monorepo"
+  package_manager: "npm"
+  
+workspaces:
+  - path: "apps/web"
+    name: "frontend"
+    type: "nextjs"
+    port: 3000
+    
+  - path: "apps/api"
+    name: "backend"
+    type: "fastapi"
+    port: 8000
+
+environment:
+  node_version: "20.x"
+  python_version: "3.11"
+  
+dependencies:
+  install_command: "npm install"
+  
+build:
+  steps:
+    - name: "Install dependencies"
+      command: "npm install"
+      working_dir: "."
+      
+    - name: "Type check"
+      command: "npm run type-check"
+      working_dir: "apps/web"
+      
+    - name: "Build"
+      command: "npm run build"
+      working_dir: "apps/web"
+
+development:
+  services:
+    - name: "backend"
+      command: "python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000"
+      working_dir: "apps/api"
+      port: 8000
+      
+    - name: "frontend"
+      command: "npm run dev"
+      working_dir: "apps/web"
+      port: 3000
