@@ -1,0 +1,223 @@
+================================================================================
+PYTHON OOP JOURNEY - WEBSITE TESTING PROMPT FOR KIMI CLAW
+================================================================================
+
+GOAL: Test the deployed website by actually clicking buttons and navigating 
+through the user flows. Report what works and what breaks.
+
+DEPLOYED URL: https://python-oop-journey.onrender.com
+
+================================================================================
+PART 1: HOMEPAGE SMOKE TEST
+================================================================================
+
+1. OPEN the homepage at https://python-oop-journey.onrender.com
+2. TAKE a screenshot of the full page
+3. CLICK each button and report what happens:
+
+   a) "Start Learning" button (top hero section)
+      - What URL does it go to?
+      - Does it work or show 404?
+      - Screenshot the result
+
+   b) "Browse Curriculum" button
+      - What URL does it go to?
+      - Does the page load?
+      - Screenshot the result
+
+   c) Week cards (Week 0, Week 1, etc. in the grid)
+      - Click on Week 0 card
+      - What URL does it go to?
+      - Does it work or 404?
+      - Screenshot
+
+   d) "View All" link next to "Curriculum Overview"
+      - Does it work?
+
+   e) Quick Links sidebar:
+      - "All Problems" 
+      - "Recently Viewed"
+      - "My Bookmarks"
+      - Do these all work?
+
+================================================================================
+PART 2: CURRICULUM NAVIGATION TEST
+================================================================================
+
+1. Navigate to /weeks
+2. TAKE screenshot of weeks list
+3. For FIRST 3 weeks (Week 0, Week 1, Week 2):
+   
+   a) Click the week card
+   b) Report: Does week detail page load?
+   c) Screenshot the week page
+   
+   d) On the week page, look for:
+      - "Start Week" or "Continue Week" button
+      - List of days
+      - Weekly Project section
+   
+   e) Click FIRST day in the list
+   f) Does day page load?
+   g) Screenshot
+   
+   h) On day page, look for:
+      - List of problems
+      - "Read Theory" button (if available)
+   
+   i) Click FIRST problem
+   j) Does problem page load?
+   k) Screenshot
+
+================================================================================
+PART 3: PROBLEM SOLVING FLOW TEST
+================================================================================
+
+1. Navigate to a working problem page (e.g., /problems/problem_01_assign_and_print)
+2. TAKE screenshot of full problem page
+3. CHECK if these elements exist:
+   
+   - Code editor (Monaco editor with line numbers)
+   - Instructions panel (left side)
+   - Run button
+   - Submit button
+   - Output panel
+   
+4. If code editor exists:
+   - Click in the editor
+   - Type something simple: print("hello")
+   - Does the editor accept input?
+   
+5. If Run button exists:
+   - Click Run
+   - What happens?
+   - Does output appear?
+   - Screenshot result
+
+================================================================================
+PART 4: NAVIGATION & LAYOUT TEST
+================================================================================
+
+1. SIDEBAR NAVIGATION (when inside dashboard/weeks area):
+   
+   a) Click "Curriculum" in sidebar
+   b) Click "Projects" 
+   c) Click "Bookmarks"
+   d) Click "Search"
+   
+   - Does each one work?
+   - Any 404s?
+
+2. HEADER ELEMENTS:
+   - Is there a user menu?
+   - Search icon in header?
+   - Theme toggle?
+
+3. MOBILE TEST (if possible):
+   - Resize to mobile viewport
+   - Does mobile menu work?
+   - Can you navigate?
+
+================================================================================
+PART 5: BROKEN ROUTES TO VERIFY
+================================================================================
+
+These routes SHOULD work but likely don't. Verify each:
+
+1. /problems - Problem index page
+2. /weeks/0 - Week by number (should use slug)
+3. /weeks/1 - Week by number
+4. /profile - User profile
+5. /submissions - Submission history
+
+For each:
+- Navigate directly to URL
+- Report: Works or 404?
+- Screenshot
+
+================================================================================
+PART 6: USER AUTHENTICATION TEST
+================================================================================
+
+1. Look for "Sign In" or "Login" button
+2. Where does it go?
+3. Does login page load?
+4. Screenshot login form
+
+================================================================================
+REPORT FORMAT
+================================================================================
+
+Create a summary with:
+
+## Working Routes ✅
+List all URLs that work correctly
+
+## Broken Routes ❌  
+List all URLs that return 404 or error
+
+## Critical Issues 🔴
+- Things that completely block users
+- 404s on main navigation
+- Broken "Start Learning" flow
+
+## UI Issues 🟡
+- Missing elements
+- Layout problems
+- Editor not loading
+
+## Screenshots 📸
+Attach all screenshots taken during testing
+
+## Questions ❓
+Anything unclear about the functionality
+
+================================================================================
+KNOWN ISSUES TO VERIFY
+================================================================================
+
+Based on Playwright testing, these are likely broken:
+
+1. Start Learning button → /problems (404 - no index page)
+2. Homepage week cards → /weeks/0 (404 - should be /weeks/week00_getting_started)
+3. Monaco editor may not load on problem pages
+4. /submissions page may 404
+5. /admin/reviews page may 404
+
+Please verify all of these and report actual behavior.
+
+================================================================================
+TIPS FOR TESTING
+================================================================================
+
+1. Screenshot EVERY page you visit
+2. Note the EXACT URL in address bar
+3. Try to break things - click random buttons
+4. Test both desktop and mobile if possible
+5. Check browser console for JavaScript errors
+6. Note loading times (fast or slow?)
+
+================================================================================
+EXPECTED CURRICULUM STRUCTURE
+================================================================================
+
+If you need to navigate manually, here are the actual week slugs:
+
+Week 0: week00_getting_started
+Week 1: week01_fundamentals  
+Week 2: week02_fundamentals_advanced
+Week 3: week03_oop_basics
+Week 4: week04_oop_intermediate
+Week 5: week05_oop_advanced
+Week 6: week06_patterns
+Week 7: week07_real_world
+Week 8: week08_capstone
+
+Example working URLs:
+- /weeks/week00_getting_started
+- /weeks/week00_getting_started/days/day04_variables
+- /problems/problem_01_assign_and_print
+
+================================================================================
+END OF PROMPT
+================================================================================
