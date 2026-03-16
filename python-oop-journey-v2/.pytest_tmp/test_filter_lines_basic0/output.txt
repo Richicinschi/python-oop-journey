@@ -1,0 +1,2 @@
+ERROR: something
+ERROR: again

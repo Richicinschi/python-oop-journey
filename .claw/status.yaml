@@ -1,0 +1,56 @@
+status:
+  agent: claw
+  version: "1.0.0"
+  mission: website_repair
+  
+current_task:
+  id: fix-500-errors
+  name: Fix Week/Problem Detail Page 500 Errors
+  priority: critical
+  status: in_progress
+  started: "2026-03-15T14:00:00Z"
+  
+issues:
+  - id: 1
+    title: Week/Problem detail pages return 500 errors
+    severity: critical
+    status: investigating
+    description: Server components fail to load curriculum data at runtime despite successful build
+    
+  - id: 2
+    title: Database migration conflict (Alembic)
+    severity: critical
+    status: blocked
+    description: Multiple head revisions in alembic_version table
+    blocker: Requires manual DB console access
+    
+  - id: 3
+    title: Build vs runtime discrepancy
+    severity: high
+    status: investigating
+    description: Build succeeds but runtime fails on dynamic pages
+
+progress:
+  - "2026-03-15T14:00:00Z: Session started"
+  - "2026-03-15T14:05:00Z: Created CLAW memory files"
+  - "2026-03-15T14:10:00Z: Ready to start debugging"
+
+next_actions:
+  - Start backend dev server
+  - Start frontend dev server
+  - Run curl tests on week endpoints
+  - Check curriculum data loading
+  - Debug getWeekBySlug() function
+
+blockers:
+  - Database migration conflict requires manual intervention
+
+environment:
+  working_dir: "c:\\Users\\digitalnomad\\Documents\\oopkimi"
+  node_version: "20.11.0"
+  python_version: "3.11+"
+  services:
+    backend: stopped
+    frontend: stopped
+    database: unknown
+    redis: unknown

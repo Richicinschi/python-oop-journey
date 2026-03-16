@@ -1,0 +1,730 @@
+{
+  "summary": {
+    "total_tests": 29,
+    "passed": 12,
+    "failed": 17,
+    "pass_rate": 41.37931034482759,
+    "performance": {
+      "avg_ms": 392.8340895422574,
+      "median_ms": 378.48567962646484,
+      "min_ms": 344.32291984558105,
+      "max_ms": 566.9665336608887
+    }
+  },
+  "category_breakdown": {
+    "Health": {
+      "total": 5,
+      "passed": 2
+    },
+    "Code Execution": {
+      "total": 4,
+      "passed": 1
+    },
+    "Syntax Check": {
+      "total": 1,
+      "passed": 0
+    },
+    "Syntax Check (Invalid)": {
+      "total": 1,
+      "passed": 1
+    },
+    "Legacy Execute": {
+      "total": 1,
+      "passed": 0
+    },
+    "Verification": {
+      "total": 2,
+      "passed": 1
+    },
+    "Verification (Incorrect)": {
+      "total": 1,
+      "passed": 0
+    },
+    "Verification (Path Param)": {
+      "total": 1,
+      "passed": 0
+    },
+    "Validate Syntax": {
+      "total": 1,
+      "passed": 0
+    },
+    "Curriculum": {
+      "total": 4,
+      "passed": 2
+    },
+    "Authentication": {
+      "total": 3,
+      "passed": 3
+    },
+    "Error Handling": {
+      "total": 4,
+      "passed": 1
+    },
+    "Rate Limiting": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "tests": [
+    {
+      "timestamp": "2026-03-15T13:21:27.451822",
+      "category": "Health",
+      "endpoint": "/health",
+      "method": "GET",
+      "status_code": 200,
+      "response_time_ms": 344.32,
+      "payload": null,
+      "response": {
+        "status": "healthy",
+        "version": "0.1.0",
+        "timestamp": "2026-03-15T12:21:27.818406",
+        "uptime_seconds": 309.286230802536,
+        "environment": "production"
+      },
+      "passed": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:27.865691",
+      "category": "Health",
+      "endpoint": "/health/db",
+      "method": "GET",
+      "status_code": 503,
+      "response_time_ms": 413.82,
+      "payload": null,
+      "response": {
+        "detail": {
+          "status": "unhealthy",
+          "database": "disconnected",
+          "error": "connect() got an unexpected keyword argument 'prepare_threshold'",
+          "timestamp": "2026-03-15T12:21:28.218994"
+        }
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:28.248237",
+      "category": "Health",
+      "endpoint": "/health/ready",
+      "method": "GET",
+      "status_code": 503,
+      "response_time_ms": 382.5,
+      "payload": null,
+      "response": {
+        "detail": {
+          "ready": false,
+          "error": "connect() got an unexpected keyword argument 'prepare_threshold'",
+          "timestamp": "2026-03-15T12:21:28.615293"
+        }
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:28.602289",
+      "category": "Health",
+      "endpoint": "/health/live",
+      "method": "GET",
+      "status_code": 200,
+      "response_time_ms": 354.01,
+      "payload": null,
+      "response": {
+        "alive": true,
+        "timestamp": "2026-03-15T12:21:28.962718"
+      },
+      "passed": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:28.956881",
+      "category": "Health",
+      "endpoint": "/api/execute/health",
+      "method": "GET",
+      "status_code": 404,
+      "response_time_ms": 354.55,
+      "payload": null,
+      "response": {
+        "detail": "Not Found"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:29.309082",
+      "category": "Code Execution",
+      "endpoint": "/api/v1/execute/run",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 351.04,
+      "payload": {
+        "code": "print('hello world')",
+        "language": "python"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:29.686048",
+      "category": "Code Execution",
+      "endpoint": "/api/v1/execute/run",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 376.92,
+      "payload": {
+        "code": "x = 1 + 2\nprint(x)",
+        "language": "python"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:30.075185",
+      "category": "Code Execution",
+      "endpoint": "/api/v1/execute/run (syntax error)",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 389.09,
+      "payload": {
+        "code": "print('hello",
+        "language": "python"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:30.454455",
+      "category": "Code Execution",
+      "endpoint": "/api/v1/execute/run (timeout)",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 379.22,
+      "payload": {
+        "code": "while True: pass",
+        "language": "python"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:30.855759",
+      "category": "Syntax Check",
+      "endpoint": "/api/v1/execute/syntax-check",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 400.15,
+      "payload": {
+        "code": "x = 1 + 2\nprint(x)"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:31.234292",
+      "category": "Syntax Check (Invalid)",
+      "endpoint": "/api/v1/execute/syntax-check",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 378.49,
+      "payload": {
+        "code": "print('hello"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:31.674532",
+      "category": "Legacy Execute",
+      "endpoint": "/api/execute",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 439.05,
+      "payload": {
+        "code": "print('legacy test')",
+        "language": "python"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:32.426067",
+      "category": "Verification",
+      "endpoint": "/api/v1/test-info/w01d01-hello-object",
+      "method": "GET",
+      "status_code": 200,
+      "response_time_ms": 361.23,
+      "payload": null,
+      "response": {
+        "problem_slug": "w01d01-hello-object",
+        "problem_title": "Hello, Object!",
+        "test_count": 3,
+        "test_names": [
+          "test_explore_type_int",
+          "test_explore_type_str",
+          "test_explore_type_list"
+        ],
+        "has_tests": true
+      },
+      "passed": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:32.783164",
+      "category": "Verification",
+      "endpoint": "/api/v1/verify",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 357.05,
+      "payload": {
+        "problem_slug": "w01d01-hello-object",
+        "code": "def calculate_sum(a, b):\n    return a + b"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:33.129489",
+      "category": "Verification (Incorrect)",
+      "endpoint": "/api/v1/verify",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 346.28,
+      "payload": {
+        "problem_slug": "w01d01-hello-object",
+        "code": "def calculate_sum(a, b):\n    return a - b"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:33.481441",
+      "category": "Verification (Path Param)",
+      "endpoint": "/api/v1/verify/w01d01-hello-object",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 351.91,
+      "payload": {
+        "code": "def calculate_sum(a, b):\n    return a + b"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:33.850841",
+      "category": "Validate Syntax",
+      "endpoint": "/api/v1/validate-syntax",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 369.35,
+      "payload": {
+        "code": "def test():\n    return 42"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:34.208666",
+      "category": "Curriculum",
+      "endpoint": "/api/v1/curriculum",
+      "method": "GET",
+      "status_code": 200,
+      "response_time_ms": 356.64,
+      "payload": null,
+      "response": {
+        "weeks_count": 2
+      },
+      "passed": [
+        {
+          "slug": "week-01-foundations",
+          "title": "Week 1: Foundations",
+          "description": "Understanding objects, classes, and the basics of OOP",
+          "theme": "foundations",
+          "days": [
+            {
+              "slug": "day-01-objects",
+              "title": "Day 1: Objects in Python",
+              "description": "Everything is an object in Python",
+              "problems": [
+                {
+                  "slug": "w01d01-hello-object",
+                  "title": "Hello, Object!",
+                  "description": "Explore Python's object nature by inspecting types and identities",
+                  "difficulty": "beginner",
+                  "starter_code": "# Explore objects\ndef explore_type(value):\n    return type(value)",
+                  "test_code": "def test_explore_type_int():\n    assert explore_type(42) == int\n\ndef test_explore_type_str():\n    assert explore_type('hello') == str\n\ndef test_explore_type_list():\n    assert explore_type([1, 2, 3]) == list",
+                  "hints": [
+                    "Use Python's built-in type() function to get the type of an object.",
+                    "Remember that everything in Python is an object, including integers and strings.",
+                    "Try calling type() on different values to see what you get."
+                  ]
+                },
+                {
+                  "slug": "w01d01-type-check",
+                  "title": "Type Detective",
+                  "description": "Write a function that returns the type name of any object",
+                  "difficulty": "beginner",
+                  "starter_code": "def get_type_name(obj):\n    \"\"\"Return the type name of an object as a string.\"\"\"\n    pass",
+                  "test_code": "def test_get_type_name_int():\n    assert get_type_name(42) == 'int'\n\ndef test_get_type_name_str():\n    assert get_type_name('hello') == 'str'\n\ndef test_get_type_name_list():\n    assert get_type_name([1, 2]) == 'list'\n\ndef test_get_type_name_none():\n    assert get_type_name(None) == 'NoneType'",
+                  "hints": [
+                    "type(obj) gives you the type, but you need to get its name.",
+                    "Type objects have a __name__ attribute.",
+                    "You can access it like: type(obj).__name__"
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "day-02-classes",
+              "title": "Day 2: Defining Classes",
+              "description": "Create your own classes with attributes and methods",
+              "problems": [
+                {
+                  "slug": "w01d02-simple-class",
+                  "title": "Simple Person Class",
+                  "description": "Create a Person class with name and age attributes",
+                  "difficulty": "beginner",
+                  "starter_code": "class Person:\n    \"\"\"A simple person class.\"\"\"\n    \n    def __init__(self, name, age):\n        \"\"\"Initialize a person with name and age.\"\"\"\n        pass",
+                  "test_code": "def test_person_creation():\n    p = Person('Alice', 30)\n    assert p.name == 'Alice'\n    assert p.age == 30\n\ndef test_person_different_values():\n    p = Person('Bob', 25)\n    assert p.name == 'Bob'\n    assert p.age == 25\n\ndef test_person_edge_case_zero_age():\n    p = Person('Baby', 0)\n    assert p.age == 0",
+                  "hints": [
+                    "In the __init__ method, use self.name = name to set attributes.",
+                    "Remember to use self to refer to instance attributes.",
+                    "Don't forget to handle all parameters passed to __init__."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "week-02-encapsulation",
+          "title": "Week 2: Encapsulation",
+          "description": "Private attributes, properties, and controlling access",
+          "theme": "encapsulation",
+          "days": [
+            {
+              "slug": "day-01-private",
+              "title": "Day 1: Private Attributes",
+              "description": "Using underscores to indicate private members",
+              "problems": [
+                {
+                  "slug": "w02d01-bank-account",
+                  "title": "Bank Account",
+                  "description": "Create a bank account with private balance and public methods",
+                  "difficulty": "intermediate",
+                  "starter_code": "class BankAccount:\n    \"\"\"A bank account with private balance.\"\"\"\n    \n    def __init__(self):\n        self._balance = 0\n    \n    def deposit(self, amount):\n        \"\"\"Deposit money into the account.\"\"\"\n        pass\n    \n    def withdraw(self, amount):\n        \"\"\"Withdraw money from the account.\"\"\"\n        pass\n    \n    @property\n    def balance(self):\n        \"\"\"Get the current balance.\"\"\"\n        pass",
+                  "test_code": "def test_initial_balance():\n    acc = BankAccount()\n    assert acc.balance == 0\n\ndef test_deposit():\n    acc = BankAccount()\n    acc.deposit(100)\n    assert acc.balance == 100\n\ndef test_withdraw():\n    acc = BankAccount()\n    acc.deposit(100)\n    acc.withdraw(30)\n    assert acc.balance == 70\n\ndef test_multiple_operations():\n    acc = BankAccount()\n    acc.deposit(50)\n    acc.deposit(25)\n    acc.withdraw(10)\n    assert acc.balance == 65",
+                  "hints": [
+                    "Use self._balance to store the balance internally.",
+                    "Update _balance in deposit and withdraw methods.",
+                    "The balance property should just return self._balance."
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:34.554204",
+      "category": "Curriculum",
+      "endpoint": "/api/v1/curriculum/weeks",
+      "method": "GET",
+      "status_code": 404,
+      "response_time_ms": 345.49,
+      "payload": null,
+      "response": {
+        "detail": "Not Found"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:34.983483",
+      "category": "Curriculum",
+      "endpoint": "/api/v1/curriculum/problems",
+      "method": "GET",
+      "status_code": 200,
+      "response_time_ms": 429.21,
+      "payload": null,
+      "response": {
+        "problems_count": 4
+      },
+      "passed": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:35.406298",
+      "category": "Curriculum",
+      "endpoint": "/api/v1/curriculum/problems/w01d01-hello-object",
+      "method": "GET",
+      "status_code": 200,
+      "response_time_ms": 422.71,
+      "payload": null,
+      "response": {
+        "week": {
+          "slug": "week-01-foundations",
+          "title": "Week 1: Foundations",
+          "description": "Understanding objects, classes, and the basics of OOP",
+          "theme": "foundations",
+          "days": [
+            {
+              "slug": "day-01-objects",
+              "title": "Day 1: Objects in Python",
+              "description": "Everything is an object in Python",
+              "problems": [
+                {
+                  "slug": "w01d01-hello-object",
+                  "title": "Hello, Object!",
+                  "description": "Explore Python's object nature by inspecting types and identities",
+                  "difficulty": "beginner",
+                  "starter_code": "# Explore objects\ndef explore_type(value):\n    return type(value)",
+                  "test_code": "def test_explore_type_int():\n    assert explore_type(42) == int\n\ndef test_explore_type_str():\n    assert explore_type('hello') == str\n\ndef test_explore_type_list():\n    assert explore_type([1, 2, 3]) == list",
+                  "hints": [
+                    "Use Python's built-in type() function to get the type of an object.",
+                    "Remember that everything in Python is an object, including integers and strings.",
+                    "Try calling type() on different values to see what you get."
+                  ]
+                },
+                {
+                  "slug": "w01d01-type-check",
+                  "title": "Type Detective",
+                  "description": "Write a function that returns the type name of any object",
+                  "difficulty": "beginner",
+                  "starter_code": "def get_type_name(obj):\n    \"\"\"Return the type name of an object as a string.\"\"\"\n    pass",
+                  "test_code": "def test_get_type_name_int():\n    assert get_type_name(42) == 'int'\n\ndef test_get_type_name_str():\n    assert get_type_name('hello') == 'str'\n\ndef test_get_type_name_list():\n    assert get_type_name([1, 2]) == 'list'\n\ndef test_get_type_name_none():\n    assert get_type_name(None) == 'NoneType'",
+                  "hints": [
+                    "type(obj) gives you the type, but you need to get its name.",
+                    "Type objects have a __name__ attribute.",
+                    "You can access it like: type(obj).__name__"
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "day-02-classes",
+              "title": "Day 2: Defining Classes",
+              "description": "Create your own classes with attributes and methods",
+              "problems": [
+                {
+                  "slug": "w01d02-simple-class",
+                  "title": "Simple Person Class",
+                  "description": "Create a Person class with name and age attributes",
+                  "difficulty": "beginner",
+                  "starter_code": "class Person:\n    \"\"\"A simple person class.\"\"\"\n    \n    def __init__(self, name, age):\n        \"\"\"Initialize a person with name and age.\"\"\"\n        pass",
+                  "test_code": "def test_person_creation():\n    p = Person('Alice', 30)\n    assert p.name == 'Alice'\n    assert p.age == 30\n\ndef test_person_different_values():\n    p = Person('Bob', 25)\n    assert p.name == 'Bob'\n    assert p.age == 25\n\ndef test_person_edge_case_zero_age():\n    p = Person('Baby', 0)\n    assert p.age == 0",
+                  "hints": [
+                    "In the __init__ method, use self.name = name to set attributes.",
+                    "Remember to use self to refer to instance attributes.",
+                    "Don't forget to handle all parameters passed to __init__."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "day": {
+          "slug": "day-01-objects",
+          "title": "Day 1: Objects in Python",
+          "description": "Everything is an object in Python",
+          "problems": [
+            {
+              "slug": "w01d01-hello-object",
+              "title": "Hello, Object!",
+              "description": "Explore Python's object nature by inspecting types and identities",
+              "difficulty": "beginner",
+              "starter_code": "# Explore objects\ndef explore_type(value):\n    return type(value)",
+              "test_code": "def test_explore_type_int():\n    assert explore_type(42) == int\n\ndef test_explore_type_str():\n    assert explore_type('hello') == str\n\ndef test_explore_type_list():\n    assert explore_type([1, 2, 3]) == list",
+              "hints": [
+                "Use Python's built-in type() function to get the type of an object.",
+                "Remember that everything in Python is an object, including integers and strings.",
+                "Try calling type() on different values to see what you get."
+              ]
+            },
+            {
+              "slug": "w01d01-type-check",
+              "title": "Type Detective",
+              "description": "Write a function that returns the type name of any object",
+              "difficulty": "beginner",
+              "starter_code": "def get_type_name(obj):\n    \"\"\"Return the type name of an object as a string.\"\"\"\n    pass",
+              "test_code": "def test_get_type_name_int():\n    assert get_type_name(42) == 'int'\n\ndef test_get_type_name_str():\n    assert get_type_name('hello') == 'str'\n\ndef test_get_type_name_list():\n    assert get_type_name([1, 2]) == 'list'\n\ndef test_get_type_name_none():\n    assert get_type_name(None) == 'NoneType'",
+              "hints": [
+                "type(obj) gives you the type, but you need to get its name.",
+                "Type objects have a __name__ attribute.",
+                "You can access it like: type(obj).__name__"
+              ]
+            }
+          ]
+        },
+        "problem": {
+          "slug": "w01d01-hello-object",
+          "title": "Hello, Object!",
+          "description": "Explore Python's object nature by inspecting types and identities",
+          "difficulty": "beginner",
+          "starter_code": "# Explore objects\ndef explore_type(value):\n    return type(value)",
+          "test_code": "def test_explore_type_int():\n    assert explore_type(42) == int\n\ndef test_explore_type_str():\n    assert explore_type('hello') == str\n\ndef test_explore_type_list():\n    assert explore_type([1, 2, 3]) == list",
+          "hints": [
+            "Use Python's built-in type() function to get the type of an object.",
+            "Remember that everything in Python is an object, including integers and strings.",
+            "Try calling type() on different values to see what you get."
+          ]
+        }
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:35.974852",
+      "category": "Authentication",
+      "endpoint": "/api/v1/auth/me",
+      "method": "GET",
+      "status_code": 401,
+      "response_time_ms": 566.97,
+      "payload": null,
+      "response": {
+        "detail": "Authentication required"
+      },
+      "passed": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:36.406214",
+      "category": "Authentication",
+      "endpoint": "/api/v1/auth/refresh",
+      "method": "POST",
+      "status_code": 401,
+      "response_time_ms": 431.31,
+      "payload": null,
+      "response": {
+        "detail": "Refresh token required"
+      },
+      "passed": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:36.836617",
+      "category": "Authentication",
+      "endpoint": "/api/v1/auth/logout",
+      "method": "POST",
+      "status_code": 401,
+      "response_time_ms": 430.35,
+      "payload": null,
+      "response": {
+        "detail": "Authentication required"
+      },
+      "passed": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:37.349389",
+      "category": "Error Handling",
+      "endpoint": "/api/v1/execute/run",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 511.1,
+      "payload": "invalid json {",
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:37.771298",
+      "category": "Error Handling",
+      "endpoint": "/api/v1/execute/run",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 421.78,
+      "payload": {},
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:38.162640",
+      "category": "Error Handling",
+      "endpoint": "/api/v1/curriculum/problems/nonexistent_slug_12345",
+      "method": "GET",
+      "status_code": 404,
+      "response_time_ms": 391.22,
+      "payload": null,
+      "response": {
+        "detail": "Problem 'nonexistent_slug_12345' not found"
+      },
+      "passed": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:38.524334",
+      "category": "Error Handling",
+      "endpoint": "/api/v1/execute/run",
+      "method": "POST",
+      "status_code": 403,
+      "response_time_ms": 361.64,
+      "payload": {
+        "code_size_kb": 48.8359375,
+        "language": "python"
+      },
+      "response": {
+        "error": "CSRF token missing"
+      },
+      "passed": false,
+      "error": null
+    },
+    {
+      "timestamp": "2026-03-15T13:21:40.399430",
+      "category": "Rate Limiting",
+      "endpoint": "/api/v1/execute/run",
+      "method": "POST",
+      "status_code": 200,
+      "response_time_ms": 374.79,
+      "payload": {
+        "requests_sent": 5,
+        "rate_limited": false
+      },
+      "response": {
+        "rate_limit_detected": false,
+        "requests_completed": 5
+      },
+      "passed": true,
+      "error": null
+    }
+  ]
+}
